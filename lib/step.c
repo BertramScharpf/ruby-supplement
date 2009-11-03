@@ -19,7 +19,6 @@ static VALUE step_rindex_val( VALUE, VALUE);
 #endif
 
 static ID id_delete_at;
-static ID id_lshift;
 
 
 #ifdef KERNEL_TAP
@@ -734,6 +733,5 @@ void Init_step( void)
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
     id_delete_at = rb_intern( "delete_at");
-    id_lshift    = rb_intern( "<<");
 }
 
