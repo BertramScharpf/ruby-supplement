@@ -396,7 +396,7 @@ step_index_blk( VALUE ary)
  *     array.rpick { |elem| ... }  -> obj or nil
  *
  *  Deletes the element where the <em>block</em> first returns
- *  <code>true</code>. or <code>nil</code> if nothing is found. Search
+ *  <code>true</code>. Or <code>nil</code> if nothing is found. Search
  *  from right to left.
  *
  *     a = %w(ant cow bat cat dog)
