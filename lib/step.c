@@ -361,7 +361,7 @@ rb_ary_indexes( VALUE ary)
  *     array.pick { |elem| ... }  -> obj or nil
  *
  *  Deletes the element where the <em>block</em> first returns
- *  <code>true</code>. or <code>nil</code> if nothing is found.
+ *  <code>true</code>. Or <code>nil</code> if nothing is found.
  *
  *     a = %w(ant bat cat dog)
  *     a.pick { |e| e =~ /^c/ }  #=> "cat"
