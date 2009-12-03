@@ -1,4 +1,4 @@
-= step 1.0  --  Stepchildren
+= step 1.1  --  Stepchildren
 
 Some simple Ruby extensions.
 
@@ -41,4 +41,5 @@ Now here it is where I can just point to it.
 * Struct.[]
 * Interval timer
 * File system stats
+* File#flockb using the block
 
