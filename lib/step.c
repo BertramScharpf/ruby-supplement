@@ -9,6 +9,7 @@
 #include <re.h>
 
 #include <sys/stat.h>
+#include <sys/file.h>
 
 
 static VALUE step_index_blk( VALUE);
@@ -19,6 +20,20 @@ static VALUE step_rindex_val( VALUE, VALUE);
 #endif
 
 static ID id_delete_at;
+
+
+struct step_flock {
+    struct step_flock *prev;
+    VALUE              file;
+    int                op;
+    int                last_op;
+};
+
+static struct step_flock *flocks_root = NULL;
+
+static void  step_init_flock( struct step_flock *, VALUE, VALUE);
+static VALUE step_do_unflock( VALUE);
+
 
 
 #ifdef KERNEL_TAP
@@ -610,6 +625,100 @@ rb_file_size( VALUE obj)
 
 /*
  *  call-seq:
+ *     io.flockb( excl = nil, nb = nil) { || ... }  -> nil
+ *
+ *  Lock file using the <code>flock()</code> system call. 
+ *  When the <code>nb</code> flag is <code>true</code>, the method
+ *  won't block but rather raise an exception. Catch a
+ *  <code>SystemCallError</code>.
+ */
+
+VALUE
+rb_file_flockb( int argc, VALUE *argv, VALUE file)
+{
+    VALUE excl, nb;
+    struct step_flock cur_flock;
+    OpenFile *fptr;
+    int fd;
+    int op;
+
+    rb_scan_args( argc, argv, "02", &excl, &nb);
+    step_init_flock( &cur_flock, file, excl);
+
+    GetOpenFile( file, fptr);
+    fd = fileno( fptr->f);
+
+    op = cur_flock.op | LOCK_NB;
+    while (flock( fd, op) < 0) {
+        switch (errno) {
+          case EAGAIN:
+          case EACCES:
+#if defined(EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
+          case EWOULDBLOCK:
+#endif
+            if (!RTEST( nb)) {
+                rb_thread_polling();        /* busy wait */
+                rb_io_check_closed( fptr);
+                continue;
+            }
+            /* fall through */
+          default:
+            rb_sys_fail( fptr->path);
+        }
+    }
+    cur_flock.prev = flocks_root;
+    flocks_root = &cur_flock;
+    return rb_ensure( rb_yield, Qnil, step_do_unflock, Qnil);
+}
+
+void
+step_init_flock( struct step_flock *s, VALUE file, VALUE excl)
+{
+    struct step_flock *i;
+
+    s->file = file;
+
+    s->last_op = LOCK_UN;
+    for (i = flocks_root; i != NULL; i = i->prev) {
+        if (i->file == file) {
+            s->last_op = i->op;
+            break;
+        }
+    }
+
+    switch (s->last_op) {
+        case LOCK_UN:
+        case LOCK_SH:
+            s->op = RTEST( excl) ? LOCK_EX : LOCK_SH;
+            break;
+        case LOCK_EX:
+            s->op = LOCK_EX;
+            break;
+        default:
+            s->op = LOCK_UN;  /* should never be reached. */
+            break;
+    }
+}
+
+VALUE
+step_do_unflock( VALUE v)
+{
+    OpenFile *fptr;
+    int fd;
+
+    GetOpenFile( flocks_root->file, fptr);
+    fd = fileno( fptr->f);
+    flock( fd, flocks_root->last_op);
+
+    flocks_root = flocks_root->prev;
+
+    return Qnil;
+}
+
+
+
+/*
+ *  call-seq:
  *     mtch.begin( n = nil)   -> integer
  *
  *  Returns the offset of the start of the <code>n</code>th element of
@@ -726,6 +835,7 @@ void Init_step( void)
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty, 0);
 
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
+    rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
 
     rb_define_method(rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method(rb_cMatch, "end", rb_match_end, -1);
