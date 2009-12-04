@@ -625,12 +625,18 @@ rb_file_size( VALUE obj)
 
 /*
  *  call-seq:
- *     io.flockb( excl = nil, nb = nil) { || ... }  -> nil
+ *     file.flockb( excl = nil, nb = nil) { || ... }  -> nil
  *
  *  Lock file using the <code>flock()</code> system call. 
  *  When the <code>nb</code> flag is <code>true</code>, the method
- *  won't block but rather raise an exception. Catch a
- *  <code>SystemCallError</code>.
+ *  won't block but rather raise an exception. Catch
+ *  <code>SystemCallError</code>. The calls may be nested in any order.
+ *
+ *    File.open "/var/mail/joe", "a" do  |f|
+ *      f.flockb true do
+ *        f.write another_message
+ *      end
+ *    end
  */
 
 VALUE
