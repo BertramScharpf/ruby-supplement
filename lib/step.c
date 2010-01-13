@@ -283,17 +283,19 @@ rb_str_starts_with( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
+    VALUE ost;
 
-    i = RSTRING(oth)->len;
+    ost = rb_string_value( &oth);
+    i = RSTRING(ost)->len;
     if (i > RSTRING(str)->len)
         return Qnil;
     s = RSTRING(str)->ptr;
-    o = RSTRING(oth)->ptr;
+    o = RSTRING(ost)->ptr;
     for (; i; i--, s++, o++) {
         if (*s != *o)
             return Qnil;
     }
-    return INT2NUM( RSTRING(oth)->len);
+    return INT2NUM( RSTRING(ost)->len);
 }
 
 
@@ -312,16 +314,18 @@ rb_str_ends_with( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
+    VALUE ost;
 
-    i = RSTRING(oth)->len;
+    ost = rb_string_value( &oth);
+    i = RSTRING(ost)->len;
     if (i > RSTRING(str)->len)
         return Qnil;
     s = RSTRING(str)->ptr + RSTRING(str)->len;
-    o = RSTRING(oth)->ptr + RSTRING(oth)->len;
+    o = RSTRING(ost)->ptr + RSTRING(ost)->len;
     for (; i; i--)
         if (*--s != *--o)
             return Qnil;
-    return INT2NUM( RSTRING(str)->len - RSTRING(oth)->len);
+    return INT2NUM( RSTRING(str)->len - RSTRING(ost)->len);
 }
 
 
