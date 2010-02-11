@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+
+#
+#  teatimer  --  Countdown timer
+#
+
+# This is an example application for the itimer library.
+# Example:
+# 
+#   $ teatimer 3m play bell.wav
+#         # Count down 3 minutes and the exec the player.
+#
+
+require "step/itimer"
+
+
+class TeaTimer
+
+  M = 60
+  H = 60 * M
+
+  class <<self
+
+    def from_str time
+      seconds = case time
+        when /m\z/ then Integer( $`) * M
+        when /h\z/ then Integer( $`) * H
+        else            divide_colons time
+      end
+      new seconds
+    end
+
+    private
+
+    def divide_colons time
+      a = time.split ":", -1
+      a.map! { |x| Integer( x) }
+      a.reverse!
+      r = a.shift
+      if a.first then r += M * a.shift end
+      if a.first then r += H * a.shift end
+      a.empty? or raise "Illegal time spec: #{time}."
+      r
+    end
+
+  end
+
+  def initialize seconds
+    @seconds = seconds
+  end
+
+  def run
+    trap "SIGALRM" do
+      @seconds -= 1
+      print_rest
+    end
+    Process.setitimer 1
+    begin
+      print_rest
+      begin
+        sleep
+      end while @seconds.nonzero?
+      puts
+    ensure
+      trap "SIGALRM", "DEFAULT"
+      Process.setitimer nil
+    end
+  end
+
+  private
+
+  def print_rest
+    print "  \r%02d:%02d:%02d" % [ @seconds / H, @seconds % H / M, @seconds % M]
+    $stdout.flush
+  end
+
+end
+
+teatimer = TeaTimer.from_str $*.shift || "3m"
+teatimer.run
+if $*.any? then
+  exec *$*
+end
+

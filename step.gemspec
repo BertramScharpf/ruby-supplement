@@ -33,6 +33,7 @@ EOT
                           lib/step/itimer.h
                         )
   s.executables       = %w(
+                          teatimer
                         )
   s.extra_rdoc_files  = %w(
                           README

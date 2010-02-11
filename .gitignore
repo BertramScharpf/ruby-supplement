@@ -1,0 +1,8 @@
+#
+#  .gitignore  --  Files to ignore
+#
+
+*.o
+.*.sw[a-z]
+*.gem
+
