@@ -20,6 +20,7 @@ static VALUE step_rindex_val( VALUE, VALUE);
 #endif
 
 static ID id_delete_at;
+static ID id_cmp;
 
 
 struct step_flock {
@@ -295,7 +296,7 @@ rb_str_starts_with( VALUE str, VALUE oth)
         if (*s != *o)
             return Qnil;
     }
-    return INT2NUM( RSTRING(ost)->len);
+    return INT2FIX( RSTRING(ost)->len);
 }
 
 
@@ -325,7 +326,7 @@ rb_str_ends_with( VALUE str, VALUE oth)
     for (; i; i--)
         if (*--s != *--o)
             return Qnil;
-    return INT2NUM( RSTRING(str)->len - RSTRING(ost)->len);
+    return INT2FIX( RSTRING(str)->len - RSTRING(ost)->len);
 }
 
 
@@ -368,7 +369,7 @@ rb_ary_indexes( VALUE ary)
     ret = rb_ary_new2( j);
     RARRAY( ret)->len = j;
     for (i = 0; j; ++i, --j) {
-        rb_ary_store( ret, i, INT2NUM(i));
+        rb_ary_store( ret, i, INT2FIX(i));
     }
     return ret;
 }
@@ -393,7 +394,8 @@ rb_ary_pick( VALUE ary)
     VALUE pos;
 
     pos = step_index_blk( ary);
-    if (!NIL_P( pos)) return rb_funcall( ary, id_delete_at, 1, pos);
+    if (!NIL_P( pos))
+        return rb_funcall( ary, id_delete_at, 1, pos);
     return Qnil;
 }
 
@@ -429,7 +431,8 @@ rb_ary_rpick( VALUE ary)
     VALUE pos;
 
     pos = step_rindex_blk( ary);
-    if (!NIL_P( pos)) return rb_funcall( ary, id_delete_at, 1, pos);
+    if (!NIL_P( pos))
+        return rb_funcall( ary, id_delete_at, 1, pos);
     return Qnil;
 }
 
@@ -545,6 +548,42 @@ step_rindex_val( VALUE ary, VALUE val)
 
 /*
  *  call-seq:
+ *     num.neg?  ->  true or false
+ *
+ *  Check whether +num+ is negative.
+ *
+ */
+
+VALUE
+rb_num_neg_p( VALUE num)
+{
+    VALUE r = Qfalse;
+
+    switch (TYPE(num)) {
+        case T_FIXNUM:
+            if (NUM2LONG(num) < 0)
+                r = Qtrue;
+            break;
+
+        case T_BIGNUM:
+            if (!RBIGNUM(num)->sign)
+                r = Qtrue;
+            break;
+
+        case T_FLOAT:
+            if (RFLOAT(num)->value < 0)
+                r = Qtrue;
+            break;
+
+        default:
+            return rb_num_neg_p( rb_funcall( num, id_cmp, 1, INT2FIX(0)));
+            break;
+    }
+    return r;
+}
+
+/*
+ *  call-seq:
  *     num.grammatical sing, plu  -> str
  *
  *  Singular or plural
@@ -577,6 +616,12 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
             break;
 
         default:
+            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(1)));
+            if (l == 0)
+                return sing;
+            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(-1)));
+            if (l == 0)
+                return sing;
             break;
     }
     return plu;
@@ -830,6 +875,7 @@ void Init_step( void)
     rb_define_method( rb_cString, "starts_with", rb_str_starts_with, 1);
     rb_define_method( rb_cString, "ends_with", rb_str_ends_with, 1);
 
+    rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
 
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty, 0);
@@ -853,5 +899,6 @@ void Init_step( void)
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
     id_delete_at = rb_intern( "delete_at");
+    id_cmp       = rb_intern( "<=>");
 }
 

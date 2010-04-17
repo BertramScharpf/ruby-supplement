@@ -26,7 +26,8 @@ extern VALUE rb_ary_rpick( VALUE);
 extern VALUE rb_ary_index( int, VALUE *, VALUE);
 extern VALUE rb_ary_rindex( int, VALUE *, VALUE);
 #endif
-extern VALUE rb_int_grammatical( VALUE, VALUE, VALUE);
+extern VALUE rb_num_neg_p( VALUE);
+extern VALUE rb_num_grammatical( VALUE, VALUE, VALUE);
 extern VALUE rb_hash_notempty( VALUE);
 extern VALUE rb_file_size( VALUE);
 extern VALUE rb_file_flockb( int, VALUE *, VALUE);
