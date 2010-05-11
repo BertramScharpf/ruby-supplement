@@ -405,7 +405,7 @@ step_index_blk( VALUE ary)
     long i;
 
     for (i = 0; i < RARRAY( ary)->len; i++) {
-        if (rb_yield( RARRAY( ary)->ptr[ i]))
+        if (RTEST(rb_yield( RARRAY( ary)->ptr[ i])))
             return LONG2NUM( i);
     }
     return Qnil;
