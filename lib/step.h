@@ -33,6 +33,7 @@ extern VALUE rb_file_size( VALUE);
 extern VALUE rb_file_flockb( int, VALUE *, VALUE);
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
+extern VALUE rb_nil_notempty( VALUE);
 
 extern void Init_step( void);
 

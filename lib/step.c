@@ -843,6 +843,26 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
 }
 
 
+/*
+ *  call-seq:
+ *     nil.notempty?   -> nil
+ *
+ *  This spares testing for +nil+ when checking strings.
+ */
+
+/*
+ *  call-seq:
+ *     nil.nonzero?   -> nil
+ *
+ *  This spares testing for +nil+ when checking numbers.
+ */
+
+VALUE
+rb_nil_notempty( VALUE str)
+{
+    return Qnil;
+}
+
 
 
 /*
@@ -895,6 +915,9 @@ void Init_step( void)
 
     rb_define_method(rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method(rb_cMatch, "end", rb_match_end, -1);
+
+    rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty, 0);
+    rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty, 0);
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
