@@ -2,7 +2,12 @@
 #  .gitignore  --  Files to ignore
 #
 
-*.o
+.sw[a-z]
 .*.sw[a-z]
+
+.configure
+*.o
+*.so
+
 *.gem
 

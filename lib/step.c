@@ -18,9 +18,12 @@ static VALUE step_rindex_blk( VALUE);
 static VALUE step_index_val( VALUE, VALUE);
 static VALUE step_rindex_val( VALUE, VALUE);
 #endif
+static VALUE step_eat_lines_elem( VALUE);
+static VALUE step_each_line_elem( VALUE);
 
 static ID id_delete_at;
 static ID id_cmp;
+static ID id_eat_lines;
 
 
 struct step_flock {
@@ -135,6 +138,45 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     RSTRING(str)->len = r;
     OBJ_INFECT(val, str);
     return val;
+}
+
+
+/*
+ *  call-seq:
+ *     str.eat_lines   -> nil
+ *
+ *  Returns parts of +str+, line by line. The line returned will be deleted
+ *  from the string. If no +break+ occurs, the string will be empty
+ *  afterward.
+ *
+ *     a = "foo\nbar\nbaz"
+ *     a.eat_lines { |l| break l }   #=> "foo\n"
+ *     a                             #=> "bar\nbaz"
+ */
+
+VALUE
+rb_str_eat_lines( VALUE self)
+{
+    VALUE val;
+    int l, n;
+    char *p;
+
+    rb_str_modify(self);
+    RETURN_ENUMERATOR( self, 0, 0);
+    while ((l = RSTRING(self)->len) > 0) {
+        p = RSTRING(self)->ptr;
+        /* "\n" and "\r\n" both end in "\n" */
+        for (n = 0; l > 0 && *p != '\n'; n++, l--, p++)
+            ;
+        if (l > 0)
+            n++, l--;
+        val = rb_str_new5( self, RSTRING(self)->ptr, n);
+        /* It would be faster when the pointer could be moved ... */
+        memmove(RSTRING(self)->ptr, RSTRING(self)->ptr + n, l);
+        RSTRING(self)->len = l;
+        rb_yield( val);
+    }
+    return Qnil;
 }
 
 
@@ -402,9 +444,9 @@ rb_ary_pick( VALUE ary)
 VALUE
 step_index_blk( VALUE ary)
 {
-    long i;
+    long i, j;
 
-    for (i = 0; i < RARRAY( ary)->len; i++) {
+    for (i = 0, j = RARRAY( ary)->len; j > 0; i++, j--) {
         if (RTEST(rb_yield( RARRAY( ary)->ptr[ i])))
             return LONG2NUM( i);
     }
@@ -646,6 +688,35 @@ rb_hash_notempty( VALUE hash)
 }
 
 
+/*
+ *  call-seq:
+ *     ary.eat_lines   -> ary
+ *
+ *  Do +eat_lines+ for each member. Members are typically strings and
+ *  files. You don't need to +flatten+ as Array lines will be eaten, too.
+ *
+ */
+
+VALUE
+rb_ary_eat_lines( VALUE self)
+{
+    long i, j;
+
+    /*
+    RETURN_ENUMERATOR( self, 0, 0);
+    */
+    for (i = 0, j = RARRAY( self)->len; j > 0; i++, j--)
+        rb_iterate( &step_eat_lines_elem, RARRAY( self)->ptr[ i],
+                            &rb_yield, Qnil);
+    return Qnil;
+}
+
+VALUE step_eat_lines_elem( VALUE elem)
+{
+    rb_funcall( elem, id_eat_lines, 0);
+    return Qnil;
+}
+
 
 /*
  *  call-seq:
@@ -771,6 +842,29 @@ step_do_unflock( VALUE v)
 }
 
 
+/*
+ *  call-seq:
+ *     file.eat_lines   -> nil
+ *
+ *  Same as +File#each_line+ but returns nil so that +break+ values
+ *  may be distinguished.
+ *
+ */
+
+VALUE
+rb_file_eat_lines( VALUE self)
+{
+    rb_iterate( &step_each_line_elem, self, &rb_yield, Qnil);
+    return Qnil;
+}
+
+VALUE step_each_line_elem( VALUE elem)
+{
+    rb_funcall( elem, rb_intern( "each_line"), 0);
+    return Qnil;
+}
+
+
 
 /*
  *  call-seq:
@@ -887,6 +981,7 @@ void Init_step( void)
 
     rb_define_method( rb_cString, "notempty?", rb_str_notempty, 0);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
+    rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
     rb_define_method( rb_cString, "clear", rb_str_clear, 0);
     rb_define_method( rb_cString, "head", rb_str_head, 1);
@@ -907,11 +1002,13 @@ void Init_step( void)
     rb_define_method( rb_cArray, "index", rb_ary_index, -1);
     rb_define_method( rb_cArray, "rindex", rb_ary_rindex, -1);
 #endif
+    rb_define_method( rb_cArray, "eat_lines", rb_ary_eat_lines, 0);
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty, 0);
 
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
     rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
+    rb_define_method( rb_cFile, "eat_lines", rb_file_eat_lines, 0);
 
     rb_define_method(rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method(rb_cMatch, "end", rb_match_end, -1);
@@ -923,5 +1020,6 @@ void Init_step( void)
 
     id_delete_at = rb_intern( "delete_at");
     id_cmp       = rb_intern( "<=>");
+    id_eat_lines = rb_intern( "eat_lines");
 }
 
