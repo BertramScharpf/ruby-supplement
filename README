@@ -25,7 +25,7 @@ that does almost the same as <code>Numeric#nonzero?</code>. Every
 attempt proposing it for the Ruby standard implementation has failed;
 the discussion evolves the same every time.
 
-Now here it is where I can just point to it.
+Now here it is where I can just point to.
 
 == Contents (uncomplete)
 
@@ -41,5 +41,5 @@ Now here it is where I can just point to it.
 * Struct.[]
 * Interval timer
 * File system stats
-* File#flockb using the block
+* File#flockb using a block
 

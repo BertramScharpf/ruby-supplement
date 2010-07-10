@@ -8,12 +8,11 @@ require "rubygems"
 
 SPEC = Gem::Specification.new do |s|
   s.name              = "step"
-  s.rubyforge_project = "step"
   (File.read "README") =~ /^=\s.*?(\d+(?:\.\d+)*)/
   s.version           = $1
   s.summary           = "Simple Ruby extensions"
   s.description       = <<EOT
-Simple methods that didn_t manage to become part of standard Ruby.
+Simple methods that didn't manage to become part of standard Ruby.
 EOT
   s.authors           = [ "Bertram Scharpf"]
   s.email             = "<software@bertram-scharpf.de>"
