@@ -10,7 +10,7 @@
 
 
 extern VALUE rb_str_notempty( VALUE);
-extern VALUE rb_str_nullif( VALUE, VALUE);
+extern VALUE rb_str_nil_if( VALUE, VALUE);
 extern VALUE rb_str_eat( int, VALUE *, VALUE);
 extern VALUE rb_str_eat_lines( VALUE);
 extern VALUE rb_str_cut_bang( VALUE, VALUE);
@@ -38,6 +38,7 @@ extern VALUE rb_file_eat_lines( VALUE);
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
 extern VALUE rb_nil_notempty( VALUE);
+extern VALUE rb_nil_nil_if( VALUE, VALUE);
 
 extern void Init_step( void);
 
