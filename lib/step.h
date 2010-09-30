@@ -9,7 +9,8 @@
 #include <ruby.h>
 
 
-extern VALUE rb_str_notempty( VALUE str);
+extern VALUE rb_str_notempty( VALUE);
+extern VALUE rb_str_nullif( VALUE, VALUE);
 extern VALUE rb_str_eat( int, VALUE *, VALUE);
 extern VALUE rb_str_eat_lines( VALUE);
 extern VALUE rb_str_cut_bang( VALUE, VALUE);

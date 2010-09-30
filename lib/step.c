@@ -93,6 +93,25 @@ rb_str_notempty( VALUE str)
 
 /*
  *  call-seq:
+ *     str.nullif val  -> nil or self
+ *
+ *  Returns +nil+ when the string matches +val+. +val+ is compared using
+ *  the <code>===</code> operator, just like in the case statement.
+ *
+ *     "hello".nullif "NONE"      #=> "hello"
+ *     "NONE".nullif "NONE"       #=> nil
+ *     "NONE".nullif /^none$/i    #=> nil
+ */
+
+VALUE
+rb_str_nullif( VALUE str, VALUE val)
+{
+    return RTEST( rb_funcall( val, rb_intern( "==="), 1, str)) ? Qnil : str;
+}
+
+
+/*
+ *  call-seq:
  *     str.eat( n = nil)   -> str
  *
  *  Returns first <code>n</code> characters of <code>self</code> or
@@ -980,6 +999,7 @@ void Init_step( void)
 #endif
 
     rb_define_method( rb_cString, "notempty?", rb_str_notempty, 0);
+    rb_define_method( rb_cString, "nullif", rb_str_nullif, 1);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
@@ -1015,6 +1035,7 @@ void Init_step( void)
 
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty, 0);
+    rb_define_method( rb_cNilClass, "nullif", rb_nil_notempty, 0);
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
