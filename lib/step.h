@@ -29,6 +29,7 @@ extern VALUE rb_ary_index( int, VALUE *, VALUE);
 extern VALUE rb_ary_rindex( int, VALUE *, VALUE);
 #endif
 extern VALUE rb_ary_eat_lines( VALUE);
+extern VALUE rb_num_nil_if( VALUE, VALUE);
 extern VALUE rb_num_neg_p( VALUE);
 extern VALUE rb_num_grammatical( VALUE, VALUE, VALUE);
 extern VALUE rb_hash_notempty( VALUE);

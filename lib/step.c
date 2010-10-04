@@ -609,6 +609,25 @@ step_rindex_val( VALUE ary, VALUE val)
 
 /*
  *  call-seq:
+ *     num.nil_if val  -> nil or self
+ *
+ *  Returns +nil+ when the number is equal to +val+. +val+ is compared using
+ *  the <code>===</code> operator, just like in the case statement.
+ *
+ *     20.nil_if 10      #=> 20
+ *     10.nil_if 10      #=> nil
+ *     1.0.nil_if Float  #=> nil
+ */
+
+VALUE
+rb_num_nil_if( VALUE num, VALUE val)
+{
+    return RTEST( rb_funcall( val, rb_intern( "==="), 1, num)) ? Qnil : num;
+}
+
+
+/*
+ *  call-seq:
  *     num.neg?  ->  true or false
  *
  *  Check whether +num+ is negative.
@@ -1023,6 +1042,7 @@ void Init_step( void)
     rb_define_method( rb_cString, "starts_with", rb_str_starts_with, 1);
     rb_define_method( rb_cString, "ends_with", rb_str_ends_with, 1);
 
+    rb_define_method( rb_cNumeric, "nil_if", rb_num_nil_if, 1);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
 
