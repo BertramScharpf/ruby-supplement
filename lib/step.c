@@ -166,7 +166,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
  *
  *  Returns parts of +str+, line by line. The line returned will be deleted
  *  from the string. If no +break+ occurs, the string will be empty
- *  afterward.
+ *  afterwards.
  *
  *     a = "foo\nbar\nbaz"
  *     a.eat_lines { |l| break l }   #=> "foo\n"
