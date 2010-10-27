@@ -1008,6 +1008,20 @@ rb_nil_nil_if( VALUE str, VALUE val)
     return Qnil;
 }
 
+/*
+ *  call-seq:
+ *     nil.each_line { |l| ... }   -> nil
+ *
+ *  This spares testing for +nil+ when checking strings.
+ */
+
+/*
+ *  call-seq:
+ *     nil.eat_lines { |l| ... }   -> nil
+ *
+ *  This spares testing for +nil+ when checking strings.
+ */
+
 
 
 /*
@@ -1069,6 +1083,8 @@ void Init_step( void)
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty, 0);
     rb_define_method( rb_cNilClass, "nil_if", rb_nil_nil_if, 1);
+    rb_define_method( rb_cNilClass, "each_line", rb_nil_notempty, 0);
+    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_notempty, 0);
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
