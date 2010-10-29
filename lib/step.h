@@ -36,6 +36,7 @@ extern VALUE rb_hash_notempty( VALUE);
 extern VALUE rb_file_size( VALUE);
 extern VALUE rb_file_flockb( int, VALUE *, VALUE);
 extern VALUE rb_file_eat_lines( VALUE);
+extern VALUE step_file_s_umask( int, VALUE *);
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
 extern VALUE rb_nil_notempty( VALUE);

@@ -20,6 +20,8 @@ static VALUE step_rindex_val( VALUE, VALUE);
 #endif
 static VALUE step_eat_lines_elem( VALUE);
 static VALUE step_each_line_elem( VALUE);
+static VALUE step_do_unumask( VALUE);
+
 
 static ID id_delete_at;
 static ID id_cmp;
@@ -896,12 +898,62 @@ rb_file_eat_lines( VALUE self)
     return Qnil;
 }
 
-VALUE step_each_line_elem( VALUE elem)
+VALUE
+step_each_line_elem( VALUE elem)
 {
     rb_funcall( elem, rb_intern( "each_line"), 0);
     return Qnil;
 }
 
+
+/*
+ *  call-seq:
+ *     File.umask()             -> int
+ *     File.umask( int)         -> int
+ *     File.umask( int) { ... } -> obj
+ *   
+ *  Returns the current umask value for this process.  If the optional
+ *  argument is given, set the umask to that value and return the
+ *  previous value.  If a block is given, the umask value will be
+ *  reset and the blocks value is returned.
+ *
+ *  Umask values are <em>subtracted</em> from the default permissions,
+ *  so a umask of <code>0222</code> would make a file read-only for
+ *  everyone.
+ *
+ *     File.umask(0006)   #=> 18
+ *     File.umask         #=> 6
+ */
+            
+VALUE    
+step_file_s_umask(int argc, VALUE *argv)
+{               
+    int omask = 0;
+
+    rb_secure( 2);
+    switch (argc) {
+    case 0:
+        omask = umask( 0777);
+        umask( omask);
+        break;
+    case 1:
+        omask = umask( NUM2INT( argv[ 0]));
+        if (rb_block_given_p())
+          return rb_ensure( rb_yield, Qnil, step_do_unumask, INT2FIX( omask));
+        break;
+    default:
+        rb_raise( rb_eArgError,
+              "wrong number of arguments (%d for 0..1)", argc);
+    }
+    return INT2FIX( omask);
+}
+
+VALUE
+step_do_unumask( VALUE v)
+{
+    umask( NUM2INT( v));
+    return Qnil;
+}
 
 
 /*
@@ -1076,6 +1128,7 @@ void Init_step( void)
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
     rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
     rb_define_method( rb_cFile, "eat_lines", rb_file_eat_lines, 0);
+    rb_define_singleton_method( rb_cFile, "umask", step_file_s_umask, -1);
 
     rb_define_method(rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method(rb_cMatch, "end", rb_match_end, -1);
