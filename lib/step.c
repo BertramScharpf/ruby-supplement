@@ -67,6 +67,22 @@ rb_krn_tap( VALUE obj)
 }
 #endif
 
+/*
+ *  call-seq:
+ *     obj.tap! { |x| ... }    -> obj
+ *
+ *  Yields +x+ to the block, and then returns +x+ if and only
+ *  if +x+ is not +nil+.
+ *
+ */
+
+VALUE
+rb_krn_tap_bang( VALUE obj)
+{
+    if (!NIL_P(obj))
+      rb_yield( obj);
+    return obj;
+}
 
 /*
  *  call-seq:
@@ -1095,6 +1111,7 @@ void Init_step( void)
 #ifdef KERNEL_TAP
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
+    rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
 
     rb_define_method( rb_cString, "notempty?", rb_str_notempty, 0);
     rb_define_method( rb_cString, "nil_if", rb_str_nil_if, 1);

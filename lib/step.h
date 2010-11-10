@@ -9,6 +9,8 @@
 #include <ruby.h>
 
 
+extern VALUE rb_krn_tap( VALUE);
+extern VALUE rb_krn_tap_bang( VALUE);
 extern VALUE rb_str_notempty( VALUE);
 extern VALUE rb_str_nil_if( VALUE, VALUE);
 extern VALUE rb_str_eat( int, VALUE *, VALUE);
