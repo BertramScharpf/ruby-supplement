@@ -906,7 +906,6 @@ step_do_unflock( VALUE v)
  *  may be distinguished.
  *
  */
-
 VALUE
 rb_file_eat_lines( VALUE self)
 {
@@ -971,6 +970,19 @@ step_do_unumask( VALUE v)
     return Qnil;
 }
 
+
+/*
+ *  call-seq:
+ *     Dir.current   -> dir
+ *
+ *  Current directory as a Dir object.
+ *
+ */
+VALUE
+step_dir_s_current( VALUE dir)
+{
+    return rb_funcall( dir, rb_intern( "new"), 1, rb_str_new( ".", 1));
+}
 
 /*
  *  call-seq:
@@ -1146,6 +1158,8 @@ void Init_step( void)
     rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
     rb_define_method( rb_cFile, "eat_lines", rb_file_eat_lines, 0);
     rb_define_singleton_method( rb_cFile, "umask", step_file_s_umask, -1);
+
+    rb_define_singleton_method( rb_cDir, "current", step_dir_s_current, 0);
 
     rb_define_method(rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method(rb_cMatch, "end", rb_match_end, -1);
