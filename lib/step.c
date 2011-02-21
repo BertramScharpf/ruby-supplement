@@ -26,6 +26,7 @@ static VALUE step_do_unumask( VALUE);
 static ID id_delete_at;
 static ID id_cmp;
 static ID id_eat_lines;
+static ID id_eqq;
 
 
 struct step_flock {
@@ -46,7 +47,7 @@ static VALUE step_do_unflock( VALUE);
 
 /*
  *  call-seq:
- *     obj.tap { |x| ... }    -> obj
+ *     tap { |x| ... }    -> obj
  *
  *  Yields <code>x</code> to the block, and then returns <code>x</code>.
  *  The primary purpose of this method is to "tap into" a method chain,
@@ -69,7 +70,7 @@ rb_krn_tap( VALUE obj)
 
 /*
  *  call-seq:
- *     obj.tap! { |x| ... }    -> obj
+ *     tap! { |x| ... }    -> obj
  *
  *  Yields +x+ to the block, and then returns +x+ if and only
  *  if +x+ is not +nil+.
@@ -86,7 +87,7 @@ rb_krn_tap_bang( VALUE obj)
 
 /*
  *  call-seq:
- *     str.notempty?   -> nil or self
+ *     notempty?   -> nil or self
  *
  *  Returns <code>self</code> if and only if <code>str</code> is not
  *  empty, <code>nil</code> otherwise.
@@ -111,7 +112,7 @@ rb_str_notempty( VALUE str)
 
 /*
  *  call-seq:
- *     str.nil_if val  -> nil or self
+ *     nil_if val  -> nil or self
  *
  *  Returns +nil+ when the string matches +val+. +val+ is compared using
  *  the <code>===</code> operator, just like in the case statement.
@@ -122,15 +123,17 @@ rb_str_notempty( VALUE str)
  */
 
 VALUE
-rb_str_nil_if( VALUE str, VALUE val)
+rb_obj_nil_if( VALUE obj, VALUE val)
 {
-    return RTEST( rb_funcall( val, rb_intern( "==="), 1, str)) ? Qnil : str;
+    if (!id_eqq)
+        id_eqq = rb_intern( "===");
+    return RTEST( rb_funcall( val, id_eqq, 1, obj)) ? Qnil : obj;
 }
 
 
 /*
  *  call-seq:
- *     str.eat( n = nil)   -> str
+ *     eat( n = nil)   -> str
  *
  *  Returns first <code>n</code> characters of <code>self</code> or
  *  whole string if <code>n</code> is <code>nil</code>. The returned
@@ -180,7 +183,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
 
 /*
  *  call-seq:
- *     str.eat_lines   -> nil
+ *     eat_lines   -> nil
  *
  *  Returns parts of +str+, line by line. The line returned will be deleted
  *  from the string. If no +break+ occurs, the string will be empty
@@ -219,7 +222,7 @@ rb_str_eat_lines( VALUE self)
 
 /*
  *  call-seq:
- *     str.cut!( length)   -> str
+ *     cut!( length)   -> str
  *
  *  Cut string to <code>length</code>. If nothing was removed,
  *  <code>nil</code> is returned.
@@ -246,7 +249,7 @@ rb_str_cut_bang( VALUE str, VALUE len)
 
 /*
  *  call-seq:
- *     str.clear   -> self
+ *     clear   -> self
  *
  *  Set to empty string. Equivalent to <code>str.replace ""</code>.
  *
@@ -266,7 +269,7 @@ rb_str_clear( VALUE str)
 
 /*
  *  call-seq:
- *     str.head( n)   -> str
+ *     head( n)   -> str
  *
  *  Returns first <code>n</code> bytes in <code>str</code>.
  *
@@ -293,7 +296,7 @@ rb_str_head( VALUE str, VALUE n)
 
 /*
  *  call-seq:
- *     str.rest( n)   -> str
+ *     rest( n)   -> str
  *
  *  Return rest after <code>n</code> bytes in <code>str</code>.
  *
@@ -321,7 +324,7 @@ rb_str_rest( VALUE str, VALUE n)
 
 /*
  *  call-seq:
- *     str.tail( n)   -> str
+ *     tail( n)   -> str
  *
  *  Returns last <code>n</code> bytes in <code>str</code>.
  *
@@ -350,7 +353,7 @@ rb_str_tail( VALUE str, VALUE n)
 
 /*
  *  call-seq:
- *     str.starts_with( oth)   -> nil or int
+ *     starts_with( oth)   -> nil or int
  *
  *  Checks whether the head is <code>oth</code>. Returns length of
  *  <code>oth</code> when matching.
@@ -381,7 +384,7 @@ rb_str_starts_with( VALUE str, VALUE oth)
 
 /*
  *  call-seq:
- *     str.ends_with( oth)   -> nil or int
+ *     ends_with( oth)   -> nil or int
  *
  *  Checks whether the tail is <code>oth</code>. Returns the position
  *  where <code>oth</code> starts when matching.
@@ -411,7 +414,7 @@ rb_str_ends_with( VALUE str, VALUE oth)
 
 /*
  *  call-seq:
- *     ary.notempty?   -> nil or self
+ *     notempty?   -> nil or self
  *
  *  Returns <code>self</code> if and only if <code>ary</code> is not
  *  empty, <code>nil</code> otherwise.
@@ -429,7 +432,7 @@ rb_ary_notempty( VALUE ary)
 
 /*
  *  call-seq:
- *     array.indexes()  ->  ary
+ *     indexes()  ->  ary
  *     array.keys()     ->  ary
  *
  *  Returns the indexes from <code>0</code> to
@@ -456,7 +459,7 @@ rb_ary_indexes( VALUE ary)
 
 /*
  *  call-seq:
- *     array.pick { |elem| ... }  -> obj or nil
+ *     pick { |elem| ... }  -> obj or nil
  *
  *  Deletes the element where the <em>block</em> first returns
  *  <code>true</code>. Or <code>nil</code> if nothing is found.
@@ -492,7 +495,7 @@ step_index_blk( VALUE ary)
 
 /*
  *  call-seq:
- *     array.rpick { |elem| ... }  -> obj or nil
+ *     rpick { |elem| ... }  -> obj or nil
  *
  *  Deletes the element where the <em>block</em> first returns
  *  <code>true</code>. Or <code>nil</code> if nothing is found. Search
@@ -533,7 +536,7 @@ step_rindex_blk( VALUE ary)
 
 /*
  *  call-seq:
- *     array.index( obj)              ->  int or nil
+ *     index( obj)              ->  int or nil
  *     array.index() { |elem| ... }   ->  int or nil
  *
  *  Returns the index of the first object in <code>self</code> such that
@@ -578,7 +581,7 @@ step_index_val( VALUE ary, VALUE val)
 
 /*
  *  call-seq:
- *     array.rindex( obj)              ->  int or nil
+ *     rindex( obj)              ->  int or nil
  *     array.rindex() { |elem| ... }   ->  int or nil
  *
  *  Returns the index of the first object in <code>self</code> such that
@@ -624,10 +627,13 @@ step_rindex_val( VALUE ary, VALUE val)
 #endif
 
 
-
 /*
+ *  Document-class: Numeric
+ *
+ *  Document-method: nil_if
+ *
  *  call-seq:
- *     num.nil_if val  -> nil or self
+ *     nil_if val  -> nil or self
  *
  *  Returns +nil+ when the number is equal to +val+. +val+ is compared using
  *  the <code>===</code> operator, just like in the case statement.
@@ -637,16 +643,10 @@ step_rindex_val( VALUE ary, VALUE val)
  *     1.0.nil_if Float  #=> nil
  */
 
-VALUE
-rb_num_nil_if( VALUE num, VALUE val)
-{
-    return RTEST( rb_funcall( val, rb_intern( "==="), 1, num)) ? Qnil : num;
-}
-
 
 /*
  *  call-seq:
- *     num.neg?  ->  true or false
+ *     neg?  ->  true or false
  *
  *  Check whether +num+ is negative.
  *
@@ -682,7 +682,7 @@ rb_num_neg_p( VALUE num)
 
 /*
  *  call-seq:
- *     num.grammatical sing, plu  -> str
+ *     grammatical sing, plu  -> str
  *
  *  Singular or plural
  *
@@ -728,7 +728,7 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
 
 /*
  *  call-seq:
- *     hash.notempty?   -> nil or self
+ *     notempty?   -> nil or self
  *
  *  Returns <code>self</code> if and only if <code>hash</code> is not
  *  empty, <code>nil</code> otherwise.
@@ -746,7 +746,7 @@ rb_hash_notempty( VALUE hash)
 
 /*
  *  call-seq:
- *     ary.eat_lines   -> ary
+ *     eat_lines   -> ary
  *
  *  Do +eat_lines+ for each member. Members are typically strings and
  *  files. You don't need to +flatten+ as Array lines will be eaten, too.
@@ -776,7 +776,7 @@ VALUE step_eat_lines_elem( VALUE elem)
 
 /*
  *  call-seq:
- *     file.size   -> integer
+ *     size   -> integer
  *
  *  Returns <code>file</code>'s size. A shortcut for
  *  <code>file.stat.size</code>. This constitutes consistency with
@@ -801,7 +801,7 @@ rb_file_size( VALUE obj)
 
 /*
  *  call-seq:
- *     file.flockb( excl = nil, nb = nil) { || ... }  -> nil
+ *     flockb( excl = nil, nb = nil) { || ... }  -> nil
  *
  *  Lock file using the <code>flock()</code> system call. 
  *  When the <code>nb</code> flag is <code>true</code>, the method
@@ -900,7 +900,7 @@ step_do_unflock( VALUE v)
 
 /*
  *  call-seq:
- *     file.eat_lines   -> nil
+ *     eat_lines   -> nil
  *
  *  Same as +File#each_line+ but returns nil so that +break+ values
  *  may be distinguished.
@@ -923,9 +923,9 @@ step_each_line_elem( VALUE elem)
 
 /*
  *  call-seq:
- *     File.umask()             -> int
- *     File.umask( int)         -> int
- *     File.umask( int) { ... } -> obj
+ *     umask()             -> int
+ *     umask( int)         -> int
+ *     umask( int) { ... } -> obj
  *   
  *  Returns the current umask value for this process.  If the optional
  *  argument is given, set the umask to that value and return the
@@ -973,7 +973,7 @@ step_do_unumask( VALUE v)
 
 /*
  *  call-seq:
- *     Dir.current   -> dir
+ *     current   -> dir
  *
  *  Current directory as a Dir object.
  *
@@ -986,7 +986,7 @@ step_dir_s_current( VALUE dir)
 
 /*
  *  call-seq:
- *     mtch.begin( n = nil)   -> integer
+ *     begin( n = nil)   -> integer
  *
  *  Returns the offset of the start of the <code>n</code>th element of
  *  the match array in the string. In case <code>n</code> is
@@ -1021,7 +1021,7 @@ rb_match_begin( int argc, VALUE *argv, VALUE match)
 
 /*
  *  call-seq:
- *     mtch.end( n = nil)   -> integer
+ *     end( n = nil)   -> integer
  *
  *  Returns the offset of the character immediately following the end of
  *  the <code>n</code>th element of the match array in the string. In
@@ -1057,16 +1057,9 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
 
 /*
  *  call-seq:
- *     nil.notempty?   -> nil
+ *     notempty?   -> nil
  *
  *  This spares testing for +nil+ when checking strings.
- */
-
-/*
- *  call-seq:
- *     nil.nonzero?   -> nil
- *
- *  This spares testing for +nil+ when checking numbers.
  */
 
 VALUE
@@ -1076,8 +1069,19 @@ rb_nil_notempty( VALUE str)
 }
 
 /*
+ *  Document-method: nonzero?
+ *
  *  call-seq:
- *     nil.nil_if val   -> nil
+ *     nonzero?   -> nil
+ *
+ *  This spares testing for +nil+ when checking numbers.
+ */
+
+/*
+ *  Document-class: NilClass
+ *
+ *  call-seq:
+ *     nil_if val   -> nil
  *
  *  This spares testing for +nil+ when checking strings.
  */
@@ -1089,22 +1093,29 @@ rb_nil_nil_if( VALUE str, VALUE val)
 }
 
 /*
+ *  Document-method: each_line
+ *
  *  call-seq:
- *     nil.each_line { |l| ... }   -> nil
+ *     each_line { |l| ... }   -> nil
  *
  *  This spares testing for +nil+ when checking strings.
  */
 
 /*
+ *  Document-method: eat_lines
+ *
  *  call-seq:
- *     nil.eat_lines { |l| ... }   -> nil
+ *     eat_lines { |l| ... }   -> nil
  *
  *  This spares testing for +nil+ when checking strings.
  */
 
 
-
 /*
+ *  Document-class: Struct
+ *
+ *  Document-method: []
+ *
  *  call-seq:
  *     Struct[ ...]  -> cls
  *
@@ -1126,7 +1137,7 @@ void Init_step( void)
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
 
     rb_define_method( rb_cString, "notempty?", rb_str_notempty, 0);
-    rb_define_method( rb_cString, "nil_if", rb_str_nil_if, 1);
+    rb_define_method( rb_cString, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
@@ -1137,7 +1148,7 @@ void Init_step( void)
     rb_define_method( rb_cString, "starts_with", rb_str_starts_with, 1);
     rb_define_method( rb_cString, "ends_with", rb_str_ends_with, 1);
 
-    rb_define_method( rb_cNumeric, "nil_if", rb_num_nil_if, 1);
+    rb_define_method( rb_cNumeric, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
 
@@ -1175,5 +1186,6 @@ void Init_step( void)
     id_delete_at = rb_intern( "delete_at");
     id_cmp       = rb_intern( "<=>");
     id_eat_lines = rb_intern( "eat_lines");
+    id_eqq       = 0;
 }
 
