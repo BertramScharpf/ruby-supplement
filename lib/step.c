@@ -43,6 +43,10 @@ static VALUE step_do_unflock( VALUE);
 
 
 
+/*
+ *  Document-module: Kernel
+ */
+
 #ifdef KERNEL_TAP
 
 /*
@@ -84,6 +88,10 @@ rb_krn_tap_bang( VALUE obj)
       rb_yield( obj);
     return obj;
 }
+
+/*
+ *  Document-class: String
+ */
 
 /*
  *  call-seq:
@@ -182,6 +190,8 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
 
 
 /*
+ *  Document-method: eat_lines
+ *
  *  call-seq:
  *     eat_lines   -> nil
  *
@@ -413,6 +423,111 @@ rb_str_ends_with( VALUE str, VALUE oth)
 
 
 /*
+ *  Document-class: Numeric
+ */
+
+/*
+ *  Document-method: nil_if
+ *
+ *  call-seq:
+ *     nil_if val  -> nil or self
+ *
+ *  Returns +nil+ when the number is equal to +val+. +val+ is compared using
+ *  the <code>===</code> operator, just like in the case statement.
+ *
+ *     20.nil_if 10      #=> 20
+ *     10.nil_if 10      #=> nil
+ *     1.0.nil_if Float  #=> nil
+ */
+
+
+/*
+ *  call-seq:
+ *     neg?  ->  true or false
+ *
+ *  Check whether +num+ is negative.
+ *
+ */
+
+VALUE
+rb_num_neg_p( VALUE num)
+{
+    VALUE r = Qfalse;
+
+    switch (TYPE(num)) {
+        case T_FIXNUM:
+            if (NUM2LONG(num) < 0)
+                r = Qtrue;
+            break;
+
+        case T_BIGNUM:
+            if (!RBIGNUM(num)->sign)
+                r = Qtrue;
+            break;
+
+        case T_FLOAT:
+            if (RFLOAT(num)->value < 0)
+                r = Qtrue;
+            break;
+
+        default:
+            return rb_num_neg_p( rb_funcall( num, id_cmp, 1, INT2FIX(0)));
+            break;
+    }
+    return r;
+}
+
+/*
+ *  call-seq:
+ *     grammatical sing, plu  -> str
+ *
+ *  Singular or plural
+ *
+ *     1.grammatical "line", "lines"         #=>  "line"
+ *     6.grammatical "child", "children"     #=>  "children"
+ */
+
+VALUE
+rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
+{
+    long l;
+    double d;
+
+    switch (TYPE(num)) {
+        case T_FIXNUM:
+            l = NUM2LONG(num);
+            if (l == 1l || l == -1l)
+                return sing;
+            break;
+
+        case T_BIGNUM:
+            /* 1 is not a Bignum */
+            break;
+
+        case T_FLOAT:
+            d = RFLOAT(num)->value;
+            if (d == 1.0 || d == -1.0)
+                return sing;
+            break;
+
+        default:
+            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(1)));
+            if (l == 0)
+                return sing;
+            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(-1)));
+            if (l == 0)
+                return sing;
+            break;
+    }
+    return plu;
+}
+
+
+/*
+ *  Document-class: Array
+ */
+
+/*
  *  call-seq:
  *     notempty?   -> nil or self
  *
@@ -433,7 +548,7 @@ rb_ary_notempty( VALUE ary)
 /*
  *  call-seq:
  *     indexes()  ->  ary
- *     array.keys()     ->  ary
+ *     keys()     ->  ary
  *
  *  Returns the indexes from <code>0</code> to
  *  <code>array.length()</code> as an array.
@@ -537,7 +652,7 @@ step_rindex_blk( VALUE ary)
 /*
  *  call-seq:
  *     index( obj)              ->  int or nil
- *     array.index() { |elem| ... }   ->  int or nil
+ *     index() { |elem| ... }   ->  int or nil
  *
  *  Returns the index of the first object in <code>self</code> such that
  *  is <code>==</code> to <code>obj</code> or the <em>block</em> returns
@@ -582,7 +697,7 @@ step_index_val( VALUE ary, VALUE val)
 /*
  *  call-seq:
  *     rindex( obj)              ->  int or nil
- *     array.rindex() { |elem| ... }   ->  int or nil
+ *     rindex() { |elem| ... }   ->  int or nil
  *
  *  Returns the index of the first object in <code>self</code> such that
  *  is <code>==</code> to <code>obj</code> or the <em>block</em> returns
@@ -626,130 +741,14 @@ step_rindex_val( VALUE ary, VALUE val)
 
 #endif
 
-
 /*
- *  Document-class: Numeric
+ *  Document-method: eat_lines
  *
- *  Document-method: nil_if
- *
- *  call-seq:
- *     nil_if val  -> nil or self
- *
- *  Returns +nil+ when the number is equal to +val+. +val+ is compared using
- *  the <code>===</code> operator, just like in the case statement.
- *
- *     20.nil_if 10      #=> 20
- *     10.nil_if 10      #=> nil
- *     1.0.nil_if Float  #=> nil
- */
-
-
-/*
- *  call-seq:
- *     neg?  ->  true or false
- *
- *  Check whether +num+ is negative.
- *
- */
-
-VALUE
-rb_num_neg_p( VALUE num)
-{
-    VALUE r = Qfalse;
-
-    switch (TYPE(num)) {
-        case T_FIXNUM:
-            if (NUM2LONG(num) < 0)
-                r = Qtrue;
-            break;
-
-        case T_BIGNUM:
-            if (!RBIGNUM(num)->sign)
-                r = Qtrue;
-            break;
-
-        case T_FLOAT:
-            if (RFLOAT(num)->value < 0)
-                r = Qtrue;
-            break;
-
-        default:
-            return rb_num_neg_p( rb_funcall( num, id_cmp, 1, INT2FIX(0)));
-            break;
-    }
-    return r;
-}
-
-/*
- *  call-seq:
- *     grammatical sing, plu  -> str
- *
- *  Singular or plural
- *
- *     1.grammatical "line", "lines"         #=>  "line"
- *     6.grammatical "child", "children"     #=>  "children"
- */
-
-VALUE
-rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
-{
-    long l;
-    double d;
-
-    switch (TYPE(num)) {
-        case T_FIXNUM:
-            l = NUM2LONG(num);
-            if (l == 1l || l == -1l)
-                return sing;
-            break;
-
-        case T_BIGNUM:
-            /* 1 is not a Bignum */
-            break;
-
-        case T_FLOAT:
-            d = RFLOAT(num)->value;
-            if (d == 1.0 || d == -1.0)
-                return sing;
-            break;
-
-        default:
-            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(1)));
-            if (l == 0)
-                return sing;
-            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(-1)));
-            if (l == 0)
-                return sing;
-            break;
-    }
-    return plu;
-}
-
-
-/*
- *  call-seq:
- *     notempty?   -> nil or self
- *
- *  Returns <code>self</code> if and only if <code>hash</code> is not
- *  empty, <code>nil</code> otherwise.
- *
- *     { :a => "A"}.notempty?   #=> { :a => "A"}
- *     {}.notempty?             #=> nil
- */
-
-VALUE
-rb_hash_notempty( VALUE hash)
-{
-    return RHASH(hash)->tbl->num_entries == 0 ? Qnil : hash;
-}
-
-
-/*
  *  call-seq:
  *     eat_lines   -> ary
  *
  *  Do +eat_lines+ for each member. Members are typically strings and
- *  files. You don't need to +flatten+ as Array lines will be eaten, too.
+ *  files. You don't need to +flatten+ as array lines will be eaten, too.
  *
  */
 
@@ -773,6 +772,32 @@ VALUE step_eat_lines_elem( VALUE elem)
     return Qnil;
 }
 
+
+/*
+ *  Document-class: Hash
+ */
+
+/*
+ *  call-seq:
+ *     notempty?   -> nil or self
+ *
+ *  Returns <code>self</code> if and only if <code>hash</code> is not
+ *  empty, <code>nil</code> otherwise.
+ *
+ *     { :a => "A"}.notempty?   #=> { :a => "A"}
+ *     {}.notempty?             #=> nil
+ */
+
+VALUE
+rb_hash_notempty( VALUE hash)
+{
+    return RHASH(hash)->tbl->num_entries == 0 ? Qnil : hash;
+}
+
+
+/*
+ *  Document-class: File
+ */
 
 /*
  *  call-seq:
@@ -899,10 +924,12 @@ step_do_unflock( VALUE v)
 
 
 /*
+ *  Document-method: eat_lines
+ *
  *  call-seq:
  *     eat_lines   -> nil
  *
- *  Same as +File#each_line+ but returns nil so that +break+ values
+ *  Same as +File#each_line+ but returns +nil+ so that +break+ values
  *  may be distinguished.
  *
  */
@@ -972,6 +999,10 @@ step_do_unumask( VALUE v)
 
 
 /*
+ *  Document-class: Dir
+ */
+
+/*
  *  call-seq:
  *     current   -> dir
  *
@@ -983,6 +1014,10 @@ step_dir_s_current( VALUE dir)
 {
     return rb_funcall( dir, rb_intern( "new"), 1, rb_str_new( ".", 1));
 }
+
+/*
+ *  Document-class: Match
+ */
 
 /*
  *  call-seq:
@@ -1056,6 +1091,10 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
 
 
 /*
+ *  Document-class: NilClass
+ */
+
+/*
  *  call-seq:
  *     notempty?   -> nil
  *
@@ -1078,8 +1117,6 @@ rb_nil_notempty( VALUE str)
  */
 
 /*
- *  Document-class: NilClass
- *
  *  call-seq:
  *     nil_if val   -> nil
  *
@@ -1113,7 +1150,9 @@ rb_nil_nil_if( VALUE str, VALUE val)
 
 /*
  *  Document-class: Struct
- *
+ */
+
+/*
  *  Document-method: []
  *
  *  call-seq:

@@ -43,3 +43,8 @@ Now here it is where I can just point to.
 * File system stats
 * File#flockb using a block
 
+== Warning
+
+The RDoc in this project doesn't work properly. If in doubt, refer to the
+source code.
+
