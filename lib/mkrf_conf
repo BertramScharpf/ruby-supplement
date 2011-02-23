@@ -16,6 +16,12 @@ else
   disable_kernel_tap
 end
 
+if RUBY_VERSION < "1.9" then
+  enable_string_ord
+else
+  disable_string_ord
+end
+
 have_header "ruby.h"
 have_header "st.h"
 have_header "rubyio.h"

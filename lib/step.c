@@ -84,7 +84,7 @@ rb_krn_tap( VALUE obj)
 VALUE
 rb_krn_tap_bang( VALUE obj)
 {
-    if (!NIL_P(obj))
+    if (!NIL_P( obj))
       rb_yield( obj);
     return obj;
 }
@@ -109,7 +109,7 @@ rb_str_notempty( VALUE str)
 {
 #if 0
     /* Ruby Coding style */
-    if (RSTRING_LEN(str) == 0)
+    if (RSTRING_LEN( str) == 0)
         return Qnil;
     return str;
 #else
@@ -161,7 +161,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     int l;
     int r;
 
-    n = l = RSTRING(str)->len;
+    n = l = RSTRING_LEN( str);
     if (rb_scan_args( argc, argv, "01", &val) == 1) {
         if (!NIL_P( val)) {
             int v = NUM2INT( val);
@@ -174,17 +174,17 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
         }
     }
 
-    rb_str_modify(str);
+    rb_str_modify( str);
     if (n > 0) {
         r = l - n;
-        val = rb_str_new5( str, RSTRING(str)->ptr, n);
-        memmove(RSTRING(str)->ptr, RSTRING(str)->ptr + n, r);
+        val = rb_str_new5( str, RSTRING_PTR( str), n);
+        memmove( RSTRING_PTR( str), RSTRING_PTR( str) + n, r);
     } else {
         r = l + n;
-        val = rb_str_new5( str, RSTRING(str)->ptr + r, -n);
+        val = rb_str_new5( str, RSTRING_PTR( str) + r, -n);
     }
-    RSTRING(str)->len = r;
-    OBJ_INFECT(val, str);
+    RSTRING_LEN( str) = r;
+    OBJ_INFECT( val, str);
     return val;
 }
 
@@ -211,19 +211,19 @@ rb_str_eat_lines( VALUE self)
     int l, n;
     char *p;
 
-    rb_str_modify(self);
+    rb_str_modify( self);
     RETURN_ENUMERATOR( self, 0, 0);
-    while ((l = RSTRING(self)->len) > 0) {
-        p = RSTRING(self)->ptr;
+    while ((l = RSTRING_LEN( self)) > 0) {
+        p = RSTRING_PTR( self);
         /* "\n" and "\r\n" both end in "\n" */
         for (n = 0; l > 0 && *p != '\n'; n++, l--, p++)
             ;
         if (l > 0)
             n++, l--;
-        val = rb_str_new5( self, RSTRING(self)->ptr, n);
+        val = rb_str_new5( self, RSTRING_PTR( self), n);
         /* It would be faster when the pointer could be moved ... */
-        memmove(RSTRING(self)->ptr, RSTRING(self)->ptr + n, l);
-        RSTRING(self)->len = l;
+        memmove( RSTRING_PTR( self), RSTRING_PTR( self) + n, l);
+        RSTRING_LEN( self) = l;
         rb_yield( val);
     }
     return Qnil;
@@ -248,9 +248,9 @@ rb_str_cut_bang( VALUE str, VALUE len)
 {
     int l = NUM2INT( len);
 
-    rb_str_modify(str);
-    if (l < RSTRING(str)->len) {
-        RSTRING(str)->len = l;
+    rb_str_modify( str);
+    if (l < RSTRING_LEN( str)) {
+        RSTRING_LEN( str) = l;
         return str;
     }
     return Qnil;
@@ -271,8 +271,8 @@ rb_str_cut_bang( VALUE str, VALUE len)
 VALUE
 rb_str_clear( VALUE str)
 {
-    rb_str_modify(str);
-    rb_str_resize(str, 0);
+    rb_str_modify( str);
+    rb_str_resize( str, 0);
     return str;
 }
 
@@ -292,13 +292,13 @@ rb_str_head( VALUE str, VALUE n)
     VALUE str2;
     long len;
 
-    len = NUM2LONG(n);
+    len = NUM2LONG( n);
     if (len < 0) return Qnil;
-    if (len > RSTRING(str)->len) {
-        len = RSTRING(str)->len;
+    if (len > RSTRING_LEN( str)) {
+        len = RSTRING_LEN( str);
     }
-    str2 = rb_str_new5(str, RSTRING(str)->ptr, len);
-    OBJ_INFECT(str2, str);
+    str2 = rb_str_new5( str, RSTRING_PTR( str), len);
+    OBJ_INFECT( str2, str);
 
     return str2;
 }
@@ -319,14 +319,14 @@ rb_str_rest( VALUE str, VALUE n)
     VALUE str2;
     long beg, len;
 
-    beg = NUM2LONG(n);
-    if (beg > RSTRING(str)->len) return Qnil;
+    beg = NUM2LONG( n);
+    if (beg > RSTRING_LEN( str)) return Qnil;
     if (beg < 0) {
         beg = 0;
     }
-    len = RSTRING(str)->len - beg;
-    str2 = rb_str_new5(str, RSTRING(str)->ptr+beg, len);
-    OBJ_INFECT(str2, str);
+    len = RSTRING_LEN( str) - beg;
+    str2 = rb_str_new5( str, RSTRING_PTR( str)+beg, len);
+    OBJ_INFECT( str2, str);
 
     return str2;
 }
@@ -347,15 +347,15 @@ rb_str_tail( VALUE str, VALUE n)
     VALUE str2;
     long beg, len;
 
-    len = NUM2LONG(n);
+    len = NUM2LONG( n);
     if (len < 0) return Qnil;
-    beg = RSTRING(str)->len - len;
+    beg = RSTRING_LEN( str) - len;
     if (beg < 0) {
         beg = 0;
-        len = RSTRING(str)->len;
+        len = RSTRING_LEN( str);
     }
-    str2 = rb_str_new5(str, RSTRING(str)->ptr+beg, len);
-    OBJ_INFECT(str2, str);
+    str2 = rb_str_new5( str, RSTRING_PTR( str) + beg, len);
+    OBJ_INFECT( str2, str);
 
     return str2;
 }
@@ -379,16 +379,16 @@ rb_str_starts_with( VALUE str, VALUE oth)
     VALUE ost;
 
     ost = rb_string_value( &oth);
-    i = RSTRING(ost)->len;
-    if (i > RSTRING(str)->len)
+    i = RSTRING_LEN( ost);
+    if (i > RSTRING_LEN( str))
         return Qnil;
-    s = RSTRING(str)->ptr;
-    o = RSTRING(ost)->ptr;
+    s = RSTRING_PTR( str);
+    o = RSTRING_PTR( ost);
     for (; i; i--, s++, o++) {
         if (*s != *o)
             return Qnil;
     }
-    return INT2FIX( RSTRING(ost)->len);
+    return INT2FIX( RSTRING_LEN( ost));
 }
 
 
@@ -410,17 +410,35 @@ rb_str_ends_with( VALUE str, VALUE oth)
     VALUE ost;
 
     ost = rb_string_value( &oth);
-    i = RSTRING(ost)->len;
-    if (i > RSTRING(str)->len)
+    i = RSTRING_LEN( ost);
+    if (i > RSTRING_LEN( str))
         return Qnil;
-    s = RSTRING(str)->ptr + RSTRING(str)->len;
-    o = RSTRING(ost)->ptr + RSTRING(ost)->len;
+    s = RSTRING_END( str);
+    o = RSTRING_END( ost);
     for (; i; i--)
         if (*--s != *--o)
             return Qnil;
-    return INT2FIX( RSTRING(str)->len - RSTRING(ost)->len);
+    return INT2FIX( RSTRING_LEN( str) - RSTRING_LEN( ost));
 }
 
+#ifdef STRING_ORD
+
+/*
+ *  call-seq:
+ *     ord()   -> nil or int
+ *
+ *  Checks whether the tail is <code>oth</code>. Returns the position
+ *  where <code>oth</code> starts when matching.
+ *
+ *     "sys-apps".ends_with( "-apps")    #=> 3
+ */
+
+VALUE rb_str_ord( VALUE str)
+{
+    return RSTRING_LEN( str) > 0 ? INT2FIX( RSTRING_PTR( str)[ 0]) : Qnil;
+}
+
+#endif
 
 /*
  *  Document-class: Numeric
@@ -454,24 +472,24 @@ rb_num_neg_p( VALUE num)
 {
     VALUE r = Qfalse;
 
-    switch (TYPE(num)) {
+    switch (TYPE( num)) {
         case T_FIXNUM:
-            if (NUM2LONG(num) < 0)
+            if (NUM2LONG( num) < 0)
                 r = Qtrue;
             break;
 
         case T_BIGNUM:
-            if (!RBIGNUM(num)->sign)
+            if (!RBIGNUM( num)->sign)
                 r = Qtrue;
             break;
 
         case T_FLOAT:
-            if (RFLOAT(num)->value < 0)
+            if (RFLOAT( num)->value < 0)
                 r = Qtrue;
             break;
 
         default:
-            return rb_num_neg_p( rb_funcall( num, id_cmp, 1, INT2FIX(0)));
+            return rb_num_neg_p( rb_funcall( num, id_cmp, 1, INT2FIX( 0)));
             break;
     }
     return r;
@@ -493,9 +511,9 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
     long l;
     double d;
 
-    switch (TYPE(num)) {
+    switch (TYPE( num)) {
         case T_FIXNUM:
-            l = NUM2LONG(num);
+            l = NUM2LONG( num);
             if (l == 1l || l == -1l)
                 return sing;
             break;
@@ -505,13 +523,13 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
             break;
 
         case T_FLOAT:
-            d = RFLOAT(num)->value;
+            d = RFLOAT( num)->value;
             if (d == 1.0 || d == -1.0)
                 return sing;
             break;
 
         default:
-            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(1)));
+            l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX( 1)));
             if (l == 0)
                 return sing;
             l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX(-1)));
@@ -566,7 +584,7 @@ rb_ary_indexes( VALUE ary)
     ret = rb_ary_new2( j);
     RARRAY( ret)->len = j;
     for (i = 0; j; ++i, --j) {
-        rb_ary_store( ret, i, INT2FIX(i));
+        rb_ary_store( ret, i, INT2FIX( i));
     }
     return ret;
 }
@@ -602,7 +620,7 @@ step_index_blk( VALUE ary)
     long i, j;
 
     for (i = 0, j = RARRAY( ary)->len; j > 0; i++, j--) {
-        if (RTEST(rb_yield( RARRAY( ary)->ptr[ i])))
+        if (RTEST( rb_yield( RARRAY( ary)->ptr[ i])))
             return LONG2NUM( i);
     }
     return Qnil;
@@ -791,7 +809,7 @@ VALUE step_eat_lines_elem( VALUE elem)
 VALUE
 rb_hash_notempty( VALUE hash)
 {
-    return RHASH(hash)->tbl->num_entries == 0 ? Qnil : hash;
+    return RHASH( hash)->tbl->num_entries == 0 ? Qnil : hash;
 }
 
 
@@ -816,11 +834,11 @@ rb_file_size( VALUE obj)
     OpenFile *fptr;
     struct stat st;
 
-    GetOpenFile(obj, fptr);
-    if (fstat(fileno(fptr->f), &st) == -1) {
-        rb_sys_fail(fptr->path);
+    GetOpenFile( obj, fptr);
+    if (fstat( fileno( fptr->f), &st) == -1) {
+        rb_sys_fail( fptr->path);
     }
-    return INT2FIX(st.st_size);
+    return INT2FIX( st.st_size);
 }
 
 
@@ -860,7 +878,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
         switch (errno) {
           case EAGAIN:
           case EACCES:
-#if defined(EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
+#if defined( EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
           case EWOULDBLOCK:
 #endif
             if (!RTEST( nb)) {
@@ -963,12 +981,12 @@ step_each_line_elem( VALUE elem)
  *  so a umask of <code>0222</code> would make a file read-only for
  *  everyone.
  *
- *     File.umask(0006)   #=> 18
- *     File.umask         #=> 6
+ *     File.umask( 0006)   #=> 18
+ *     File.umask          #=> 6
  */
             
 VALUE    
-step_file_s_umask(int argc, VALUE *argv)
+step_file_s_umask( int argc, VALUE *argv)
 {               
     int omask = 0;
 
@@ -1044,13 +1062,13 @@ rb_match_begin( int argc, VALUE *argv, VALUE match)
     } else
         i = 0;
 
-    if (i < 0 || RMATCH(match)->regs->num_regs <= i)
+    if (i < 0 || RMATCH( match)->regs->num_regs <= i)
         rb_raise( rb_eIndexError, "index %d out of matches", i);
 
-    if (RMATCH(match)->regs->beg[i] < 0)
+    if (RMATCH( match)->regs->beg[i] < 0)
         return Qnil;
 
-    return INT2FIX(RMATCH(match)->regs->beg[i]);
+    return INT2FIX( RMATCH( match)->regs->beg[i]);
 }
 
 
@@ -1080,13 +1098,13 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
     } else
         i = 0;
 
-    if (i < 0 || RMATCH(match)->regs->num_regs <= i)
+    if (i < 0 || RMATCH( match)->regs->num_regs <= i)
         rb_raise( rb_eIndexError, "index %d out of matches", i);
 
-    if (RMATCH(match)->regs->beg[i] < 0)
+    if (RMATCH( match)->regs->beg[i] < 0)
         return Qnil;
 
-    return INT2FIX(RMATCH(match)->regs->end[i]);
+    return INT2FIX( RMATCH( match)->regs->end[i]);
 }
 
 
@@ -1186,6 +1204,9 @@ void Init_step( void)
     rb_define_method( rb_cString, "tail", rb_str_tail, 1);
     rb_define_method( rb_cString, "starts_with", rb_str_starts_with, 1);
     rb_define_method( rb_cString, "ends_with", rb_str_ends_with, 1);
+#ifdef STRING_ORD
+    rb_define_method( rb_cString, "ord", rb_str_ord, 0);
+#endif
 
     rb_define_method( rb_cNumeric, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
@@ -1211,8 +1232,8 @@ void Init_step( void)
 
     rb_define_singleton_method( rb_cDir, "current", step_dir_s_current, 0);
 
-    rb_define_method(rb_cMatch, "begin", rb_match_begin, -1);
-    rb_define_method(rb_cMatch, "end", rb_match_end, -1);
+    rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
+    rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty, 0);

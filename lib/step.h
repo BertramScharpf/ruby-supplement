@@ -22,6 +22,9 @@ extern VALUE rb_str_rest( VALUE, VALUE);
 extern VALUE rb_str_tail( VALUE, VALUE);
 extern VALUE rb_str_starts_with( VALUE, VALUE);
 extern VALUE rb_str_ends_with( VALUE, VALUE);
+#ifdef STRING_ORD
+extern VALUE rb_str_ord( VALUE);
+#endif
 extern VALUE rb_ary_notempty( VALUE);
 extern VALUE rb_ary_indexes( VALUE);
 extern VALUE rb_ary_pick( VALUE);
