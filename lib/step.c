@@ -363,16 +363,16 @@ rb_str_tail( VALUE str, VALUE n)
 
 /*
  *  call-seq:
- *     starts_with( oth)   -> nil or int
+ *     start_with?( oth)   -> nil or int
  *
  *  Checks whether the head is <code>oth</code>. Returns length of
  *  <code>oth</code> when matching.
  *
- *     "sys-apps".starts_with( "sys-")    #=> 4
+ *     "sys-apps".start_with?( "sys-")    #=> 4
  */
 
 VALUE
-rb_str_starts_with( VALUE str, VALUE oth)
+rb_str_start_with_q( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -394,16 +394,16 @@ rb_str_starts_with( VALUE str, VALUE oth)
 
 /*
  *  call-seq:
- *     ends_with( oth)   -> nil or int
+ *     end_with?( oth)   -> nil or int
  *
  *  Checks whether the tail is <code>oth</code>. Returns the position
  *  where <code>oth</code> starts when matching.
  *
- *     "sys-apps".ends_with( "-apps")    #=> 3
+ *     "sys-apps".end_with?( "-apps")    #=> 3
  */
 
 VALUE
-rb_str_ends_with( VALUE str, VALUE oth)
+rb_str_end_with_q( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -427,10 +427,7 @@ rb_str_ends_with( VALUE str, VALUE oth)
  *  call-seq:
  *     ord()   -> nil or int
  *
- *  Checks whether the tail is <code>oth</code>. Returns the position
- *  where <code>oth</code> starts when matching.
- *
- *     "sys-apps".ends_with( "-apps")    #=> 3
+ *  Returns the ASCII value of the first character, if any.
  */
 
 VALUE rb_str_ord( VALUE str)
@@ -1202,8 +1199,12 @@ void Init_step( void)
     rb_define_method( rb_cString, "head", rb_str_head, 1);
     rb_define_method( rb_cString, "rest", rb_str_rest, 1);
     rb_define_method( rb_cString, "tail", rb_str_tail, 1);
-    rb_define_method( rb_cString, "starts_with", rb_str_starts_with, 1);
-    rb_define_method( rb_cString, "ends_with", rb_str_ends_with, 1);
+    rb_define_method( rb_cString, "start_with?", rb_str_start_with_q, 1);
+    rb_define_method( rb_cString, "end_with?", rb_str_end_with_q, 1);
+    rb_define_alias( rb_cString,  "starts_with?", "start_with?");
+    rb_define_alias( rb_cString,  "ends_with?", "end_with?");
+    rb_define_alias( rb_cString,  "starts_with", "start_with?");
+    rb_define_alias( rb_cString,  "ends_with", "end_with?");
 #ifdef STRING_ORD
     rb_define_method( rb_cString, "ord", rb_str_ord, 0);
 #endif

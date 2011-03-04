@@ -20,8 +20,8 @@ extern VALUE rb_str_clear( VALUE);
 extern VALUE rb_str_head( VALUE, VALUE);
 extern VALUE rb_str_rest( VALUE, VALUE);
 extern VALUE rb_str_tail( VALUE, VALUE);
-extern VALUE rb_str_starts_with( VALUE, VALUE);
-extern VALUE rb_str_ends_with( VALUE, VALUE);
+extern VALUE rb_str_start_with_q( VALUE, VALUE);
+extern VALUE rb_str_end_with_q( VALUE, VALUE);
 #ifdef STRING_ORD
 extern VALUE rb_str_ord( VALUE);
 #endif

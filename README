@@ -34,8 +34,8 @@ Now here it is where I can just point to.
 * String#head
 * String#tail
 * String#rest
-* String#starts_with
-* String#ends_with
+* String#start_with?
+* String#end_with?
 * Array#notempty?
 * Hash#notempty?
 * Struct.[]
