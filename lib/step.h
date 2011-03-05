@@ -17,9 +17,9 @@ extern VALUE rb_str_eat( int, VALUE *, VALUE);
 extern VALUE rb_str_eat_lines( VALUE);
 extern VALUE rb_str_cut_bang( VALUE, VALUE);
 extern VALUE rb_str_clear( VALUE);
-extern VALUE rb_str_head( VALUE, VALUE);
-extern VALUE rb_str_rest( VALUE, VALUE);
-extern VALUE rb_str_tail( VALUE, VALUE);
+extern VALUE rb_str_head( int, VALUE *, VALUE);
+extern VALUE rb_str_rest( int, VALUE *, VALUE);
+extern VALUE rb_str_tail( int, VALUE *, VALUE);
 extern VALUE rb_str_start_with_q( VALUE, VALUE);
 extern VALUE rb_str_end_with_q( VALUE, VALUE);
 #ifdef STRING_ORD

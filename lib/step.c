@@ -279,7 +279,7 @@ rb_str_clear( VALUE str)
 
 /*
  *  call-seq:
- *     head( n)   -> str
+ *     head( n = 1)   -> str
  *
  *  Returns first <code>n</code> bytes in <code>str</code>.
  *
@@ -287,16 +287,18 @@ rb_str_clear( VALUE str)
  */
 
 VALUE
-rb_str_head( VALUE str, VALUE n)
+rb_str_head( int argc, VALUE *argv, VALUE str)
 {
+    VALUE n;
     VALUE str2;
     long len;
 
-    len = NUM2LONG( n);
-    if (len < 0) return Qnil;
-    if (len > RSTRING_LEN( str)) {
+    len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
+
+    if (len < 0)
+        return Qnil;
+    if (len > RSTRING_LEN( str))
         len = RSTRING_LEN( str);
-    }
     str2 = rb_str_new5( str, RSTRING_PTR( str), len);
     OBJ_INFECT( str2, str);
 
@@ -306,7 +308,7 @@ rb_str_head( VALUE str, VALUE n)
 
 /*
  *  call-seq:
- *     rest( n)   -> str
+ *     rest( n = 1)   -> str
  *
  *  Return rest after <code>n</code> bytes in <code>str</code>.
  *
@@ -314,18 +316,20 @@ rb_str_head( VALUE str, VALUE n)
  */
 
 VALUE
-rb_str_rest( VALUE str, VALUE n)
+rb_str_rest( int argc, VALUE *argv, VALUE str)
 {
+    VALUE n;
     VALUE str2;
     long beg, len;
 
-    beg = NUM2LONG( n);
-    if (beg > RSTRING_LEN( str)) return Qnil;
-    if (beg < 0) {
+    beg = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
+
+    if (beg > RSTRING_LEN( str))
+        return Qnil;
+    if (beg < 0)
         beg = 0;
-    }
     len = RSTRING_LEN( str) - beg;
-    str2 = rb_str_new5( str, RSTRING_PTR( str)+beg, len);
+    str2 = rb_str_new5( str, RSTRING_PTR( str) + beg, len);
     OBJ_INFECT( str2, str);
 
     return str2;
@@ -334,7 +338,7 @@ rb_str_rest( VALUE str, VALUE n)
 
 /*
  *  call-seq:
- *     tail( n)   -> str
+ *     tail( n = 1)   -> str
  *
  *  Returns last <code>n</code> bytes in <code>str</code>.
  *
@@ -342,13 +346,16 @@ rb_str_rest( VALUE str, VALUE n)
  */
 
 VALUE
-rb_str_tail( VALUE str, VALUE n)
+rb_str_tail( int argc, VALUE *argv, VALUE str)
 {
+    VALUE n;
     VALUE str2;
     long beg, len;
 
-    len = NUM2LONG( n);
-    if (len < 0) return Qnil;
+    len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
+
+    if (len < 0)
+        return Qnil;
     beg = RSTRING_LEN( str) - len;
     if (beg < 0) {
         beg = 0;
@@ -687,12 +694,11 @@ rb_ary_index( int argc, VALUE *argv, VALUE ary)
     VALUE val;
 
     if (rb_scan_args( argc, argv, "01", &val) == 1) {
-        if (rb_block_given_p()) rb_warning( "given block not used");
+        if (rb_block_given_p())
+            rb_warning( "given block not used");
         return step_index_val( ary, val);
-    }
-    else {
+    } else
         return step_index_blk( ary);
-    }
     return Qnil;
 }
 
@@ -701,10 +707,9 @@ step_index_val( VALUE ary, VALUE val)
 {
     long i;
 
-    for (i = 0; i < RARRAY( ary)->len; i++) {
+    for (i = 0; i < RARRAY( ary)->len; i++)
         if (rb_equal( RARRAY( ary)->ptr[ i], val))
             return LONG2NUM( i);
-    }
     return Qnil;
 }
 
@@ -732,12 +737,11 @@ rb_ary_rindex( int argc, VALUE *argv, VALUE ary)
     VALUE val;
 
     if (rb_scan_args( argc, argv, "01", &val) == 1) {
-        if (rb_block_given_p()) rb_warning( "given block not used");
+        if (rb_block_given_p())
+            rb_warning( "given block not used");
         return step_rindex_val( ary, val);
-    }
-    else {
+    } else
         return step_rindex_blk( ary);
-    }
     return Qnil;
 }
 
@@ -746,11 +750,9 @@ step_rindex_val( VALUE ary, VALUE val)
 {
     long i;
 
-    for (i = RARRAY( ary)->len; i;) {
-        --i;
-        if (rb_equal( RARRAY( ary)->ptr[ i], val))
+    for (i = RARRAY( ary)->len; i;)
+        if (rb_equal( RARRAY( ary)->ptr[ --i], val))
             return LONG2NUM( i);
-    }
     return Qnil;
 }
 
@@ -1196,9 +1198,9 @@ void Init_step( void)
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
     rb_define_method( rb_cString, "clear", rb_str_clear, 0);
-    rb_define_method( rb_cString, "head", rb_str_head, 1);
-    rb_define_method( rb_cString, "rest", rb_str_rest, 1);
-    rb_define_method( rb_cString, "tail", rb_str_tail, 1);
+    rb_define_method( rb_cString, "head", rb_str_head, -1);
+    rb_define_method( rb_cString, "rest", rb_str_rest, -1);
+    rb_define_method( rb_cString, "tail", rb_str_tail, -1);
     rb_define_method( rb_cString, "start_with?", rb_str_start_with_q, 1);
     rb_define_method( rb_cString, "end_with?", rb_str_end_with_q, 1);
     rb_define_alias( rb_cString,  "starts_with?", "start_with?");

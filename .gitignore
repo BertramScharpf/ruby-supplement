@@ -8,6 +8,7 @@
 .configure
 *.o
 *.so
+*.core
 
 *.gem
 
