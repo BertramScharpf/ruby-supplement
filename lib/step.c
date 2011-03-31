@@ -193,7 +193,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
  *  Document-method: eat_lines
  *
  *  call-seq:
- *     eat_lines   -> nil
+ *     eat_lines() { |l| .. }   -> nil
  *
  *  Returns parts of +str+, line by line. The line returned will be deleted
  *  from the string. If no +break+ occurs, the string will be empty
