@@ -17,6 +17,7 @@ DLs = {
   "step.so"         => "step.o",
   "step/filesys.so" => "step/filesys.o",
   "step/itimer.so"  => "step/itimer.o",
+  "step/sync.so"    => "step/sync.o",
 }
 
 DLs.each { |k,v|

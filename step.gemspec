@@ -30,6 +30,8 @@ EOT
                           lib/step/filesys.h
                           lib/step/itimer.c
                           lib/step/itimer.h
+                          lib/step/sync.c
+                          lib/step/sync.h
                           lib/step/date.rb
                         )
   s.executables       = %w(
