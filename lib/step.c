@@ -845,7 +845,7 @@ rb_file_size( VALUE obj)
  *  call-seq:
  *     flockb( excl = nil, nb = nil) { || ... }  -> nil
  *
- *  Lock file using the <code>flock()</code> system call. 
+ *  Lock file using the <code>flock()</code> system call.
  *  When the <code>nb</code> flag is <code>true</code>, the method
  *  won't block but rather raise an exception. Catch
  *  <code>SystemCallError</code>. The calls may be nested in any order.
@@ -970,7 +970,7 @@ step_each_line_elem( VALUE elem)
  *     umask()             -> int
  *     umask( int)         -> int
  *     umask( int) { ... } -> obj
- *   
+ *
  *  Returns the current umask value for this process.  If the optional
  *  argument is given, set the umask to that value and return the
  *  previous value.  If a block is given, the umask value will be
@@ -983,10 +983,10 @@ step_each_line_elem( VALUE elem)
  *     File.umask( 0006)   #=> 18
  *     File.umask          #=> 6
  */
-            
-VALUE    
+
+VALUE
 step_file_s_umask( int argc, VALUE *argv)
-{               
+{
     int omask = 0;
 
     rb_secure( 2);

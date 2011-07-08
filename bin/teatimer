@@ -6,7 +6,7 @@
 
 # This is an example application for the itimer library.
 # Example:
-# 
+#
 #   $ teatimer 3m play bell.wav
 #         # Count down 3 minutes and the exec the player.
 #
