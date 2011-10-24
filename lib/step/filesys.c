@@ -60,7 +60,7 @@ rb_fsstat_init( VALUE obj, VALUE dname)
     SafeStringValue( dname);
 
     if (statfs( StringValueCStr( dname), &st) == -1)
-        rb_sys_fail( RSTRING(dname)->ptr);
+        rb_sys_fail( RSTRING_PTR(dname));
     if (DATA_PTR(obj)) {
         free( DATA_PTR(obj));
         DATA_PTR(obj) = NULL;
