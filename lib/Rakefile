@@ -14,10 +14,9 @@ end
 
 
 DLs = {
-  "step.so"         => "step.o",
-  "step/filesys.so" => "step/filesys.o",
-  "step/itimer.so"  => "step/itimer.o",
-  "step/sync.so"    => "step/sync.o",
+  "step.so"         => %w(step.o sync.o),
+  "step/filesys.so" => %w(step/filesys.o),
+  "step/itimer.so"  => %w(step/itimer.o),
 }
 
 DLs.each { |k,v|

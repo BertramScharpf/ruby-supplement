@@ -6,7 +6,7 @@
 require "rubygems"
 
 
-SPEC = Gem::Specification.new do |s|
+Gem::Specification.new do |s|
   s.name              = "step"
   (File.read "README") =~ /^=\s.*?(\d+(?:\.\d+)*)/
   s.version           = $1
@@ -26,12 +26,12 @@ EOT
                           lib/Rakefile
                           lib/step.c
                           lib/step.h
+                          lib/sync.c
+                          lib/sync.h
                           lib/step/filesys.c
                           lib/step/filesys.h
                           lib/step/itimer.c
                           lib/step/itimer.h
-                          lib/step/sync.c
-                          lib/step/sync.h
                           lib/step/date.rb
                         )
   s.executables       = %w(
@@ -41,9 +41,5 @@ EOT
                           README
                           LICENSE
                         )
-end
-
-if $0 == __FILE__ then
-  (Gem::Builder.new SPEC).build
 end
 

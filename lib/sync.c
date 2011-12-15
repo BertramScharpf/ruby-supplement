@@ -22,8 +22,3 @@ rb_process_sync( VALUE obj)
     return Qnil;
 }
 
-void Init_sync( void)
-{
-    rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
-}
-

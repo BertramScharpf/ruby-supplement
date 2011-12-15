@@ -4,6 +4,8 @@
 
 #include "step.h"
 
+#include "sync.h"
+
 #include <st.h>
 #include <rubyio.h>
 #include <re.h>
@@ -1250,5 +1252,7 @@ void Init_step( void)
     id_cmp       = rb_intern( "<=>");
     id_eat_lines = rb_intern( "eat_lines");
     id_eqq       = 0;
+
+    rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
 }
 
