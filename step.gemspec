@@ -17,9 +17,16 @@ EOT
   s.authors           = [ "Bertram Scharpf"]
   s.email             = "<software@bertram-scharpf.de>"
   s.homepage          = "http://www.bertram-scharpf.de"
+
   s.requirements      = "just Ruby"
   s.add_dependency      "autorake", ">=1.0"
+
   s.has_rdoc          = true
+  s.extra_rdoc_files  = %w(
+                          README
+                          LICENSE
+                        )
+
   s.extensions        = "lib/mkrf_conf"
   s.files             = %w(
                           lib/mkrf_conf
@@ -33,13 +40,9 @@ EOT
                           lib/step/itimer.c
                           lib/step/itimer.h
                           lib/step/date.rb
+                          examples/teatimer
                         )
   s.executables       = %w(
-                          teatimer
-                        )
-  s.extra_rdoc_files  = %w(
-                          README
-                          LICENSE
                         )
 end
 
