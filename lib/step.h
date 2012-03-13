@@ -25,6 +25,7 @@ extern VALUE rb_str_end_with_q( VALUE, VALUE);
 #ifdef STRING_ORD
 extern VALUE rb_str_ord( VALUE);
 #endif
+extern VALUE rb_str_axe( int, VALUE *, VALUE);
 extern VALUE rb_ary_notempty( VALUE);
 extern VALUE rb_ary_indexes( VALUE);
 extern VALUE rb_ary_pick( VALUE);

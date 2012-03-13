@@ -445,6 +445,44 @@ VALUE rb_str_ord( VALUE str)
 #endif
 
 /*
+ *  call-seq:
+ *     axe( n = 80)   -> str
+ *
+ *  Cut off everthing beyond then <code>n</code>th character. Replace the
+ *  last bytes by ellipses.
+ *
+ *     a = "Redistribution and use in source and binary forms, with or without"
+ *     a.axe( 16)     #=> "Redistributio..."
+ */
+
+VALUE
+rb_str_axe( int argc, VALUE *argv, VALUE str)
+{
+    VALUE n;
+    VALUE str2;
+    long len;
+    int x;
+
+    if (rb_scan_args( argc, argv, "01", &n) == 1 && !NIL_P( n))
+        len = NUM2LONG( n);
+    else
+        len = 80;
+
+    if (len < 0)
+        return Qnil;
+    x = len < RSTRING_LEN( str) ? 3 : 0;
+    if (len > RSTRING_LEN( str))
+        len = RSTRING_LEN( str);
+    str2 = rb_str_new5( str, RSTRING_PTR( str), len);
+    for (; x && len; --x)
+        RSTRING_PTR( str2)[ --len] = '.';
+    OBJ_INFECT( str2, str);
+
+    return str2;
+}
+
+
+/*
  *  Document-class: Numeric
  */
 
@@ -1186,7 +1224,7 @@ rb_nil_nil_if( VALUE str, VALUE val)
 
 void Init_step( void)
 {
-    rb_define_alias( rb_cObject, "cls", "class");
+    rb_define_alias(  rb_cObject, "cls", "class");
 #ifdef KERNEL_TAP
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
@@ -1203,13 +1241,14 @@ void Init_step( void)
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
     rb_define_method( rb_cString, "start_with?", rb_str_start_with_q, 1);
     rb_define_method( rb_cString, "end_with?", rb_str_end_with_q, 1);
-    rb_define_alias( rb_cString,  "starts_with?", "start_with?");
-    rb_define_alias( rb_cString,  "ends_with?", "end_with?");
-    rb_define_alias( rb_cString,  "starts_with", "start_with?");
-    rb_define_alias( rb_cString,  "ends_with", "end_with?");
+    rb_define_alias(  rb_cString, "starts_with?", "start_with?");
+    rb_define_alias(  rb_cString, "ends_with?", "end_with?");
+    rb_define_alias(  rb_cString, "starts_with", "start_with?");
+    rb_define_alias(  rb_cString, "ends_with", "end_with?");
 #ifdef STRING_ORD
     rb_define_method( rb_cString, "ord", rb_str_ord, 0);
 #endif
+    rb_define_method( rb_cString, "axe", rb_str_axe, -1);
 
     rb_define_method( rb_cNumeric, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
@@ -1217,7 +1256,7 @@ void Init_step( void)
 
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty, 0);
     rb_define_method( rb_cArray, "indexes", rb_ary_indexes, 0);
-    rb_define_alias( rb_cArray,  "keys", "indexes");
+    rb_define_alias(  rb_cArray, "keys", "indexes");
     rb_define_method( rb_cArray, "pick", rb_ary_pick, 0);
     rb_define_method( rb_cArray, "rpick", rb_ary_rpick, 0);
 #ifdef ARRAY_INDEX_WITH_BLOCK
