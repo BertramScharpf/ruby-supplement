@@ -503,6 +503,42 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
 
 /*
  *  call-seq:
+ *     pos?  ->  true or false
+ *
+ *  Check whether +num+ is positive.
+ *
+ */
+
+VALUE
+rb_num_pos_p( VALUE num)
+{
+    VALUE r = Qfalse;
+
+    switch (TYPE( num)) {
+        case T_FIXNUM:
+            if (NUM2LONG( num) > 0)
+                r = Qtrue;
+            break;
+
+        case T_BIGNUM:
+            if (RBIGNUM( num)->sign)  /* 0 is not a Bignum. */
+                r = Qtrue;
+            break;
+
+        case T_FLOAT:
+            if (RFLOAT( num)->value > 0)
+                r = Qtrue;
+            break;
+
+        default:
+            return rb_num_neg_p( rb_funcall( INT2FIX( 0), id_cmp, 1, num));
+            break;
+    }
+    return r;
+}
+
+/*
+ *  call-seq:
  *     neg?  ->  true or false
  *
  *  Check whether +num+ is negative.
@@ -521,7 +557,7 @@ rb_num_neg_p( VALUE num)
             break;
 
         case T_BIGNUM:
-            if (!RBIGNUM( num)->sign)
+            if (!RBIGNUM( num)->sign)  /* 0 is not a Bignum. */
                 r = Qtrue;
             break;
 
@@ -1251,6 +1287,7 @@ void Init_step( void)
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
 
     rb_define_method( rb_cNumeric, "nil_if", rb_obj_nil_if, 1);
+    rb_define_method( rb_cNumeric, "pos?", rb_num_pos_p, 0);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
 
