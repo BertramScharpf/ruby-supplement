@@ -221,7 +221,7 @@ rb_str_eat_lines( VALUE self)
         if (l > 0)
             n++, l--;
         val = rb_str_new5( self, RSTRING_PTR( self), n);
-        /* It would be faster when the pointer could be moved ... */
+        /* It would be faster if the pointer could be moved ... */
         memmove( RSTRING_PTR( self), RSTRING_PTR( self) + n, l);
         RSTRING_LEN( self) = l;
         rb_yield( val);
