@@ -9,6 +9,7 @@
 #include <ruby.h>
 
 
+extern VALUE rb_obj_new_string( VALUE);
 extern VALUE rb_krn_tap( VALUE);
 extern VALUE rb_krn_tap_bang( VALUE);
 extern VALUE rb_str_notempty( VALUE);

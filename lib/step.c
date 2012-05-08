@@ -44,6 +44,26 @@ static VALUE step_do_unflock( VALUE);
 
 
 /*
+ *  Document-class: Object
+ */
+
+/*
+ *  call-seq:
+ *     new_string     -> str
+ *
+ *  Returns another string that may be modified without touching the original
+ *  object. This means +dup+ for a string and +to_s+ for any other object.
+ *
+ */
+
+VALUE
+rb_obj_new_string( VALUE obj)
+{
+    return TYPE( obj) == T_STRING ? rb_str_dup( obj) : rb_obj_as_string( obj);
+}
+
+
+/*
  *  Document-module: Kernel
  */
 
@@ -1261,6 +1281,7 @@ rb_nil_nil_if( VALUE str, VALUE val)
 void Init_step( void)
 {
     rb_define_alias(  rb_cObject, "cls", "class");
+    rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
 #ifdef KERNEL_TAP
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
