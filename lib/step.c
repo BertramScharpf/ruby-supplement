@@ -59,7 +59,7 @@ static VALUE step_do_unflock( VALUE);
 VALUE
 rb_obj_new_string( VALUE obj)
 {
-    return TYPE( obj) == T_STRING ? rb_str_dup( obj) : rb_obj_as_string( obj);
+    return rb_obj_as_string( obj);
 }
 
 
@@ -112,6 +112,23 @@ rb_krn_tap_bang( VALUE obj)
 /*
  *  Document-class: String
  */
+
+
+/*
+ *  call-seq:
+ *     new_string     -> str
+ *
+ *  Returns another string that may be modified without touching the original
+ *  object. This means +dup+ for a string and +to_s+ for any other object.
+ *
+ */
+
+VALUE
+rb_str_new_string( VALUE obj)
+{
+    return rb_str_dup( obj);
+}
+
 
 /*
  *  call-seq:
@@ -1291,6 +1308,7 @@ void Init_step( void)
 #endif
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
 
+    rb_define_method( rb_cString, "new_string", rb_str_new_string, 0);
     rb_define_method( rb_cString, "notempty?", rb_str_notempty, 0);
     rb_define_method( rb_cString, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
