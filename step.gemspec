@@ -2,7 +2,6 @@
 #  step.gemspec  --  Step Gem specification
 #
 
-
 Gem::Specification.new do |s|
   s.name              = "step"
   (File.read "README") =~ /^=\s.*?(\d+(?:\.\d+)*)/
