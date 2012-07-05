@@ -3,10 +3,7 @@
 #
 
 
-require "rubygems"
-
-
-SPEC = Gem::Specification.new do |s|
+Gem::Specification.new do |s|
   s.name              = "step"
   (File.read "README") =~ /^=\s.*?(\d+(?:\.\d+)*)/
   s.version           = $1
@@ -41,9 +38,5 @@ EOT
                           README
                           LICENSE
                         )
-end
-
-if $0 == __FILE__ then
-  (Gem::Builder.new SPEC).build
 end
 

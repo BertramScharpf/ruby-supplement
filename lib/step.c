@@ -887,6 +887,35 @@ rb_hash_notempty( VALUE hash)
 
 
 /*
+ *  Document-class: IO
+ */
+
+/*
+ *  Document-method: eat_lines
+ *
+ *  call-seq:
+ *     eat_lines   -> nil
+ *
+ *  Same as +IO#each_line+ but returns +nil+ so that +break+ values
+ *  may be distinguished.
+ *
+ */
+VALUE
+rb_io_eat_lines( VALUE self)
+{
+    rb_iterate( &step_each_line_elem, self, &rb_yield, Qnil);
+    return Qnil;
+}
+
+VALUE
+step_each_line_elem( VALUE elem)
+{
+    rb_funcall( elem, rb_intern( "each_line"), 0);
+    return Qnil;
+}
+
+
+/*
  *  Document-class: File
  */
 
@@ -1010,31 +1039,6 @@ step_do_unflock( VALUE v)
 
     flocks_root = flocks_root->prev;
 
-    return Qnil;
-}
-
-
-/*
- *  Document-method: eat_lines
- *
- *  call-seq:
- *     eat_lines   -> nil
- *
- *  Same as +File#each_line+ but returns +nil+ so that +break+ values
- *  may be distinguished.
- *
- */
-VALUE
-rb_file_eat_lines( VALUE self)
-{
-    rb_iterate( &step_each_line_elem, self, &rb_yield, Qnil);
-    return Qnil;
-}
-
-VALUE
-step_each_line_elem( VALUE elem)
-{
-    rb_funcall( elem, rb_intern( "each_line"), 0);
     return Qnil;
 }
 
@@ -1304,9 +1308,10 @@ void Init_step( void)
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty, 0);
 
+    rb_define_method( rb_cIO, "eat_lines", rb_io_eat_lines, 0);
+
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
     rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
-    rb_define_method( rb_cFile, "eat_lines", rb_file_eat_lines, 0);
     rb_define_singleton_method( rb_cFile, "umask", step_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", step_dir_s_current, 0);
