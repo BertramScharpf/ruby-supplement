@@ -150,7 +150,7 @@ rb_str_new_string( VALUE obj)
  */
 
 VALUE
-rb_str_notempty( VALUE str)
+rb_str_notempty_p( VALUE str)
 {
 #if 0
     /* Ruby Coding style */
@@ -424,7 +424,7 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
  */
 
 VALUE
-rb_str_start_with_q( VALUE str, VALUE oth)
+rb_str_start_with_p( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -455,7 +455,7 @@ rb_str_start_with_q( VALUE str, VALUE oth)
  */
 
 VALUE
-rb_str_end_with_q( VALUE str, VALUE oth)
+rb_str_end_with_p( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -680,7 +680,7 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
  */
 
 VALUE
-rb_ary_notempty( VALUE ary)
+rb_ary_notempty_p( VALUE ary)
 {
     return RARRAY( ary)->len == 0 ? Qnil : ary;
 }
@@ -925,7 +925,7 @@ VALUE step_eat_lines_elem( VALUE elem)
  */
 
 VALUE
-rb_hash_notempty( VALUE hash)
+rb_hash_notempty_p( VALUE hash)
 {
     return RHASH( hash)->tbl->num_entries == 0 ? Qnil : hash;
 }
@@ -1242,7 +1242,7 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
  */
 
 VALUE
-rb_nil_notempty( VALUE str)
+rb_nil_notempty_p( VALUE str)
 {
     return Qnil;
 }
@@ -1317,7 +1317,7 @@ void Init_step( void)
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
 
     rb_define_method( rb_cString, "new_string", rb_str_new_string, 0);
-    rb_define_method( rb_cString, "notempty?", rb_str_notempty, 0);
+    rb_define_method( rb_cString, "notempty?", rb_str_notempty_p, 0);
     rb_define_method( rb_cString, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
@@ -1326,8 +1326,8 @@ void Init_step( void)
     rb_define_method( rb_cString, "head", rb_str_head, -1);
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
-    rb_define_method( rb_cString, "start_with?", rb_str_start_with_q, 1);
-    rb_define_method( rb_cString, "end_with?", rb_str_end_with_q, 1);
+    rb_define_method( rb_cString, "start_with?", rb_str_start_with_p, 1);
+    rb_define_method( rb_cString, "end_with?", rb_str_end_with_p, 1);
     rb_define_alias(  rb_cString, "starts_with?", "start_with?");
     rb_define_alias(  rb_cString, "ends_with?", "end_with?");
     rb_define_alias(  rb_cString, "starts_with", "start_with?");
@@ -1342,7 +1342,7 @@ void Init_step( void)
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
 
-    rb_define_method( rb_cArray, "notempty?", rb_ary_notempty, 0);
+    rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
     rb_define_method( rb_cArray, "indexes", rb_ary_indexes, 0);
     rb_define_alias(  rb_cArray, "keys", "indexes");
     rb_define_method( rb_cArray, "pick", rb_ary_pick, 0);
@@ -1353,7 +1353,7 @@ void Init_step( void)
 #endif
     rb_define_method( rb_cArray, "eat_lines", rb_ary_eat_lines, 0);
 
-    rb_define_method( rb_cHash, "notempty?", rb_hash_notempty, 0);
+    rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
     rb_define_method( rb_cIO, "eat_lines", rb_io_eat_lines, 0);
 
@@ -1366,11 +1366,11 @@ void Init_step( void)
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
-    rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty, 0);
-    rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty, 0);
+    rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
+    rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nil_if", rb_nil_nil_if, 1);
-    rb_define_method( rb_cNilClass, "each_line", rb_nil_notempty, 0);
-    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_notempty, 0);
+    rb_define_method( rb_cNilClass, "each_line", rb_nil_notempty_p, 0);
+    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_notempty_p, 0);
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
