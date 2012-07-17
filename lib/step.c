@@ -54,12 +54,20 @@ static VALUE step_do_unflock( VALUE);
  *  Returns another string that may be modified without touching the original
  *  object. This means +dup+ for a string and +to_s+ for any other object.
  *
+ *  If a block is given, that may modify a created string (built from a
+ *  non-string object). For a dup'ed string object the block will not be
+ *  called.
  */
 
 VALUE
 rb_obj_new_string( VALUE obj)
 {
-    return rb_obj_as_string( obj);
+    VALUE r;
+
+    r = rb_obj_as_string( obj);
+    if (rb_block_given_p())
+        rb_yield( r);
+    return r;
 }
 
 
