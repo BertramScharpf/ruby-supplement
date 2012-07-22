@@ -50,6 +50,7 @@ extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
 extern VALUE rb_nil_notempty_p( VALUE);
 extern VALUE rb_nil_nil_if( VALUE, VALUE);
+extern VALUE rb_nil_each_line( VALUE);
 
 extern void Init_step( void);
 

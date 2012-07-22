@@ -256,8 +256,8 @@ rb_str_eat_lines( VALUE self)
     int l, n;
     char *p;
 
-    rb_str_modify( self);
     RETURN_ENUMERATOR( self, 0, 0);
+    rb_str_modify( self);
     while ((l = RSTRING_LEN( self)) > 0) {
         p = RSTRING_PTR( self);
         /* "\n" and "\r\n" both end in "\n" */
@@ -893,9 +893,7 @@ rb_ary_eat_lines( VALUE self)
 {
     long i, j;
 
-    /*
     RETURN_ENUMERATOR( self, 0, 0);
-    */
     for (i = 0, j = RARRAY( self)->len; j > 0; i++, j--)
         rb_iterate( &step_eat_lines_elem, RARRAY( self)->ptr[ i],
                             &rb_yield, Qnil);
@@ -948,6 +946,7 @@ rb_hash_notempty_p( VALUE hash)
 VALUE
 rb_io_eat_lines( VALUE self)
 {
+    RETURN_ENUMERATOR( self, 0, 0);
     rb_iterate( &step_each_line_elem, self, &rb_yield, Qnil);
     return Qnil;
 }
@@ -1278,6 +1277,14 @@ rb_nil_nil_if( VALUE str, VALUE val)
  *  This spares testing for +nil+ when checking strings.
  */
 
+VALUE
+rb_nil_each_line( VALUE str)
+{
+    RETURN_ENUMERATOR( str, 0, 0);
+    return Qnil;
+}
+
+
 /*
  *  Document-method: eat_lines
  *
@@ -1369,8 +1376,8 @@ void Init_step( void)
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nil_if", rb_nil_nil_if, 1);
-    rb_define_method( rb_cNilClass, "each_line", rb_nil_notempty_p, 0);
-    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_notempty_p, 0);
+    rb_define_method( rb_cNilClass, "each_line", rb_nil_each_line, 0);
+    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_each_line, 0);
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
