@@ -20,8 +20,12 @@ static VALUE step_rindex_blk( VALUE);
 static VALUE step_index_val( VALUE, VALUE);
 static VALUE step_rindex_val( VALUE, VALUE);
 #endif
-static VALUE step_eat_lines_elem( VALUE);
-static VALUE step_each_line_elem( VALUE);
+#ifdef ARRAY_SELECT_BANG
+static VALUE step_reject( VALUE);
+static VALUE step_invert_yield( VALUE);
+#endif
+static VALUE step_eat_lines( VALUE);
+static VALUE step_each_line( VALUE);
 static VALUE step_do_unumask( VALUE);
 
 
@@ -29,6 +33,9 @@ static ID id_delete_at;
 static ID id_cmp;
 static ID id_eat_lines;
 static ID id_eqq;
+#ifdef ARRAY_SELECT_BANG
+static ID id_reject_bang;
+#endif
 
 
 struct step_flock {
@@ -43,6 +50,34 @@ static struct step_flock *flocks_root = NULL;
 static void  step_init_flock( struct step_flock *, VALUE, VALUE);
 static VALUE step_do_unflock( VALUE);
 
+
+
+/*
+ *  Document-class: Object
+ */
+
+/*
+ *  call-seq:
+ *     new_string     -> str
+ *
+ *  Returns another string that may be modified without touching the original
+ *  object. This means +dup+ for a string and +to_s+ for any other object.
+ *
+ *  If a block is given, that may modify a created string (built from a
+ *  non-string object). For a dup'ed string object the block will not be
+ *  called.
+ */
+
+VALUE
+rb_obj_new_string( VALUE obj)
+{
+    VALUE r;
+
+    r = rb_obj_as_string( obj);
+    if (rb_block_given_p())
+        rb_yield( r);
+    return r;
+}
 
 
 /*
@@ -95,6 +130,23 @@ rb_krn_tap_bang( VALUE obj)
  *  Document-class: String
  */
 
+
+/*
+ *  call-seq:
+ *     new_string     -> str
+ *
+ *  Returns another string that may be modified without touching the original
+ *  object. This means +dup+ for a string and +to_s+ for any other object.
+ *
+ */
+
+VALUE
+rb_str_new_string( VALUE obj)
+{
+    return rb_str_dup( obj);
+}
+
+
 /*
  *  call-seq:
  *     notempty?   -> nil or self
@@ -107,7 +159,7 @@ rb_krn_tap_bang( VALUE obj)
  */
 
 VALUE
-rb_str_notempty( VALUE str)
+rb_str_notempty_p( VALUE str)
 {
 #if 0
     /* Ruby Coding style */
@@ -213,8 +265,8 @@ rb_str_eat_lines( VALUE self)
     int l, n;
     char *p;
 
-    rb_str_modify( self);
     RETURN_ENUMERATOR( self, 0, 0);
+    rb_str_modify( self);
     while ((l = RSTRING_LEN( self)) > 0) {
         p = RSTRING_PTR( self);
         /* "\n" and "\r\n" both end in "\n" */
@@ -223,7 +275,7 @@ rb_str_eat_lines( VALUE self)
         if (l > 0)
             n++, l--;
         val = rb_str_new5( self, RSTRING_PTR( self), n);
-        /* It would be faster when the pointer could be moved ... */
+        /* It would be faster if the pointer could be moved ... */
         memmove( RSTRING_PTR( self), RSTRING_PTR( self) + n, l);
         RSTRING_LEN( self) = l;
         rb_yield( val);
@@ -381,7 +433,7 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
  */
 
 VALUE
-rb_str_start_with_q( VALUE str, VALUE oth)
+rb_str_start_with_p( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -412,7 +464,7 @@ rb_str_start_with_q( VALUE str, VALUE oth)
  */
 
 VALUE
-rb_str_end_with_q( VALUE str, VALUE oth)
+rb_str_end_with_p( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -447,6 +499,44 @@ VALUE rb_str_ord( VALUE str)
 #endif
 
 /*
+ *  call-seq:
+ *     axe( n = 80)   -> str
+ *
+ *  Cut off everthing beyond then <code>n</code>th character. Replace the
+ *  last bytes by ellipses.
+ *
+ *     a = "Redistribution and use in source and binary forms, with or without"
+ *     a.axe( 16)     #=> "Redistributio..."
+ */
+
+VALUE
+rb_str_axe( int argc, VALUE *argv, VALUE str)
+{
+    VALUE n;
+    VALUE str2;
+    long len;
+    int x;
+
+    if (rb_scan_args( argc, argv, "01", &n) == 1 && !NIL_P( n))
+        len = NUM2LONG( n);
+    else
+        len = 80;
+
+    if (len < 0)
+        return Qnil;
+    x = len < RSTRING_LEN( str) ? 3 : 0;
+    if (len > RSTRING_LEN( str))
+        len = RSTRING_LEN( str);
+    str2 = rb_str_new5( str, RSTRING_PTR( str), len);
+    for (; x && len; --x)
+        RSTRING_PTR( str2)[ --len] = '.';
+    OBJ_INFECT( str2, str);
+
+    return str2;
+}
+
+
+/*
  *  Document-class: Numeric
  */
 
@@ -464,6 +554,42 @@ VALUE rb_str_ord( VALUE str)
  *     1.0.nil_if Float  #=> nil
  */
 
+
+/*
+ *  call-seq:
+ *     pos?  ->  true or false
+ *
+ *  Check whether +num+ is positive.
+ *
+ */
+
+VALUE
+rb_num_pos_p( VALUE num)
+{
+    VALUE r = Qfalse;
+
+    switch (TYPE( num)) {
+        case T_FIXNUM:
+            if (NUM2LONG( num) > 0)
+                r = Qtrue;
+            break;
+
+        case T_BIGNUM:
+            if (RBIGNUM( num)->sign)  /* 0 is not a Bignum. */
+                r = Qtrue;
+            break;
+
+        case T_FLOAT:
+            if (RFLOAT( num)->value > 0)
+                r = Qtrue;
+            break;
+
+        default:
+            return rb_num_neg_p( rb_funcall( INT2FIX( 0), id_cmp, 1, num));
+            break;
+    }
+    return r;
+}
 
 /*
  *  call-seq:
@@ -485,7 +611,7 @@ rb_num_neg_p( VALUE num)
             break;
 
         case T_BIGNUM:
-            if (!RBIGNUM( num)->sign)
+            if (!RBIGNUM( num)->sign)  /* 0 is not a Bignum. */
                 r = Qtrue;
             break;
 
@@ -563,9 +689,9 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
  */
 
 VALUE
-rb_ary_notempty( VALUE ary)
+rb_ary_notempty_p( VALUE ary)
 {
-    return RARRAY( ary)->len == 0 ? Qnil : ary;
+    return RARRAY_LEN( ary) == 0 ? Qnil : ary;
 }
 
 
@@ -586,9 +712,9 @@ rb_ary_indexes( VALUE ary)
     VALUE ret;
     int i, j;
 
-    j = RARRAY( ary)->len;
+    j = RARRAY_LEN( ary);
     ret = rb_ary_new2( j);
-    RARRAY( ret)->len = j;
+    RARRAY_LEN( ret) = j;
     for (i = 0; j; ++i, --j) {
         rb_ary_store( ret, i, INT2FIX( i));
     }
@@ -625,8 +751,8 @@ step_index_blk( VALUE ary)
 {
     long i, j;
 
-    for (i = 0, j = RARRAY( ary)->len; j > 0; i++, j--) {
-        if (RTEST( rb_yield( RARRAY( ary)->ptr[ i])))
+    for (i = 0, j = RARRAY_LEN( ary); j > 0; i++, j--) {
+        if (RTEST( rb_yield( RARRAY_PTR( ary)[ i])))
             return LONG2NUM( i);
     }
     return Qnil;
@@ -662,9 +788,9 @@ step_rindex_blk( VALUE ary)
 {
     long i;
 
-    for (i = RARRAY( ary)->len; i;) {
+    for (i = RARRAY_LEN( ary); i;) {
         --i;
-        if (rb_yield( RARRAY( ary)->ptr[ i]))
+        if (rb_yield( RARRAY_PTR( ary)[ i]))
             return LONG2NUM( i);
     }
     return Qnil;
@@ -709,8 +835,8 @@ step_index_val( VALUE ary, VALUE val)
 {
     long i;
 
-    for (i = 0; i < RARRAY( ary)->len; i++)
-        if (rb_equal( RARRAY( ary)->ptr[ i], val))
+    for (i = 0; i < RARRAY_LEN( ary); i++)
+        if (rb_equal( RARRAY_PTR( ary)[ i], val))
             return LONG2NUM( i);
     return Qnil;
 }
@@ -752,13 +878,48 @@ step_rindex_val( VALUE ary, VALUE val)
 {
     long i;
 
-    for (i = RARRAY( ary)->len; i;)
-        if (rb_equal( RARRAY( ary)->ptr[ --i], val))
+    for (i = RARRAY_LEN( ary); i;)
+        if (rb_equal( RARRAY_PTR( ary)[ --i], val))
             return LONG2NUM( i);
     return Qnil;
 }
 
 #endif
+
+#ifdef ARRAY_SELECT_BANG
+
+/*
+ *  Document-method: select!
+ *
+ *  call-seq:
+ *     select! { |x| ... }   -> ary
+ *
+ *  Remove all items for that the block returns +nil+ or +false+.
+ *
+ */
+
+VALUE
+rb_ary_select_bang( VALUE self)
+{
+    return rb_iterate( &step_reject, self, &step_invert_yield, Qnil);
+}
+
+VALUE
+step_reject( VALUE obj)
+{
+    if (!id_reject_bang)
+        id_reject_bang = rb_intern( "reject!");
+    return rb_funcall( obj, id_reject_bang, 0);
+}
+
+VALUE
+step_invert_yield( VALUE elem)
+{
+    return NIL_P( rb_yield( elem)) ? Qtrue : Qfalse;
+}
+
+#endif
+
 
 /*
  *  Document-method: eat_lines
@@ -774,20 +935,19 @@ step_rindex_val( VALUE ary, VALUE val)
 VALUE
 rb_ary_eat_lines( VALUE self)
 {
-    long i, j;
+    VALUE s;
 
-    /*
     RETURN_ENUMERATOR( self, 0, 0);
-    */
-    for (i = 0, j = RARRAY( self)->len; j > 0; i++, j--)
-        rb_iterate( &step_eat_lines_elem, RARRAY( self)->ptr[ i],
-                            &rb_yield, Qnil);
+    while (RARRAY_LEN( self) > 0) {
+        s = rb_ary_shift( self);
+        rb_iterate( &step_eat_lines, s, &rb_yield, Qnil);
+    }
     return Qnil;
 }
 
-VALUE step_eat_lines_elem( VALUE elem)
+VALUE step_eat_lines( VALUE obj)
 {
-    rb_funcall( elem, id_eat_lines, 0);
+    rb_funcall( obj, id_eat_lines, 0);
     return Qnil;
 }
 
@@ -808,9 +968,39 @@ VALUE step_eat_lines_elem( VALUE elem)
  */
 
 VALUE
-rb_hash_notempty( VALUE hash)
+rb_hash_notempty_p( VALUE hash)
 {
     return RHASH( hash)->tbl->num_entries == 0 ? Qnil : hash;
+}
+
+
+/*
+ *  Document-class: IO
+ */
+
+/*
+ *  Document-method: eat_lines
+ *
+ *  call-seq:
+ *     eat_lines   -> nil
+ *
+ *  Same as +IO#each_line+ but returns +nil+ so that +break+ values
+ *  may be distinguished.
+ *
+ */
+VALUE
+rb_io_eat_lines( VALUE self)
+{
+    RETURN_ENUMERATOR( self, 0, 0);
+    rb_iterate( &step_each_line, self, &rb_yield, Qnil);
+    return Qnil;
+}
+
+VALUE
+step_each_line( VALUE obj)
+{
+    rb_funcall( obj, rb_intern( "each_line"), 0);
+    return Qnil;
 }
 
 
@@ -938,31 +1128,6 @@ step_do_unflock( VALUE v)
 
     flocks_root = flocks_root->prev;
 
-    return Qnil;
-}
-
-
-/*
- *  Document-method: eat_lines
- *
- *  call-seq:
- *     eat_lines   -> nil
- *
- *  Same as +File#each_line+ but returns +nil+ so that +break+ values
- *  may be distinguished.
- *
- */
-VALUE
-rb_file_eat_lines( VALUE self)
-{
-    rb_iterate( &step_each_line_elem, self, &rb_yield, Qnil);
-    return Qnil;
-}
-
-VALUE
-step_each_line_elem( VALUE elem)
-{
-    rb_funcall( elem, rb_intern( "each_line"), 0);
     return Qnil;
 }
 
@@ -1121,7 +1286,7 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
  */
 
 VALUE
-rb_nil_notempty( VALUE str)
+rb_nil_notempty_p( VALUE str)
 {
     return Qnil;
 }
@@ -1157,6 +1322,14 @@ rb_nil_nil_if( VALUE str, VALUE val)
  *  This spares testing for +nil+ when checking strings.
  */
 
+VALUE
+rb_nil_each_line( VALUE str)
+{
+    RETURN_ENUMERATOR( str, 0, 0);
+    return Qnil;
+}
+
+
 /*
  *  Document-method: eat_lines
  *
@@ -1188,13 +1361,15 @@ rb_nil_nil_if( VALUE str, VALUE val)
 
 void Init_step( void)
 {
-    rb_define_alias( rb_cObject, "cls", "class");
+    rb_define_alias(  rb_cObject, "cls", "class");
+    rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
 #ifdef KERNEL_TAP
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
 
-    rb_define_method( rb_cString, "notempty?", rb_str_notempty, 0);
+    rb_define_method( rb_cString, "new_string", rb_str_new_string, 0);
+    rb_define_method( rb_cString, "notempty?", rb_str_notempty_p, 0);
     rb_define_method( rb_cString, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
@@ -1203,36 +1378,42 @@ void Init_step( void)
     rb_define_method( rb_cString, "head", rb_str_head, -1);
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
-    rb_define_method( rb_cString, "start_with?", rb_str_start_with_q, 1);
-    rb_define_method( rb_cString, "end_with?", rb_str_end_with_q, 1);
-    rb_define_alias( rb_cString,  "starts_with?", "start_with?");
-    rb_define_alias( rb_cString,  "ends_with?", "end_with?");
-    rb_define_alias( rb_cString,  "starts_with", "start_with?");
-    rb_define_alias( rb_cString,  "ends_with", "end_with?");
+    rb_define_method( rb_cString, "start_with?", rb_str_start_with_p, 1);
+    rb_define_method( rb_cString, "end_with?", rb_str_end_with_p, 1);
+    rb_define_alias(  rb_cString, "starts_with?", "start_with?");
+    rb_define_alias(  rb_cString, "ends_with?", "end_with?");
+    rb_define_alias(  rb_cString, "starts_with", "start_with?");
+    rb_define_alias(  rb_cString, "ends_with", "end_with?");
 #ifdef STRING_ORD
     rb_define_method( rb_cString, "ord", rb_str_ord, 0);
 #endif
+    rb_define_method( rb_cString, "axe", rb_str_axe, -1);
 
     rb_define_method( rb_cNumeric, "nil_if", rb_obj_nil_if, 1);
+    rb_define_method( rb_cNumeric, "pos?", rb_num_pos_p, 0);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
 
-    rb_define_method( rb_cArray, "notempty?", rb_ary_notempty, 0);
+    rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
     rb_define_method( rb_cArray, "indexes", rb_ary_indexes, 0);
-    rb_define_alias( rb_cArray,  "keys", "indexes");
+    rb_define_alias(  rb_cArray, "keys", "indexes");
     rb_define_method( rb_cArray, "pick", rb_ary_pick, 0);
     rb_define_method( rb_cArray, "rpick", rb_ary_rpick, 0);
 #ifdef ARRAY_INDEX_WITH_BLOCK
     rb_define_method( rb_cArray, "index", rb_ary_index, -1);
     rb_define_method( rb_cArray, "rindex", rb_ary_rindex, -1);
 #endif
+#ifdef ARRAY_SELECT_BANG
+    rb_define_method( rb_cArray, "select!", rb_ary_select_bang, 0);
+#endif
     rb_define_method( rb_cArray, "eat_lines", rb_ary_eat_lines, 0);
 
-    rb_define_method( rb_cHash, "notempty?", rb_hash_notempty, 0);
+    rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
+
+    rb_define_method( rb_cIO, "eat_lines", rb_io_eat_lines, 0);
 
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
     rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
-    rb_define_method( rb_cFile, "eat_lines", rb_file_eat_lines, 0);
     rb_define_singleton_method( rb_cFile, "umask", step_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", step_dir_s_current, 0);
@@ -1240,11 +1421,11 @@ void Init_step( void)
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
-    rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty, 0);
-    rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty, 0);
+    rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
+    rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nil_if", rb_nil_nil_if, 1);
-    rb_define_method( rb_cNilClass, "each_line", rb_nil_notempty, 0);
-    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_notempty, 0);
+    rb_define_method( rb_cNilClass, "each_line", rb_nil_each_line, 0);
+    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_each_line, 0);
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
@@ -1252,6 +1433,9 @@ void Init_step( void)
     id_cmp       = rb_intern( "<=>");
     id_eat_lines = rb_intern( "eat_lines");
     id_eqq       = 0;
+#ifdef ARRAY_SELECT_BANG
+    id_reject_bang = 0;
+#endif
 
     rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
 }

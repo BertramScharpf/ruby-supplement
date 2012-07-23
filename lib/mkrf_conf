@@ -8,19 +8,11 @@ require "rbconfig"
 
 incdir_ruby RbConfig::CONFIG[ "topdir"]
 
-if RUBY_VERSION <= "1.8.6" then
-  enable_array_index_with_block
-  enable_kernel_tap
-else
-  disable_array_index_with_block
-  disable_kernel_tap
-end
-
-if RUBY_VERSION < "1.9" then
-  enable_string_ord
-else
-  disable_string_ord
-end
+very_old =                     RUBY_VERSION <= "1.8.6"
+feature_array_index_with_block very_old
+feature_kernel_tap             very_old
+feature_array_select_bang      RUBY_VERSION < "1.9.2"
+feature_string_ord             RUBY_VERSION < "1.9"
 
 have_header "ruby.h"
 have_header "st.h"
