@@ -935,12 +935,10 @@ step_invert_yield( VALUE elem)
 VALUE
 rb_ary_eat_lines( VALUE self)
 {
-    VALUE s;
-
     RETURN_ENUMERATOR( self, 0, 0);
     while (RARRAY_LEN( self) > 0) {
-        s = rb_ary_shift( self);
-        rb_iterate( &step_eat_lines, s, &rb_yield, Qnil);
+        rb_iterate( &step_eat_lines, RARRAY_PTR( self)[0], &rb_yield, Qnil);
+        rb_ary_shift( self);
     }
     return Qnil;
 }
