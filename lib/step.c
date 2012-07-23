@@ -18,8 +18,12 @@ static VALUE step_rindex_blk( VALUE);
 static VALUE step_index_val( VALUE, VALUE);
 static VALUE step_rindex_val( VALUE, VALUE);
 #endif
-static VALUE step_eat_lines_elem( VALUE);
-static VALUE step_each_line_elem( VALUE);
+#ifdef ARRAY_SELECT_BANG
+static VALUE step_reject( VALUE);
+static VALUE step_invert_yield( VALUE);
+#endif
+static VALUE step_eat_lines( VALUE);
+static VALUE step_each_line( VALUE);
 static VALUE step_do_unumask( VALUE);
 
 
@@ -27,6 +31,9 @@ static ID id_delete_at;
 static ID id_cmp;
 static ID id_eat_lines;
 static ID id_eqq;
+#ifdef ARRAY_SELECT_BANG
+static ID id_reject_bang;
+#endif
 
 
 struct step_flock {
@@ -682,7 +689,7 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
 VALUE
 rb_ary_notempty_p( VALUE ary)
 {
-    return RARRAY( ary)->len == 0 ? Qnil : ary;
+    return RARRAY_LEN( ary) == 0 ? Qnil : ary;
 }
 
 
@@ -703,9 +710,9 @@ rb_ary_indexes( VALUE ary)
     VALUE ret;
     int i, j;
 
-    j = RARRAY( ary)->len;
+    j = RARRAY_LEN( ary);
     ret = rb_ary_new2( j);
-    RARRAY( ret)->len = j;
+    RARRAY_LEN( ret) = j;
     for (i = 0; j; ++i, --j) {
         rb_ary_store( ret, i, INT2FIX( i));
     }
@@ -742,8 +749,8 @@ step_index_blk( VALUE ary)
 {
     long i, j;
 
-    for (i = 0, j = RARRAY( ary)->len; j > 0; i++, j--) {
-        if (RTEST( rb_yield( RARRAY( ary)->ptr[ i])))
+    for (i = 0, j = RARRAY_LEN( ary); j > 0; i++, j--) {
+        if (RTEST( rb_yield( RARRAY_PTR( ary)[ i])))
             return LONG2NUM( i);
     }
     return Qnil;
@@ -779,9 +786,9 @@ step_rindex_blk( VALUE ary)
 {
     long i;
 
-    for (i = RARRAY( ary)->len; i;) {
+    for (i = RARRAY_LEN( ary); i;) {
         --i;
-        if (rb_yield( RARRAY( ary)->ptr[ i]))
+        if (rb_yield( RARRAY_PTR( ary)[ i]))
             return LONG2NUM( i);
     }
     return Qnil;
@@ -826,8 +833,8 @@ step_index_val( VALUE ary, VALUE val)
 {
     long i;
 
-    for (i = 0; i < RARRAY( ary)->len; i++)
-        if (rb_equal( RARRAY( ary)->ptr[ i], val))
+    for (i = 0; i < RARRAY_LEN( ary); i++)
+        if (rb_equal( RARRAY_PTR( ary)[ i], val))
             return LONG2NUM( i);
     return Qnil;
 }
@@ -869,13 +876,48 @@ step_rindex_val( VALUE ary, VALUE val)
 {
     long i;
 
-    for (i = RARRAY( ary)->len; i;)
-        if (rb_equal( RARRAY( ary)->ptr[ --i], val))
+    for (i = RARRAY_LEN( ary); i;)
+        if (rb_equal( RARRAY_PTR( ary)[ --i], val))
             return LONG2NUM( i);
     return Qnil;
 }
 
 #endif
+
+#ifdef ARRAY_SELECT_BANG
+
+/*
+ *  Document-method: select!
+ *
+ *  call-seq:
+ *     select! { |x| ... }   -> ary
+ *
+ *  Remove all items for that the block returns +nil+ or +false+.
+ *
+ */
+
+VALUE
+rb_ary_select_bang( VALUE self)
+{
+    return rb_iterate( &step_reject, self, &step_invert_yield, Qnil);
+}
+
+VALUE
+step_reject( VALUE obj)
+{
+    if (!id_reject_bang)
+        id_reject_bang = rb_intern( "reject!");
+    return rb_funcall( obj, id_reject_bang, 0);
+}
+
+VALUE
+step_invert_yield( VALUE elem)
+{
+    return NIL_P( rb_yield( elem)) ? Qtrue : Qfalse;
+}
+
+#endif
+
 
 /*
  *  Document-method: eat_lines
@@ -891,18 +933,19 @@ step_rindex_val( VALUE ary, VALUE val)
 VALUE
 rb_ary_eat_lines( VALUE self)
 {
-    long i, j;
+    VALUE s;
 
     RETURN_ENUMERATOR( self, 0, 0);
-    for (i = 0, j = RARRAY( self)->len; j > 0; i++, j--)
-        rb_iterate( &step_eat_lines_elem, RARRAY( self)->ptr[ i],
-                            &rb_yield, Qnil);
+    while (RARRAY_LEN( self) > 0) {
+        s = rb_ary_shift( self);
+        rb_iterate( &step_eat_lines, s, &rb_yield, Qnil);
+    }
     return Qnil;
 }
 
-VALUE step_eat_lines_elem( VALUE elem)
+VALUE step_eat_lines( VALUE obj)
 {
-    rb_funcall( elem, id_eat_lines, 0);
+    rb_funcall( obj, id_eat_lines, 0);
     return Qnil;
 }
 
@@ -947,14 +990,14 @@ VALUE
 rb_io_eat_lines( VALUE self)
 {
     RETURN_ENUMERATOR( self, 0, 0);
-    rb_iterate( &step_each_line_elem, self, &rb_yield, Qnil);
+    rb_iterate( &step_each_line, self, &rb_yield, Qnil);
     return Qnil;
 }
 
 VALUE
-step_each_line_elem( VALUE elem)
+step_each_line( VALUE obj)
 {
-    rb_funcall( elem, rb_intern( "each_line"), 0);
+    rb_funcall( obj, rb_intern( "each_line"), 0);
     return Qnil;
 }
 
@@ -1358,6 +1401,9 @@ void Init_step( void)
     rb_define_method( rb_cArray, "index", rb_ary_index, -1);
     rb_define_method( rb_cArray, "rindex", rb_ary_rindex, -1);
 #endif
+#ifdef ARRAY_SELECT_BANG
+    rb_define_method( rb_cArray, "select!", rb_ary_select_bang, 0);
+#endif
     rb_define_method( rb_cArray, "eat_lines", rb_ary_eat_lines, 0);
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
@@ -1381,9 +1427,12 @@ void Init_step( void)
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
-    id_delete_at = rb_intern( "delete_at");
-    id_cmp       = rb_intern( "<=>");
-    id_eat_lines = rb_intern( "eat_lines");
-    id_eqq       = 0;
+    id_delete_at   = rb_intern( "delete_at");
+    id_cmp         = rb_intern( "<=>");
+    id_eat_lines   = rb_intern( "eat_lines");
+    id_eqq         = 0;
+#ifdef ARRAY_SELECT_BANG
+    id_reject_bang = 0;
+#endif
 }
 

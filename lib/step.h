@@ -36,6 +36,9 @@ extern VALUE rb_ary_rpick( VALUE);
 extern VALUE rb_ary_index( int, VALUE *, VALUE);
 extern VALUE rb_ary_rindex( int, VALUE *, VALUE);
 #endif
+#ifdef ARRAY_SELECT_BANG
+extern VALUE rb_ary_select_bang( VALUE);
+#endif
 extern VALUE rb_ary_eat_lines( VALUE);
 extern VALUE rb_num_nil_if( VALUE, VALUE);
 extern VALUE rb_num_pos_p( VALUE);
