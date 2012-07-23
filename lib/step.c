@@ -348,15 +348,7 @@ rb_str_head( int argc, VALUE *argv, VALUE str)
     long len;
 
     len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
-
-    if (len < 0)
-        return Qnil;
-    if (len > RSTRING_LEN( str))
-        len = RSTRING_LEN( str);
-    str2 = rb_str_new5( str, RSTRING_PTR( str), len);
-    OBJ_INFECT( str2, str);
-
-    return str2;
+    return rb_str_substr( str, 0, len);
 }
 
 
@@ -373,20 +365,13 @@ VALUE
 rb_str_rest( int argc, VALUE *argv, VALUE str)
 {
     VALUE n;
-    VALUE str2;
-    long beg, len;
+    long l, beg, len;
 
     beg = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
-
-    if (beg > RSTRING_LEN( str))
-        return Qnil;
     if (beg < 0)
         beg = 0;
-    len = RSTRING_LEN( str) - beg;
-    str2 = rb_str_new5( str, RSTRING_PTR( str) + beg, len);
-    OBJ_INFECT( str2, str);
-
-    return str2;
+    l = RSTRING_LEN( str);
+    return rb_str_substr( str, beg, l - beg);
 }
 
 
@@ -403,24 +388,18 @@ VALUE
 rb_str_tail( int argc, VALUE *argv, VALUE str)
 {
     VALUE n;
-    VALUE str2;
-    long beg, len;
+    long l, beg, len;
 
     len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
-
-    if (len < 0)
-        return Qnil;
-    beg = RSTRING_LEN( str) - len;
-    if (beg < 0) {
-        beg = 0;
-        len = RSTRING_LEN( str);
-    }
-    str2 = rb_str_new5( str, RSTRING_PTR( str) + beg, len);
-    OBJ_INFECT( str2, str);
-
-    return str2;
+    l = RSTRING_LEN( str);
+    beg = l - len;
+    if (beg < 0)
+        beg = 0, len = l;
+    return rb_str_substr( str, beg, len);
 }
 
+
+#ifdef STRING_START_WITH
 
 /*
  *  call-seq:
@@ -481,6 +460,8 @@ rb_str_end_with_p( VALUE str, VALUE oth)
             return Qnil;
     return INT2FIX( RSTRING_LEN( str) - RSTRING_LEN( ost));
 }
+
+#endif
 
 #ifdef STRING_ORD
 
@@ -1376,8 +1357,10 @@ void Init_step( void)
     rb_define_method( rb_cString, "head", rb_str_head, -1);
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
+#ifdef STRING_START_WITH
     rb_define_method( rb_cString, "start_with?", rb_str_start_with_p, 1);
     rb_define_method( rb_cString, "end_with?", rb_str_end_with_p, 1);
+#endif
     rb_define_alias(  rb_cString, "starts_with?", "start_with?");
     rb_define_alias(  rb_cString, "ends_with?", "end_with?");
     rb_define_alias(  rb_cString, "starts_with", "start_with?");

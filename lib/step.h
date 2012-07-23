@@ -22,8 +22,10 @@ extern VALUE rb_str_clear( VALUE);
 extern VALUE rb_str_head( int, VALUE *, VALUE);
 extern VALUE rb_str_rest( int, VALUE *, VALUE);
 extern VALUE rb_str_tail( int, VALUE *, VALUE);
+#ifdef STRING_START_WITH
 extern VALUE rb_str_start_with_p( VALUE, VALUE);
 extern VALUE rb_str_end_with_p( VALUE, VALUE);
+#endif
 #ifdef STRING_ORD
 extern VALUE rb_str_ord( VALUE);
 #endif

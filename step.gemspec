@@ -14,7 +14,9 @@ EOT
   s.email             = "<software@bertram-scharpf.de>"
   s.homepage          = "http://www.bertram-scharpf.de"
 
-  s.requirements      = "just Ruby"
+  s.rubyforge_project = "NONE"
+
+  s.requirements      = "Ruby and the autorake gem"
   s.add_dependency      "autorake", ">=1.0"
 
   s.has_rdoc          = true
