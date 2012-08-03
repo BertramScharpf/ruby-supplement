@@ -10,11 +10,11 @@
 
 
 extern VALUE rb_obj_new_string( VALUE);
+extern VALUE rb_obj_nil_if( VALUE, VALUE);
 extern VALUE rb_krn_tap( VALUE);
 extern VALUE rb_krn_tap_bang( VALUE);
 extern VALUE rb_str_new_string( VALUE);
 extern VALUE rb_str_notempty_p( VALUE);
-extern VALUE rb_str_nil_if( VALUE, VALUE);
 extern VALUE rb_str_eat( int, VALUE *, VALUE);
 extern VALUE rb_str_eat_lines( VALUE);
 extern VALUE rb_str_cut_bang( VALUE, VALUE);
@@ -42,7 +42,6 @@ extern VALUE rb_ary_rindex( int, VALUE *, VALUE);
 extern VALUE rb_ary_select_bang( VALUE);
 #endif
 extern VALUE rb_ary_eat_lines( VALUE);
-extern VALUE rb_num_nil_if( VALUE, VALUE);
 extern VALUE rb_num_pos_p( VALUE);
 extern VALUE rb_num_neg_p( VALUE);
 extern VALUE rb_num_grammatical( VALUE, VALUE, VALUE);
@@ -54,7 +53,6 @@ extern VALUE step_file_s_umask( int, VALUE *);
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
 extern VALUE rb_nil_notempty_p( VALUE);
-extern VALUE rb_nil_nil_if( VALUE, VALUE);
 extern VALUE rb_nil_each_line( VALUE);
 
 extern void Init_step( void);

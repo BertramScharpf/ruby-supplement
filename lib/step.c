@@ -81,6 +81,32 @@ rb_obj_new_string( VALUE obj)
 
 
 /*
+ *  call-seq:
+ *     nil_if val  -> nil or self
+ *
+ *  Returns +nil+ when the string matches +val+. +val+ is compared using
+ *  the <code>===</code> operator, just like in the case statement.
+ *
+ *     "hello".nil_if "NONE"      #=> "hello"
+ *     "NONE".nil_if "NONE"       #=> nil
+ *     "NONE".nil_if /^none$/i    #=> nil
+ *
+ *     20.nil_if 10      #=> 20
+ *     10.nil_if 10      #=> nil
+ *     1.0.nil_if Float  #=> nil
+ *
+ */
+
+VALUE
+rb_obj_nil_if( VALUE obj, VALUE val)
+{
+    if (!id_eqq)
+        id_eqq = rb_intern( "===");
+    return RTEST( rb_funcall( val, id_eqq, 1, obj)) ? Qnil : obj;
+}
+
+
+/*
  *  Document-module: Kernel
  */
 
@@ -107,6 +133,7 @@ rb_krn_tap( VALUE obj)
     rb_yield( obj);
     return obj;
 }
+
 #endif
 
 /*
@@ -169,27 +196,6 @@ rb_str_notempty_p( VALUE str)
 #else
     return RSTRING_LEN( str) ? str : Qnil;
 #endif
-}
-
-
-/*
- *  call-seq:
- *     nil_if val  -> nil or self
- *
- *  Returns +nil+ when the string matches +val+. +val+ is compared using
- *  the <code>===</code> operator, just like in the case statement.
- *
- *     "hello".nil_if "NONE"      #=> "hello"
- *     "NONE".nil_if "NONE"       #=> nil
- *     "NONE".nil_if /^none$/i    #=> nil
- */
-
-VALUE
-rb_obj_nil_if( VALUE obj, VALUE val)
-{
-    if (!id_eqq)
-        id_eqq = rb_intern( "===");
-    return RTEST( rb_funcall( val, id_eqq, 1, obj)) ? Qnil : obj;
 }
 
 
@@ -520,21 +526,6 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
 /*
  *  Document-class: Numeric
  */
-
-/*
- *  Document-method: nil_if
- *
- *  call-seq:
- *     nil_if val  -> nil or self
- *
- *  Returns +nil+ when the number is equal to +val+. +val+ is compared using
- *  the <code>===</code> operator, just like in the case statement.
- *
- *     20.nil_if 10      #=> 20
- *     10.nil_if 10      #=> nil
- *     1.0.nil_if Float  #=> nil
- */
-
 
 /*
  *  call-seq:
@@ -1280,19 +1271,6 @@ rb_nil_notempty_p( VALUE str)
  */
 
 /*
- *  call-seq:
- *     nil_if val   -> nil
- *
- *  This spares testing for +nil+ when checking strings.
- */
-
-VALUE
-rb_nil_nil_if( VALUE str, VALUE val)
-{
-    return Qnil;
-}
-
-/*
  *  Document-method: each_line
  *
  *  call-seq:
@@ -1342,6 +1320,7 @@ void Init_step( void)
 {
     rb_define_alias(  rb_cObject, "cls", "class");
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
+    rb_define_method( rb_cObject, "nil_if", rb_obj_nil_if, 1);
 #ifdef KERNEL_TAP
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
@@ -1349,7 +1328,6 @@ void Init_step( void)
 
     rb_define_method( rb_cString, "new_string", rb_str_new_string, 0);
     rb_define_method( rb_cString, "notempty?", rb_str_notempty_p, 0);
-    rb_define_method( rb_cString, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
@@ -1370,7 +1348,6 @@ void Init_step( void)
 #endif
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
 
-    rb_define_method( rb_cNumeric, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_cNumeric, "pos?", rb_num_pos_p, 0);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
@@ -1404,7 +1381,6 @@ void Init_step( void)
 
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
-    rb_define_method( rb_cNilClass, "nil_if", rb_nil_nil_if, 1);
     rb_define_method( rb_cNilClass, "each_line", rb_nil_each_line, 0);
     rb_define_method( rb_cNilClass, "eat_lines", rb_nil_each_line, 0);
 
