@@ -409,16 +409,52 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
 
 /*
  *  call-seq:
- *     start_with?( oth)   -> nil or int
+ *     start_with?( oth)   -> true or false
  *
- *  Checks whether the head is <code>oth</code>. Returns length of
- *  <code>oth</code> when matching.
+ *  Checks whether the head is <code>oth</code>.
  *
- *     "sys-apps".start_with?( "sys-")    #=> 4
+ *     "sys-apps".start_with?( "sys-")    #=> true
  */
 
 VALUE
 rb_str_start_with_p( VALUE str, VALUE oth)
+{
+    return NIL_P( rb_str_starts_with_p( str, oth)) ? Qfalse : Qtrue;
+}
+
+
+/*
+ *  call-seq:
+ *     end_with?( oth)   -> true or false
+ *
+ *  Checks whether the tail is <code>oth</code>.
+ *
+ *     "sys-apps".end_with?( "-apps")    #=> true
+ */
+
+VALUE
+rb_str_end_with_p( VALUE str, VALUE oth)
+{
+    return NIL_P( rb_str_ends_with_p( str, oth)) ? Qfalse : Qtrue;
+}
+
+#endif
+
+/*
+ *  call-seq:
+ *     starts_with?( oth)   -> nil or int
+ *
+ *  Checks whether the head is <code>oth</code>. Returns length of
+ *  <code>oth</code> when matching.
+ *
+ *     "sys-apps".starts_with?( "sys-")    #=> 4
+ *
+ *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  just returns +true+ or +false+.
+ */
+
+VALUE
+rb_str_starts_with_p( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -440,16 +476,19 @@ rb_str_start_with_p( VALUE str, VALUE oth)
 
 /*
  *  call-seq:
- *     end_with?( oth)   -> nil or int
+ *     ends_with?( oth)   -> nil or int
  *
  *  Checks whether the tail is <code>oth</code>. Returns the position
  *  where <code>oth</code> starts when matching.
  *
- *     "sys-apps".end_with?( "-apps")    #=> 3
+ *     "sys-apps".ends_with?( "-apps")    #=> 3
+ *
+ *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  just returns +true+ or +false+.
  */
 
 VALUE
-rb_str_end_with_p( VALUE str, VALUE oth)
+rb_str_ends_with_p( VALUE str, VALUE oth)
 {
     long i;
     char *s, *o;
@@ -466,8 +505,6 @@ rb_str_end_with_p( VALUE str, VALUE oth)
             return Qnil;
     return INT2FIX( RSTRING_LEN( str) - RSTRING_LEN( ost));
 }
-
-#endif
 
 #ifdef STRING_ORD
 
@@ -1339,8 +1376,8 @@ void Init_step( void)
     rb_define_method( rb_cString, "start_with?", rb_str_start_with_p, 1);
     rb_define_method( rb_cString, "end_with?", rb_str_end_with_p, 1);
 #endif
-    rb_define_alias(  rb_cString, "starts_with?", "start_with?");
-    rb_define_alias(  rb_cString, "ends_with?", "end_with?");
+    rb_define_method( rb_cString, "starts_with?", rb_str_starts_with_p, 1);
+    rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, 1);
     rb_define_alias(  rb_cString, "starts_with", "start_with?");
     rb_define_alias(  rb_cString, "ends_with", "end_with?");
 #ifdef STRING_ORD

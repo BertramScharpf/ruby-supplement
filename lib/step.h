@@ -26,6 +26,8 @@ extern VALUE rb_str_tail( int, VALUE *, VALUE);
 extern VALUE rb_str_start_with_p( VALUE, VALUE);
 extern VALUE rb_str_end_with_p( VALUE, VALUE);
 #endif
+extern VALUE rb_str_starts_with_p( VALUE, VALUE);
+extern VALUE rb_str_ends_with_p( VALUE, VALUE);
 #ifdef STRING_ORD
 extern VALUE rb_str_ord( VALUE);
 #endif
