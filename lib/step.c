@@ -27,6 +27,7 @@ static VALUE step_invert_yield( VALUE);
 static VALUE step_eat_lines( VALUE);
 static VALUE step_each_line( VALUE);
 static VALUE step_do_unumask( VALUE);
+static VALUE step_chdir( VALUE);
 
 
 static ID id_delete_at;
@@ -36,6 +37,8 @@ static ID id_eqq;
 #ifdef ARRAY_SELECT_BANG
 static ID id_reject_bang;
 #endif
+static ID id_chdir;
+static ID id_path;
 
 
 struct step_flock {
@@ -1195,16 +1198,50 @@ step_do_unumask( VALUE v)
 
 /*
  *  call-seq:
- *     current   -> dir
+ *     current()   -> dir
  *
  *  Current directory as a Dir object.
  *
  */
+
 VALUE
 step_dir_s_current( VALUE dir)
 {
     return rb_funcall( dir, rb_intern( "new"), 1, rb_str_new( ".", 1));
 }
+
+
+/*
+ *  call-seq:
+ *     chdir()           -> nil
+ *     chdir() { .... }  -> obj
+ *
+ *  As you probably expect, change the working directory like in
+ *  <code>Dir.chdir</code>.
+ *
+ */
+
+VALUE
+step_dir_chdir( VALUE dir)
+{
+    if (rb_block_given_p())
+        return rb_iterate( &step_chdir, dir, &rb_yield, Qnil);
+    else {
+        step_chdir( dir);
+        return Qnil;
+    }
+}
+
+VALUE
+step_chdir( VALUE dir)
+{
+    if (!id_chdir) {
+        id_chdir = rb_intern( "chdir");
+        id_path  = rb_intern( "path");
+    }
+    return rb_funcall( rb_cDir, id_chdir, 1, rb_funcall( dir, id_path, 0));
+}
+
 
 /*
  *  Document-class: Match
@@ -1412,6 +1449,7 @@ void Init_step( void)
     rb_define_singleton_method( rb_cFile, "umask", step_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", step_dir_s_current, 0);
+    rb_define_method( rb_cDir, "chdir", step_dir_chdir, 0);
 
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
@@ -1423,13 +1461,15 @@ void Init_step( void)
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
-    id_delete_at = rb_intern( "delete_at");
-    id_cmp       = rb_intern( "<=>");
-    id_eat_lines = rb_intern( "eat_lines");
-    id_eqq       = 0;
+    id_delete_at   = rb_intern( "delete_at");
+    id_cmp         = rb_intern( "<=>");
+    id_eat_lines   = rb_intern( "eat_lines");
+    id_eqq         = 0;
 #ifdef ARRAY_SELECT_BANG
     id_reject_bang = 0;
 #endif
+    id_chdir       = 0;
+    id_path        = 0;
 
     rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
 }
