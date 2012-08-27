@@ -6,7 +6,9 @@
 #ifndef __STEP_H__
 #define __STEP_H__
 
-#include <ruby.h>
+#if HAVE_HEADER_RUBY_H
+  #include <ruby.h>
+#endif
 
 
 extern VALUE rb_obj_new_string( VALUE);

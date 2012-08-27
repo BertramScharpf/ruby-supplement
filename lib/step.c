@@ -6,9 +6,21 @@
 
 #include "sync.h"
 
-#include <st.h>
-#include <rubyio.h>
-#include <re.h>
+#if   HAVE_HEADER_ST_H
+    #include <st.h>
+#elif HAVE_HEADER_RUBY_ST_H
+    #include <ruby/st.h>
+#endif
+#if   HAVE_HEADER_RUBYIO_H
+    #include <rubyio.h>
+#elif HAVE_HEADER_RUBY_IO_H
+    #include <ruby/io.h>
+#endif
+#if   HAVE_HEADER_RE_H
+    #include <re.h>
+#elif HAVE_HEADER_RUBY_RE_H
+    #include <ruby/re.h>
+#endif
 
 #include <sys/stat.h>
 #include <sys/file.h>
