@@ -204,9 +204,9 @@ rb_fsstat_ffree( VALUE self)
 
 /*
  *  call-seq:
- *     stat.fsid    => fixnum
+ *     stat.fsid    => ary
  *
- *  Filesystem id.
+ *  Filesystem id; array of 2 integers.
  */
 
 #ifdef __FSID_T_TYPE
@@ -221,16 +221,11 @@ rb_fsstat_fsid( VALUE self)
 {
     struct statfs *s;
     VALUE r;
-    int i;
 
     s = get_statfs( self);
-    i = 2;
-    r = rb_ary_new2( i);
-    RARRAY( r)->len = i;
-    while (i > 0) {
-        --i;
-        rb_ary_store( r, i, INT2NUM(s->f_fsid.FSID_val[i]));
-    }
+    r = rb_ary_new3( 2,
+        INT2NUM(s->f_fsid.FSID_val[0]),
+        INT2NUM(s->f_fsid.FSID_val[1]));
     return r;
 }
 

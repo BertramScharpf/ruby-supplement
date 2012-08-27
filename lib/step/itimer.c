@@ -53,16 +53,16 @@ step_sec_timeval( VALUE secs, struct timeval *t)
         break;
 
       case T_FLOAT:
-        if (RFLOAT(secs)->value < 0.0)
+        if (RFLOAT_VALUE(secs) < 0.0)
             rb_raise( rb_eArgError, "time interval must be positive");
         else {
             double f, d;
 
-            d = modf( RFLOAT(secs)->value, &f);
+            d = modf( RFLOAT_VALUE(secs), &f);
             t->tv_sec = (time_t) f, t->tv_usec = (time_t) (d*1e6+0.5);
             if (f != t->tv_sec)
                 rb_raise( rb_eRangeError, "time interval out of Time range",
-                    RFLOAT(secs)->value);
+                    RFLOAT_VALUE(secs));
         }
         break;
 
@@ -100,10 +100,9 @@ rb_process_getitimer( VALUE obj)
     if (getitimer( ITIMER_REAL, &it) < 0)
         rb_raise( rb_eSystemCallError, "getitimer failed.");
 
-    r = rb_ary_new2( 2);
-    RARRAY( r)->len = 2;
-    rb_ary_store( r, 0, step_timeval_sec( &it.it_interval));
-    rb_ary_store( r, 1, step_timeval_sec( &it.it_value));
+    r = rb_ary_new3( 2,
+      step_timeval_sec( &it.it_interval),
+      step_timeval_sec( &it.it_value));
     return r;
 }
 
