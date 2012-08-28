@@ -26,6 +26,7 @@
 #include <sys/file.h>
 
 
+static long  step_str_index( VALUE, const char *);
 static VALUE step_index_blk( VALUE);
 static VALUE step_rindex_blk( VALUE);
 #ifdef ARRAY_INDEX_WITH_BLOCK
@@ -51,7 +52,7 @@ static ID id_reject_bang;
 #endif
 static ID id_chdir;
 static ID id_path;
-
+static ID id_index;
 
 struct step_flock {
     struct step_flock *prev;
@@ -236,7 +237,11 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     int l;
     int r;
 
+#ifndef HAVE_RUBY_VM_H
     n = l = RSTRING_LEN( str);
+#else
+    n = l = rb_str_strlen( str);
+#endif
     if (rb_scan_args( argc, argv, "01", &val) == 1) {
         if (!NIL_P( val)) {
             int v = NUM2INT( val);
@@ -248,8 +253,8 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
             }
         }
     }
-
     rb_str_modify( str);
+#ifndef HAVE_RUBY_VM_H
     if (n > 0) {
         r = l - n;
         val = rb_str_new5( str, RSTRING_PTR( str), n);
@@ -260,6 +265,18 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     }
     RSTRING_LEN( str) = r;
     OBJ_INFECT( val, str);
+#else
+    if (n > 0) {
+        r = 0;
+    } else if (n < 0) {
+        r = l + n;
+        n = -n;
+    } else
+        return Qnil;
+    val = rb_str_substr( str, r, n);
+    if (!NIL_P(val))
+        rb_str_update( str, r, n, rb_str_new( NULL, 0));
+#endif
     return val;
 }
 
@@ -283,12 +300,15 @@ VALUE
 rb_str_eat_lines( VALUE self)
 {
     VALUE val;
-    int l, n;
-    char *p;
+    long l;
 
     RETURN_ENUMERATOR( self, 0, 0);
     rb_str_modify( self);
+#ifndef HAVE_RUBY_VM_H
     while ((l = RSTRING_LEN( self)) > 0) {
+        int n;
+        char *p;
+
         p = RSTRING_PTR( self);
         /* "\n" and "\r\n" both end in "\n" */
         for (n = 0; l > 0 && *p != '\n'; n++, l--, p++)
@@ -301,9 +321,27 @@ rb_str_eat_lines( VALUE self)
         RSTRING_LEN( self) = l;
         rb_yield( val);
     }
+#else
+    while ((l = step_str_index( self, "\n"))) {
+        val = rb_str_substr( self, 0, l);
+        rb_str_update( self, 0, l, rb_str_new( NULL, 0));
+        rb_yield( val);
+    }
+#endif
     return Qnil;
 }
 
+/* Arrgh. They forgot to export rb_str_index(). */
+long
+step_str_index( VALUE str, const char *pat)
+{
+    VALUE ix;
+
+    if (!id_index)
+        id_index = rb_intern( "index");
+    ix = rb_funcall( str, id_index, 1, rb_str_new2( pat));
+    return NIL_P( ix) ? rb_str_strlen( str) : NUM2INT( ix) + 1;
+}
 
 /*
  *  call-seq:
@@ -321,13 +359,28 @@ rb_str_eat_lines( VALUE self)
 VALUE
 rb_str_cut_bang( VALUE str, VALUE len)
 {
-    int l = NUM2INT( len);
+    int l;
+#ifndef HAVE_RUBY_VM_H
+#else
+    int n;
+#endif
 
     rb_str_modify( str);
+    l = NUM2INT( len);
+    if (l < 0)
+        l = 0;
+#ifndef HAVE_RUBY_VM_H
     if (l < RSTRING_LEN( str)) {
         RSTRING_LEN( str) = l;
         return str;
     }
+#else
+    n = rb_str_strlen( str);
+    if (l < n) {
+        rb_str_update( str, l, n - l, rb_str_new( NULL, 0));
+        return str;
+    }
+#endif
     return Qnil;
 }
 
@@ -391,7 +444,11 @@ rb_str_rest( int argc, VALUE *argv, VALUE str)
     beg = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
     if (beg < 0)
         beg = 0;
+#ifndef HAVE_RUBY_VM_H
     l = RSTRING_LEN( str);
+#else
+    l = rb_str_strlen( str);
+#endif
     return rb_str_substr( str, beg, l - beg);
 }
 
@@ -412,7 +469,11 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
     long l, beg, len;
 
     len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
+#ifndef HAVE_RUBY_VM_H
     l = RSTRING_LEN( str);
+#else
+    l = rb_str_strlen( str);
+#endif
     beg = l - len;
     if (beg < 0)
         beg = 0, len = l;
@@ -475,6 +536,11 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
+#ifndef HAVE_RUBY_VM_H
+#else
+    if (!rb_str_comparable( str, oth))
+      return Qnil;
+#endif
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
@@ -485,7 +551,11 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
         if (*s != *o)
             return Qnil;
     }
+#ifndef HAVE_RUBY_VM_H
     return INT2FIX( RSTRING_LEN( ost));
+#else
+    return INT2FIX( rb_str_strlen( ost));
+#endif
 }
 
 
@@ -509,6 +579,11 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
+#ifndef HAVE_RUBY_VM_H
+#else
+    if (!rb_str_comparable( str, oth))
+      return Qnil;
+#endif
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
@@ -518,7 +593,11 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     for (; i; i--)
         if (*--s != *--o)
             return Qnil;
+#ifndef HAVE_RUBY_VM_H
     return INT2FIX( RSTRING_LEN( str) - RSTRING_LEN( ost));
+#else
+    return INT2FIX( rb_str_strlen( str) - rb_str_strlen( ost));
+#endif
 }
 
 #ifdef STRING_ORD
@@ -528,6 +607,10 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
  *     ord()   -> nil or int
  *
  *  Returns the ASCII value of the first character, if any.
+ *
+ *  Caution! For UTF-8 characters, this will return the first byte's value.
+ *  This will do no harm in Ruby 1.8 but the standard Ruby 1.9 +String#ord+
+ *  returns the first codepoint. Please do not overwrite that method.
  */
 
 VALUE rb_str_ord( VALUE str)
@@ -552,26 +635,40 @@ VALUE
 rb_str_axe( int argc, VALUE *argv, VALUE str)
 {
     VALUE n;
-    VALUE str2;
-    long len;
-    int x;
+    VALUE ret;
+    long newlen, oldlen;
 
     if (rb_scan_args( argc, argv, "01", &n) == 1 && !NIL_P( n))
-        len = NUM2LONG( n);
+        newlen = NUM2LONG( n);
     else
-        len = 80;
-
-    if (len < 0)
+        newlen = 80;
+    if (newlen < 0)
         return Qnil;
-    x = len < RSTRING_LEN( str) ? 3 : 0;
-    if (len > RSTRING_LEN( str))
-        len = RSTRING_LEN( str);
-    str2 = rb_str_new5( str, RSTRING_PTR( str), len);
-    for (; x && len; --x)
-        RSTRING_PTR( str2)[ --len] = '.';
-    OBJ_INFECT( str2, str);
 
-    return str2;
+#ifndef HAVE_RUBY_VM_H
+    oldlen = RSTRING_LEN( str);
+#else
+    oldlen = rb_str_strlen( str);
+#endif
+    if (newlen < oldlen) {
+        VALUE ell;
+        long e;
+
+        ell = rb_str_new2( "...");
+#ifndef HAVE_RUBY_VM_H
+        e = RSTRING_LEN( ell);
+#else
+        e = rb_str_strlen( ell);
+#endif
+        if (newlen > e) {
+          ret = rb_str_substr( str, 0, newlen - e);
+          rb_str_append( ret, ell);
+        } else
+            ret = rb_str_substr( str, 0, newlen);
+        OBJ_INFECT( ret, str);
+    } else 
+        ret = str;
+    return ret;
 }
 
 
@@ -599,12 +696,12 @@ rb_num_pos_p( VALUE num)
             break;
 
         case T_BIGNUM:
-            if (RBIGNUM( num)->sign)  /* 0 is not a Bignum. */
+            if (RBIGNUM_SIGN( num))  /* 0 is not a Bignum. */
                 r = Qtrue;
             break;
 
         case T_FLOAT:
-            if (RFLOAT( num)->value > 0)
+            if (RFLOAT_VALUE( num) > 0.0)
                 r = Qtrue;
             break;
 
@@ -635,12 +732,12 @@ rb_num_neg_p( VALUE num)
             break;
 
         case T_BIGNUM:
-            if (!RBIGNUM( num)->sign)  /* 0 is not a Bignum. */
+            if (!RBIGNUM_SIGN( num))  /* 0 is not a Bignum. */
                 r = Qtrue;
             break;
 
         case T_FLOAT:
-            if (RFLOAT( num)->value < 0)
+            if (RFLOAT_VALUE( num) < 0.0)
                 r = Qtrue;
             break;
 
@@ -679,7 +776,7 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
             break;
 
         case T_FLOAT:
-            d = RFLOAT( num)->value;
+            d = RFLOAT_VALUE( num);
             if (d == 1.0 || d == -1.0)
                 return sing;
             break;
@@ -738,9 +835,8 @@ rb_ary_indexes( VALUE ary)
 
     j = RARRAY_LEN( ary);
     ret = rb_ary_new2( j);
-    RARRAY_LEN( ret) = j;
     for (i = 0; j; ++i, --j) {
-        rb_ary_store( ret, i, INT2FIX( i));
+        rb_ary_push( ret, INT2FIX( i));
     }
     return ret;
 }
@@ -992,7 +1088,7 @@ VALUE step_eat_lines( VALUE obj)
 VALUE
 rb_hash_notempty_p( VALUE hash)
 {
-    return RHASH( hash)->tbl->num_entries == 0 ? Qnil : hash;
+    return RHASH_SIZE( hash) == 0 ? Qnil : hash;
 }
 
 
@@ -1044,13 +1140,23 @@ step_each_line( VALUE obj)
 VALUE
 rb_file_size( VALUE obj)
 {
+#ifndef HAVE_RUBY_VM_H
     OpenFile *fptr;
+#else
+    rb_io_t *fptr;
+#endif
     struct stat st;
 
     GetOpenFile( obj, fptr);
+#ifndef HAVE_RUBY_VM_H
     if (fstat( fileno( fptr->f), &st) == -1) {
         rb_sys_fail( fptr->path);
     }
+#else
+    if (fstat( fptr->fd, &st) == -1) {
+        rb_sys_fail_str( fptr->pathv);
+    }
+#endif
     return INT2FIX( st.st_size);
 }
 
@@ -1076,18 +1182,23 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
 {
     VALUE excl, nb;
     struct step_flock cur_flock;
+#ifndef HAVE_RUBY_VM_H
     OpenFile *fptr;
-    int fd;
+#else
+    rb_io_t *fptr;
+#endif
     int op;
 
     rb_scan_args( argc, argv, "02", &excl, &nb);
     step_init_flock( &cur_flock, file, excl);
 
-    GetOpenFile( file, fptr);
-    fd = fileno( fptr->f);
-
     op = cur_flock.op | LOCK_NB;
-    while (flock( fd, op) < 0) {
+    GetOpenFile( file, fptr);
+#ifndef HAVE_RUBY_VM_H
+    while (flock( fileno( fptr->f), op) < 0) {
+#else
+    while (flock( fptr->fd, op) < 0) {
+#endif
         switch (errno) {
           case EAGAIN:
           case EACCES:
@@ -1101,7 +1212,11 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
             }
             /* fall through */
           default:
+#ifndef HAVE_RUBY_VM_H
             rb_sys_fail( fptr->path);
+#else
+            rb_sys_fail_str( fptr->pathv);
+#endif
         }
     }
     cur_flock.prev = flocks_root;
@@ -1141,13 +1256,19 @@ step_init_flock( struct step_flock *s, VALUE file, VALUE excl)
 VALUE
 step_do_unflock( VALUE v)
 {
+#ifndef HAVE_RUBY_VM_H
     OpenFile *fptr;
+#else
+    rb_io_t *fptr;
+#endif
     int fd;
 
     GetOpenFile( flocks_root->file, fptr);
-    fd = fileno( fptr->f);
-    flock( fd, flocks_root->last_op);
-
+#ifndef HAVE_RUBY_VM_H
+    flock( fileno( fptr->f), flocks_root->last_op);
+#else
+    flock( fptr->fd, flocks_root->last_op);
+#endif
     flocks_root = flocks_root->prev;
 
     return Qnil;
@@ -1284,13 +1405,13 @@ rb_match_begin( int argc, VALUE *argv, VALUE match)
     } else
         i = 0;
 
-    if (i < 0 || RMATCH( match)->regs->num_regs <= i)
+    if (i < 0 || RMATCH_REGS( match)->num_regs <= i)
         rb_raise( rb_eIndexError, "index %d out of matches", i);
 
-    if (RMATCH( match)->regs->beg[i] < 0)
+    if (RMATCH_REGS( match)->beg[i] < 0)
         return Qnil;
 
-    return INT2FIX( RMATCH( match)->regs->beg[i]);
+    return INT2FIX( RMATCH_REGS( match)->beg[i]);
 }
 
 
@@ -1320,13 +1441,13 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
     } else
         i = 0;
 
-    if (i < 0 || RMATCH( match)->regs->num_regs <= i)
+    if (i < 0 || RMATCH_REGS( match)->num_regs <= i)
         rb_raise( rb_eIndexError, "index %d out of matches", i);
 
-    if (RMATCH( match)->regs->beg[i] < 0)
+    if (RMATCH_REGS( match)->beg[i] < 0)
         return Qnil;
 
-    return INT2FIX( RMATCH( match)->regs->end[i]);
+    return INT2FIX( RMATCH_REGS( match)->end[i]);
 }
 
 
@@ -1482,6 +1603,7 @@ void Init_step( void)
 #endif
     id_chdir       = 0;
     id_path        = 0;
+    ID id_index    = 0;
 
     rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
 }
