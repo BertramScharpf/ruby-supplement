@@ -25,6 +25,11 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 
+#ifndef HAVE_RUBY_VM_H
+    /* Oh what a bug! */
+    #define R_MATCH( obj) RMATCH( obj)
+#else
+#endif
 
 static long  step_str_index( VALUE, const char *);
 static VALUE step_index_blk( VALUE);
