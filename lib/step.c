@@ -1660,6 +1660,6 @@ void Init_step( void)
     id_path        = 0;
     ID id_index    = 0;
 
-    rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
+    Init_step_sync();
 }
 
