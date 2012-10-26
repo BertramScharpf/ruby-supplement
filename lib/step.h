@@ -24,7 +24,9 @@ extern VALUE rb_str_notempty_p( VALUE);
 extern VALUE rb_str_eat( int, VALUE *, VALUE);
 extern VALUE rb_str_eat_lines( VALUE);
 extern VALUE rb_str_cut_bang( VALUE, VALUE);
+#ifdef STRING_CLEAR
 extern VALUE rb_str_clear( VALUE);
+#endif
 extern VALUE rb_str_head( int, VALUE *, VALUE);
 extern VALUE rb_str_rest( int, VALUE *, VALUE);
 extern VALUE rb_str_tail( int, VALUE *, VALUE);

@@ -455,6 +455,8 @@ rb_str_cut_bang( VALUE str, VALUE len)
 }
 
 
+#ifdef STRING_CLEAR
+
 /*
  *  call-seq:
  *     clear   -> self
@@ -473,6 +475,8 @@ rb_str_clear( VALUE str)
     rb_str_resize( str, 0);
     return str;
 }
+
+#endif
 
 
 /*
@@ -1594,7 +1598,9 @@ void Init_step( void)
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
+#ifdef STRING_CLEAR
     rb_define_method( rb_cString, "clear", rb_str_clear, 0);
+#endif
     rb_define_method( rb_cString, "head", rb_str_head, -1);
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
