@@ -22,6 +22,13 @@
     #include <ruby/re.h>
 #endif
 
+#ifdef THREAD_EXCLUSIVE
+#ifdef HAVE_HEADER_RUBYSIG_H
+#include <rubysig.h>
+#endif
+#endif
+
+
 #include <sys/stat.h>
 #include <sys/file.h>
 
@@ -71,6 +78,9 @@ static struct step_flock *flocks_root = NULL;
 static void  step_init_flock( struct step_flock *, VALUE, VALUE);
 static VALUE step_do_unflock( VALUE);
 
+#ifdef THREAD_EXCLUSIVE
+static VALUE bsruby_set_thread_critical( VALUE);
+#endif
 
 
 /*
@@ -173,6 +183,61 @@ rb_krn_tap_bang( VALUE obj)
       rb_yield( obj);
     return obj;
 }
+
+
+/*
+ *  Document-class: NilClass
+ */
+
+/*
+ *  call-seq:
+ *     notempty?   -> nil
+ *
+ *  This spares testing for +nil+ when checking strings.
+ */
+
+VALUE
+rb_nil_notempty_p( VALUE str)
+{
+    return Qnil;
+}
+
+/*
+ *  Document-method: nonzero?
+ *
+ *  call-seq:
+ *     nonzero?   -> nil
+ *
+ *  This spares testing for +nil+ when checking numbers.
+ */
+
+/*
+ *  Document-method: each_line
+ *
+ *  call-seq:
+ *     each_line { |l| ... }   -> nil
+ *
+ *  This spares testing for +nil+ when checking strings.
+ */
+
+VALUE
+rb_nil_each_line( VALUE str)
+{
+    RETURN_ENUMERATOR( str, 0, 0);
+    return Qnil;
+}
+
+
+/*
+ *  Document-method: eat_lines
+ *
+ *  call-seq:
+ *     eat_lines { |l| ... }   -> nil
+ *
+ *  This spares testing for +nil+ when checking strings.
+ */
+
+
 
 /*
  *  Document-class: String
@@ -1456,57 +1521,38 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
 }
 
 
+#ifdef THREAD_EXCLUSIVE
+
 /*
- *  Document-class: NilClass
+ *  Document-class: Thread
  */
 
 /*
  *  call-seq:
- *     notempty?   -> nil
+ *     Thread.exclusive { ... }  -> obj
  *
- *  This spares testing for +nil+ when checking strings.
+ *  Sets the global ``thread critical'' condition temporarily. Return
+ *  value is the object returned by the <em>block</em>.
  */
 
 VALUE
-rb_nil_notempty_p( VALUE str)
+rb_thread_exclusive( void)
 {
-    return Qnil;
+    VALUE old_tc = rb_thread_critical;
+
+    rb_thread_critical = Qtrue;
+    return rb_ensure( rb_yield, Qnil, bsruby_set_thread_critical, old_tc);
 }
-
-/*
- *  Document-method: nonzero?
- *
- *  call-seq:
- *     nonzero?   -> nil
- *
- *  This spares testing for +nil+ when checking numbers.
- */
-
-/*
- *  Document-method: each_line
- *
- *  call-seq:
- *     each_line { |l| ... }   -> nil
- *
- *  This spares testing for +nil+ when checking strings.
- */
 
 VALUE
-rb_nil_each_line( VALUE str)
+bsruby_set_thread_critical( VALUE c)
 {
-    RETURN_ENUMERATOR( str, 0, 0);
+    rb_thread_critical = c;
     return Qnil;
 }
 
+#endif
 
-/*
- *  Document-method: eat_lines
- *
- *  call-seq:
- *     eat_lines { |l| ... }   -> nil
- *
- *  This spares testing for +nil+ when checking strings.
- */
 
 
 /*
@@ -1537,6 +1583,11 @@ void Init_step( void)
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
+
+    rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
+    rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
+    rb_define_method( rb_cNilClass, "each_line", rb_nil_each_line, 0);
+    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_each_line, 0);
 
     rb_define_method( rb_cString, "new_string", rb_str_new_string, 0);
     rb_define_method( rb_cString, "notempty?", rb_str_notempty_p, 0);
@@ -1592,10 +1643,9 @@ void Init_step( void)
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
-    rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
-    rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
-    rb_define_method( rb_cNilClass, "each_line", rb_nil_each_line, 0);
-    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_each_line, 0);
+#ifdef THREAD_EXCLUSIVE
+    rb_define_singleton_method( rb_cThread, "exclusive", rb_thread_exclusive, 0);
+#endif
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
 
