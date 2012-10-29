@@ -6,8 +6,10 @@
 #ifndef __STEP_H__
 #define __STEP_H__
 
-#if HAVE_HEADER_RUBY_H
-  #include <ruby.h>
+#if   HAVE_HEADER_RUBY_H
+    #include <ruby.h>
+#elif HAVE_HEADER_RUBY_RUBY_H
+    #include <ruby/ruby.h>
 #endif
 
 

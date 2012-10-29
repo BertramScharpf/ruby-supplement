@@ -21,12 +21,13 @@ if RUBY_VERSION < "1.9.2" then
   end
 end
 
-have_header "ruby.h"
 if RUBY_VERSION < "1.9" then
+  have_header "ruby.h"
   have_header "st.h"
   have_header "rubyio.h"
   have_header "re.h"
 else
+  have_header "ruby/ruby.h"
   have_header "ruby/st.h"
   have_header "ruby/io.h"
   have_header "ruby/re.h"

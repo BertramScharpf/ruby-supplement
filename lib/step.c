@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     /* Oh what a bug! */
     #define R_MATCH( obj) RMATCH( obj)
 #else
@@ -307,7 +307,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     int l;
     int r;
 
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     n = l = RSTRING_LEN( str);
 #else
     n = l = rb_str_strlen( str);
@@ -324,7 +324,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
         }
     }
     rb_str_modify( str);
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     if (n > 0) {
         r = l - n;
         val = rb_str_new5( str, RSTRING_PTR( str), n);
@@ -374,7 +374,7 @@ rb_str_eat_lines( VALUE self)
 
     RETURN_ENUMERATOR( self, 0, 0);
     rb_str_modify( self);
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     while ((l = RSTRING_LEN( self)) > 0) {
         int n;
         char *p;
@@ -430,7 +430,7 @@ VALUE
 rb_str_cut_bang( VALUE str, VALUE len)
 {
     int l;
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
 #else
     int n;
 #endif
@@ -439,7 +439,7 @@ rb_str_cut_bang( VALUE str, VALUE len)
     l = NUM2INT( len);
     if (l < 0)
         l = 0;
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     if (l < RSTRING_LEN( str)) {
         RSTRING_LEN( str) = l;
         return str;
@@ -518,7 +518,7 @@ rb_str_rest( int argc, VALUE *argv, VALUE str)
     beg = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
     if (beg < 0)
         beg = 0;
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     l = RSTRING_LEN( str);
 #else
     l = rb_str_strlen( str);
@@ -543,7 +543,7 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
     long l, beg, len;
 
     len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     l = RSTRING_LEN( str);
 #else
     l = rb_str_strlen( str);
@@ -610,7 +610,7 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
 #else
     if (!rb_str_comparable( str, oth))
       return Qnil;
@@ -625,7 +625,7 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
         if (*s != *o)
             return Qnil;
     }
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     return INT2FIX( RSTRING_LEN( ost));
 #else
     return INT2FIX( rb_str_strlen( ost));
@@ -653,7 +653,7 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
 #else
     if (!rb_str_comparable( str, oth))
       return Qnil;
@@ -667,7 +667,7 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     for (; i; i--)
         if (*--s != *--o)
             return Qnil;
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     return INT2FIX( RSTRING_LEN( str) - RSTRING_LEN( ost));
 #else
     return INT2FIX( rb_str_strlen( str) - rb_str_strlen( ost));
@@ -719,7 +719,7 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
     if (newlen < 0)
         return Qnil;
 
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     oldlen = RSTRING_LEN( str);
 #else
     oldlen = rb_str_strlen( str);
@@ -729,7 +729,7 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
         long e;
 
         ell = rb_str_new2( "...");
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
         e = RSTRING_LEN( ell);
 #else
         e = rb_str_strlen( ell);
@@ -1214,7 +1214,7 @@ step_each_line( VALUE obj)
 VALUE
 rb_file_size( VALUE obj)
 {
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     OpenFile *fptr;
 #else
     rb_io_t *fptr;
@@ -1222,7 +1222,7 @@ rb_file_size( VALUE obj)
     struct stat st;
 
     GetOpenFile( obj, fptr);
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     if (fstat( fileno( fptr->f), &st) == -1) {
         rb_sys_fail( fptr->path);
     }
@@ -1256,7 +1256,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
 {
     VALUE excl, nb;
     struct step_flock cur_flock;
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     OpenFile *fptr;
 #else
     rb_io_t *fptr;
@@ -1268,7 +1268,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
 
     op = cur_flock.op | LOCK_NB;
     GetOpenFile( file, fptr);
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     while (flock( fileno( fptr->f), op) < 0) {
 #else
     while (flock( fptr->fd, op) < 0) {
@@ -1286,7 +1286,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
             }
             /* fall through */
           default:
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
             rb_sys_fail( fptr->path);
 #else
             rb_sys_fail_str( fptr->pathv);
@@ -1330,7 +1330,7 @@ step_init_flock( struct step_flock *s, VALUE file, VALUE excl)
 VALUE
 step_do_unflock( VALUE v)
 {
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     OpenFile *fptr;
 #else
     rb_io_t *fptr;
@@ -1338,7 +1338,7 @@ step_do_unflock( VALUE v)
     int fd;
 
     GetOpenFile( flocks_root->file, fptr);
-#ifndef HAVE_RUBY_VM_H
+#ifndef RUBY_VM
     flock( fileno( fptr->f), flocks_root->last_op);
 #else
     flock( fptr->fd, flocks_root->last_op);
