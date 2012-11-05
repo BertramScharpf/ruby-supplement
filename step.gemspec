@@ -37,6 +37,8 @@ EOT
                           lib/step/filesys.h
                           lib/step/itimer.c
                           lib/step/itimer.h
+                          lib/step/terminal.c
+                          lib/step/terminal.h
                           lib/step/date.rb
                           examples/teatimer
                         )
