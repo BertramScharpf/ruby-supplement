@@ -15,8 +15,8 @@ if RUBY_VERSION < "1.9.2" then
       enable_array_index_with_block
       enable_kernel_tap
       enable_string_start_with
+      enable_thread_exclusive
     end
-    enable_thread_exclusive
     have_header "rubysig.h"
   end
 end
