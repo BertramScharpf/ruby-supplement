@@ -31,6 +31,9 @@
 
 #include <sys/stat.h>
 #include <sys/file.h>
+#include <math.h>
+
+
 
 #ifndef RUBY_VM
     /* Oh what a bug! */
@@ -869,6 +872,56 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
 
 
 /*
+ *  call-seq:
+ *     num.sqrt   -> num
+ *
+ *  Square root.
+ *
+ *     144.sqrt       #=> 12.0
+ */
+
+VALUE
+rb_num_sqrt( VALUE num)
+{
+    return rb_float_new( sqrt( RFLOAT_VALUE( rb_Float( num))));
+}
+
+/*
+ *  call-seq:
+ *     num.cbrt   -> num
+ *
+ *  Cube root.
+ *
+ *     27.cbrt       #=> 3.0
+ */
+
+VALUE
+rb_num_cbrt( VALUE num)
+{
+    double n;
+    int neg;
+    int i;
+
+    n = RFLOAT_VALUE( rb_Float( num));
+    if ((neg = n < 0))
+      n = -n;
+    n = sqrt( sqrt( n));
+    i = 2;
+    for (;;) {
+      double w = n;
+      int j;
+
+      for (j=i;j;--j) w = sqrt( w);
+      i *= 2;
+      w *= n;
+      if (n == w) break;
+      n = w;
+    }
+    return rb_float_new( neg ? -n : n);
+}
+
+
+/*
  *  Document-class: Array
  */
 
@@ -1620,6 +1673,8 @@ void Init_step( void)
     rb_define_method( rb_cNumeric, "pos?", rb_num_pos_p, 0);
     rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
+    rb_define_method( rb_cNumeric, "sqrt", rb_num_sqrt, 0);
+    rb_define_method( rb_cNumeric, "cbrt", rb_num_cbrt, 0);
 
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
     rb_define_method( rb_cArray, "indexes", rb_ary_indexes, 0);
