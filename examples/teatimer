@@ -30,6 +30,11 @@ class TeaTimer
       new seconds
     end
 
+    def run time
+      t = from_str time
+      t.run
+    end
+
     private
 
     def divide_colons time
@@ -49,36 +54,34 @@ class TeaTimer
     @seconds = seconds
   end
 
+  class Done < Exception ; end
+
   def run
     trap "SIGALRM" do
       @seconds -= 1
       print_rest
+      raise Done if @seconds.zero?
     end
     Process.setitimer 1
-    begin
-      print_rest
-      begin
-        sleep
-      end while @seconds.nonzero?
-      puts
-    ensure
-      trap "SIGALRM", "DEFAULT"
-      Process.setitimer nil
-    end
+    print_rest
+    sleep
+  rescue Done
+    puts
+  ensure
+    trap "SIGALRM", "DEFAULT"
+    Process.setitimer nil
   end
 
   private
 
   def print_rest
-    print "  \r%02d:%02d:%02d" % [ @seconds / H, @seconds % H / M, @seconds % M]
+    $stdout.print "  \r%02d:%02d:%02d" %
+                    [ @seconds / H, @seconds % H / M, @seconds % M]
     $stdout.flush
   end
 
 end
 
-teatimer = TeaTimer.from_str $*.shift || "3m"
-teatimer.run
-if $*.any? then
-  exec *$*
-end
+TeaTimer.run $*.first =~ /\A\d+/ ? $*.shift : "3m"
+exec *$* if $*.any?
 
