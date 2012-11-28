@@ -1473,8 +1473,8 @@ step_dir_s_current( VALUE dir)
 
 /*
  *  call-seq:
- *     chdir()           -> nil
- *     chdir() { .... }  -> obj
+ *     chdir()                  -> nil
+ *     chdir() { |path| .... }  -> obj
  *
  *  As you probably expect, change the working directory like in
  *  <code>Dir.chdir</code>.
@@ -1484,22 +1484,25 @@ step_dir_s_current( VALUE dir)
 VALUE
 step_dir_chdir( VALUE dir)
 {
+    VALUE path;
+
+    if (!id_chdir) {
+        id_chdir = rb_intern( "chdir");
+        id_path  = rb_intern( "path");
+    }
+    path = rb_funcall( dir, id_path, 0);
     if (rb_block_given_p())
-        return rb_iterate( &step_chdir, dir, &rb_yield, Qnil);
+        return rb_iterate( &step_chdir, path, &rb_yield, Qnil);
     else {
-        step_chdir( dir);
+        step_chdir( path);
         return Qnil;
     }
 }
 
 VALUE
-step_chdir( VALUE dir)
+step_chdir( VALUE path)
 {
-    if (!id_chdir) {
-        id_chdir = rb_intern( "chdir");
-        id_path  = rb_intern( "path");
-    }
-    return rb_funcall( rb_cDir, id_chdir, 1, rb_funcall( dir, id_path, 0));
+    return rb_funcall( rb_cDir, id_chdir, 1, path);
 }
 
 
