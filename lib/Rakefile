@@ -2,16 +2,14 @@
 #  Rakefile  --  build some libraries
 #
 
+require "autorake"
 
-require "rake/autorake"
-
-extend Rake::Configure
-
+c = compiler "-O2", "-fPIC"
+l = linker "-shared"
 
 rule ".o" => ".c" do |t|
-  cc t.name, t.source, "-O2", "-fPIC"
+  c.cc t.name, t.source
 end
-
 
 DLs = {
   "step.so"          => %w(step.o sync.o),
@@ -22,13 +20,11 @@ DLs = {
 
 DLs.each { |k,v|
   task k => v do |t|
-    ld t.name, t.prerequisites, "-shared"
+    l.cc t.name, t.prerequisites
   end
 }
 
-
 task :default => DLs.keys
-
 
 task :clean do
   FileList[ "**/*.o", "**/*.so"].each { |f| rm_f f }

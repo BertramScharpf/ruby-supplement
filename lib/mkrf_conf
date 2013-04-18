@@ -1,36 +1,41 @@
-#!/usr/bin/env autorake
+#!/usr/bin/env ruby
 
 #
 #  mkrf_conf  --  configure Step
 #
 
-extending_ruby
+require "autorake/mkconfig"
 
-if RUBY_VERSION < "1.9.2" then
-  enable_array_select_bang
-  if RUBY_VERSION < "1.9" then
-    enable_string_ord
-    enable_string_clear
-    if RUBY_VERSION < "1.8.7" then
-      enable_array_index_with_block
-      enable_kernel_tap
-      enable_string_start_with
-      enable_thread_exclusive
+Autorake.configure {
+
+  extending_ruby
+
+  if RUBY_VERSION < "1.9.2" then
+    enable_array_select_bang
+    if RUBY_VERSION < "1.9" then
+      enable_string_ord
+      enable_string_clear
+      if RUBY_VERSION < "1.8.7" then
+        enable_array_index_with_block
+        enable_kernel_tap
+        enable_string_start_with
+        enable_thread_exclusive
+      end
+      have_header "rubysig.h"
     end
-    have_header "rubysig.h"
   end
-end
 
-if RUBY_VERSION < "1.9" then
-  have_header "ruby.h"
-  have_header "st.h"
-  have_header "rubyio.h"
-  have_header "re.h"
-else
-  have_header "ruby/ruby.h"
-  have_header "ruby/st.h"
-  have_header "ruby/io.h"
-  have_header "ruby/re.h"
-end
+  if RUBY_VERSION < "1.9" then
+    have_header "ruby.h"
+    have_header "st.h"
+    have_header "rubyio.h"
+    have_header "re.h"
+  else
+    have_header "ruby/ruby.h"
+    have_header "ruby/st.h"
+    have_header "ruby/io.h"
+    have_header "ruby/re.h"
+  end
 
-# vim:set ft=ruby :
+}
+

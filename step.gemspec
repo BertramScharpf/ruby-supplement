@@ -17,7 +17,7 @@ EOT
   s.rubyforge_project = "NONE"
 
   s.requirements      = "Ruby and the autorake gem"
-  s.add_dependency      "autorake", ">=1.0"
+  s.add_dependency      "autorake", ">=2.0"
 
   s.has_rdoc          = true
   s.extra_rdoc_files  = %w(
