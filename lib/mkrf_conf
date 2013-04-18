@@ -11,15 +11,15 @@ Autorake.configure {
   extending_ruby
 
   if RUBY_VERSION < "1.9.2" then
-    enable_array_select_bang
+    enable :array_select_bang
     if RUBY_VERSION < "1.9" then
-      enable_string_ord
-      enable_string_clear
+      enable :string_ord
+      enable :string_clear
       if RUBY_VERSION < "1.8.7" then
-        enable_array_index_with_block
-        enable_kernel_tap
-        enable_string_start_with
-        enable_thread_exclusive
+        enable :array_index_with_block
+        enable :kernel_tap
+        enable :string_start_with
+        enable :thread_exclusive
       end
       have_header "rubysig.h"
     end

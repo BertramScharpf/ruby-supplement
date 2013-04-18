@@ -22,7 +22,7 @@
     #include <ruby/re.h>
 #endif
 
-#ifdef THREAD_EXCLUSIVE
+#ifdef FEATURE_THREAD_EXCLUSIVE
 #ifdef HAVE_HEADER_RUBYSIG_H
 #include <rubysig.h>
 #endif
@@ -35,7 +35,7 @@
 
 
 
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     /* Oh what a bug! */
     #define R_MATCH( obj) RMATCH( obj)
 #else
@@ -44,11 +44,11 @@
 static long  step_str_index( VALUE, const char *);
 static VALUE step_index_blk( VALUE);
 static VALUE step_rindex_blk( VALUE);
-#ifdef ARRAY_INDEX_WITH_BLOCK
+#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
 static VALUE step_index_val( VALUE, VALUE);
 static VALUE step_rindex_val( VALUE, VALUE);
 #endif
-#ifdef ARRAY_SELECT_BANG
+#ifdef FEATURE_ARRAY_SELECT_BANG
 static VALUE step_reject( VALUE);
 static VALUE step_invert_yield( VALUE);
 #endif
@@ -62,7 +62,7 @@ static ID id_delete_at;
 static ID id_cmp;
 static ID id_eat_lines;
 static ID id_eqq;
-#ifdef ARRAY_SELECT_BANG
+#ifdef FEATURE_ARRAY_SELECT_BANG
 static ID id_reject_bang;
 #endif
 static ID id_chdir;
@@ -81,7 +81,7 @@ static struct step_flock *flocks_root = NULL;
 static void  step_init_flock( struct step_flock *, VALUE, VALUE);
 static VALUE step_do_unflock( VALUE);
 
-#ifdef THREAD_EXCLUSIVE
+#ifdef FEATURE_THREAD_EXCLUSIVE
 static VALUE bsruby_set_thread_critical( VALUE);
 #endif
 
@@ -144,7 +144,7 @@ rb_obj_nil_if( VALUE obj, VALUE val)
  *  Document-module: Kernel
  */
 
-#ifdef KERNEL_TAP
+#ifdef FEATURE_KERNEL_TAP
 
 /*
  *  call-seq:
@@ -310,7 +310,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     int l;
     int r;
 
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     n = l = RSTRING_LEN( str);
 #else
     n = l = rb_str_strlen( str);
@@ -327,7 +327,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
         }
     }
     rb_str_modify( str);
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     if (n > 0) {
         r = l - n;
         val = rb_str_new5( str, RSTRING_PTR( str), n);
@@ -377,7 +377,7 @@ rb_str_eat_lines( VALUE self)
 
     RETURN_ENUMERATOR( self, 0, 0);
     rb_str_modify( self);
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     while ((l = RSTRING_LEN( self)) > 0) {
         int n;
         char *p;
@@ -433,7 +433,7 @@ VALUE
 rb_str_cut_bang( VALUE str, VALUE len)
 {
     int l;
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
 #else
     int n;
 #endif
@@ -442,7 +442,7 @@ rb_str_cut_bang( VALUE str, VALUE len)
     l = NUM2INT( len);
     if (l < 0)
         l = 0;
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     if (l < RSTRING_LEN( str)) {
         RSTRING_LEN( str) = l;
         return str;
@@ -458,7 +458,7 @@ rb_str_cut_bang( VALUE str, VALUE len)
 }
 
 
-#ifdef STRING_CLEAR
+#ifdef FEATURE_STRING_CLEAR
 
 /*
  *  call-seq:
@@ -521,7 +521,7 @@ rb_str_rest( int argc, VALUE *argv, VALUE str)
     beg = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
     if (beg < 0)
         beg = 0;
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     l = RSTRING_LEN( str);
 #else
     l = rb_str_strlen( str);
@@ -546,7 +546,7 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
     long l, beg, len;
 
     len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     l = RSTRING_LEN( str);
 #else
     l = rb_str_strlen( str);
@@ -558,7 +558,7 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
 }
 
 
-#ifdef STRING_START_WITH
+#ifdef FEATURE_STRING_START_WITH
 
 /*
  *  call-seq:
@@ -613,7 +613,7 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
 #else
     if (!rb_str_comparable( str, oth))
       return Qnil;
@@ -628,7 +628,7 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
         if (*s != *o)
             return Qnil;
     }
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     return INT2FIX( RSTRING_LEN( ost));
 #else
     return INT2FIX( rb_str_strlen( ost));
@@ -656,7 +656,7 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
 #else
     if (!rb_str_comparable( str, oth))
       return Qnil;
@@ -670,14 +670,14 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     for (; i; i--)
         if (*--s != *--o)
             return Qnil;
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     return INT2FIX( RSTRING_LEN( str) - RSTRING_LEN( ost));
 #else
     return INT2FIX( rb_str_strlen( str) - rb_str_strlen( ost));
 #endif
 }
 
-#ifdef STRING_ORD
+#ifdef FEATURE_STRING_ORD
 
 /*
  *  call-seq:
@@ -722,7 +722,7 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
     if (newlen < 0)
         return Qnil;
 
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     oldlen = RSTRING_LEN( str);
 #else
     oldlen = rb_str_strlen( str);
@@ -732,7 +732,7 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
         long e;
 
         ell = rb_str_new2( "...");
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
         e = RSTRING_LEN( ell);
 #else
         e = rb_str_strlen( ell);
@@ -1044,7 +1044,7 @@ step_rindex_blk( VALUE ary)
 }
 
 
-#ifdef ARRAY_INDEX_WITH_BLOCK
+#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
 
 /*
  *  call-seq:
@@ -1133,7 +1133,7 @@ step_rindex_val( VALUE ary, VALUE val)
 
 #endif
 
-#ifdef ARRAY_SELECT_BANG
+#ifdef FEATURE_ARRAY_SELECT_BANG
 
 /*
  *  Document-method: select!
@@ -1267,7 +1267,7 @@ step_each_line( VALUE obj)
 VALUE
 rb_file_size( VALUE obj)
 {
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     OpenFile *fptr;
 #else
     rb_io_t *fptr;
@@ -1275,7 +1275,7 @@ rb_file_size( VALUE obj)
     struct stat st;
 
     GetOpenFile( obj, fptr);
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     if (fstat( fileno( fptr->f), &st) == -1) {
         rb_sys_fail( fptr->path);
     }
@@ -1309,7 +1309,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
 {
     VALUE excl, nb;
     struct step_flock cur_flock;
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     OpenFile *fptr;
 #else
     rb_io_t *fptr;
@@ -1321,7 +1321,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
 
     op = cur_flock.op | LOCK_NB;
     GetOpenFile( file, fptr);
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     while (flock( fileno( fptr->f), op) < 0) {
 #else
     while (flock( fptr->fd, op) < 0) {
@@ -1339,7 +1339,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
             }
             /* fall through */
           default:
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
             rb_sys_fail( fptr->path);
 #else
             rb_sys_fail_str( fptr->pathv);
@@ -1383,7 +1383,7 @@ step_init_flock( struct step_flock *s, VALUE file, VALUE excl)
 VALUE
 step_do_unflock( VALUE v)
 {
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     OpenFile *fptr;
 #else
     rb_io_t *fptr;
@@ -1391,7 +1391,7 @@ step_do_unflock( VALUE v)
     int fd;
 
     GetOpenFile( flocks_root->file, fptr);
-#ifndef RUBY_VM
+#ifdef HAVE_HEADER_RUBY_H
     flock( fileno( fptr->f), flocks_root->last_op);
 #else
     flock( fptr->fd, flocks_root->last_op);
@@ -1581,7 +1581,7 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
 }
 
 
-#ifdef THREAD_EXCLUSIVE
+#ifdef FEATURE_THREAD_EXCLUSIVE
 
 /*
  *  Document-class: Thread
@@ -1639,7 +1639,7 @@ void Init_step( void)
     rb_define_alias(  rb_cObject, "cls", "class");
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
     rb_define_method( rb_cObject, "nil_if", rb_obj_nil_if, 1);
-#ifdef KERNEL_TAP
+#ifdef FEATURE_KERNEL_TAP
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
@@ -1654,13 +1654,13 @@ void Init_step( void)
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
-#ifdef STRING_CLEAR
+#ifdef FEATURE_STRING_CLEAR
     rb_define_method( rb_cString, "clear", rb_str_clear, 0);
 #endif
     rb_define_method( rb_cString, "head", rb_str_head, -1);
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
-#ifdef STRING_START_WITH
+#ifdef FEATURE_STRING_START_WITH
     rb_define_method( rb_cString, "start_with?", rb_str_start_with_p, 1);
     rb_define_method( rb_cString, "end_with?", rb_str_end_with_p, 1);
 #endif
@@ -1668,7 +1668,7 @@ void Init_step( void)
     rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, 1);
     rb_define_alias(  rb_cString, "starts_with", "start_with?");
     rb_define_alias(  rb_cString, "ends_with", "end_with?");
-#ifdef STRING_ORD
+#ifdef FEATURE_STRING_ORD
     rb_define_method( rb_cString, "ord", rb_str_ord, 0);
 #endif
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
@@ -1684,11 +1684,11 @@ void Init_step( void)
     rb_define_alias(  rb_cArray, "keys", "indexes");
     rb_define_method( rb_cArray, "pick", rb_ary_pick, 0);
     rb_define_method( rb_cArray, "rpick", rb_ary_rpick, 0);
-#ifdef ARRAY_INDEX_WITH_BLOCK
+#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
     rb_define_method( rb_cArray, "index", rb_ary_index, -1);
     rb_define_method( rb_cArray, "rindex", rb_ary_rindex, -1);
 #endif
-#ifdef ARRAY_SELECT_BANG
+#ifdef FEATURE_ARRAY_SELECT_BANG
     rb_define_method( rb_cArray, "select!", rb_ary_select_bang, 0);
 #endif
     rb_define_method( rb_cArray, "eat_lines", rb_ary_eat_lines, 0);
@@ -1707,7 +1707,7 @@ void Init_step( void)
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
-#ifdef THREAD_EXCLUSIVE
+#ifdef FEATURE_THREAD_EXCLUSIVE
     rb_define_singleton_method( rb_cThread, "exclusive", rb_thread_exclusive, 0);
 #endif
 
@@ -1717,7 +1717,7 @@ void Init_step( void)
     id_cmp         = rb_intern( "<=>");
     id_eat_lines   = rb_intern( "eat_lines");
     id_eqq         = 0;
-#ifdef ARRAY_SELECT_BANG
+#ifdef FEATURE_ARRAY_SELECT_BANG
     id_reject_bang = 0;
 #endif
     id_chdir       = 0;

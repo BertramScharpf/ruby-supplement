@@ -26,19 +26,19 @@ extern VALUE rb_str_notempty_p( VALUE);
 extern VALUE rb_str_eat( int, VALUE *, VALUE);
 extern VALUE rb_str_eat_lines( VALUE);
 extern VALUE rb_str_cut_bang( VALUE, VALUE);
-#ifdef STRING_CLEAR
+#ifdef FEATURE_STRING_CLEAR
 extern VALUE rb_str_clear( VALUE);
 #endif
 extern VALUE rb_str_head( int, VALUE *, VALUE);
 extern VALUE rb_str_rest( int, VALUE *, VALUE);
 extern VALUE rb_str_tail( int, VALUE *, VALUE);
-#ifdef STRING_START_WITH
+#ifdef FEATURE_STRING_START_WITH
 extern VALUE rb_str_start_with_p( VALUE, VALUE);
 extern VALUE rb_str_end_with_p( VALUE, VALUE);
 #endif
 extern VALUE rb_str_starts_with_p( VALUE, VALUE);
 extern VALUE rb_str_ends_with_p( VALUE, VALUE);
-#ifdef STRING_ORD
+#ifdef FEATURE_STRING_ORD
 extern VALUE rb_str_ord( VALUE);
 #endif
 extern VALUE rb_str_axe( int, VALUE *, VALUE);
@@ -47,11 +47,11 @@ extern VALUE rb_ary_notempty_p( VALUE);
 extern VALUE rb_ary_indexes( VALUE);
 extern VALUE rb_ary_pick( VALUE);
 extern VALUE rb_ary_rpick( VALUE);
-#ifdef ARRAY_INDEX_WITH_BLOCK
+#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
 extern VALUE rb_ary_index( int, VALUE *, VALUE);
 extern VALUE rb_ary_rindex( int, VALUE *, VALUE);
 #endif
-#ifdef ARRAY_SELECT_BANG
+#ifdef FEATURE_ARRAY_SELECT_BANG
 extern VALUE rb_ary_select_bang( VALUE);
 #endif
 extern VALUE rb_ary_eat_lines( VALUE);
@@ -74,7 +74,7 @@ extern VALUE step_dir_chdir( VALUE);
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
 
-#ifdef THREAD_EXCLUSIVE
+#ifdef FEATURE_THREAD_EXCLUSIVE
 extern VALUE rb_thread_exclusive( void);
 #endif
 
