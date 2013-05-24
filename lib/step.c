@@ -81,6 +81,7 @@ static ID id_reject_bang;
 #endif
 static ID id_chdir;
 static ID id_path;
+static ID id_mkdir;
 static ID id_index;
 
 
@@ -670,7 +671,7 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
         } else
             ret = rb_str_substr( str, 0, newlen);
         OBJ_INFECT( ret, str);
-    } else 
+    } else
         ret = str;
     return ret;
 }
@@ -1342,6 +1343,40 @@ rb_dir_s_current( VALUE dir)
 
 /*
  *  call-seq:
+ *     mkdir!( path, modes = nil)   -> nil
+ *
+ *  Make a directory and all subdirectories if needed.
+ *
+ *  If you specifiy modes, be sure that you have the permission to create
+ *  subdirectories.
+ *
+ */
+
+VALUE
+rb_dir_s_mkdir_bang( int argc, VALUE *argv)
+{
+    VALUE path, modes;
+
+    rb_scan_args( argc, argv, "11", &path, &modes);
+    if (!rb_file_directory_p( rb_cFile, path)) {
+        VALUE parent[2];
+
+        parent[ 0] = rb_file_dirname( path);
+        parent[ 1] = modes;
+        rb_dir_s_mkdir_bang( 2, parent);
+        if (!id_mkdir)
+            id_mkdir = rb_intern( "mkdir");
+        if (NIL_P(modes))
+            rb_funcall( rb_cDir, id_mkdir, 1, path);
+        else
+            rb_funcall( rb_cDir, id_mkdir, 2, path, modes);
+    }
+    return Qnil;
+}
+
+
+/*
+ *  call-seq:
  *     chdir()                  -> nil
  *     chdir() { |path| .... }  -> obj
  *
@@ -1566,6 +1601,7 @@ void Init_step( void)
     rb_define_singleton_method( rb_cFile, "umask", rb_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
+    rb_define_singleton_method( rb_cDir, "mkdir!", rb_dir_s_mkdir_bang, -1);
     rb_define_method( rb_cDir, "chdir", rb_dir_chdir, 0);
 
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
@@ -1585,7 +1621,8 @@ void Init_step( void)
 #endif
     id_chdir       = 0;
     id_path        = 0;
-    ID id_index    = 0;
+    id_mkdir       = 0;
+    id_index       = 0;
 
     Init_step_sync();
 }
