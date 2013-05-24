@@ -41,33 +41,6 @@
 #else
 #endif
 
-static long  step_str_index( VALUE, const char *);
-static VALUE step_index_blk( VALUE);
-static VALUE step_rindex_blk( VALUE);
-#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
-static VALUE step_index_val( VALUE, VALUE);
-static VALUE step_rindex_val( VALUE, VALUE);
-#endif
-#ifdef FEATURE_ARRAY_SELECT_BANG
-static VALUE step_reject( VALUE);
-static VALUE step_invert_yield( VALUE);
-#endif
-static VALUE step_eat_lines( VALUE);
-static VALUE step_each_line( VALUE);
-static VALUE step_do_unumask( VALUE);
-static VALUE step_chdir( VALUE);
-
-
-static ID id_delete_at;
-static ID id_cmp;
-static ID id_eat_lines;
-static ID id_eqq;
-#ifdef FEATURE_ARRAY_SELECT_BANG
-static ID id_reject_bang;
-#endif
-static ID id_chdir;
-static ID id_path;
-static ID id_index;
 
 struct step_flock {
     struct step_flock *prev;
@@ -78,12 +51,38 @@ struct step_flock {
 
 static struct step_flock *flocks_root = NULL;
 
+
+static VALUE step_index_blk( VALUE);
+static VALUE step_rindex_blk( VALUE);
+#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
+static VALUE step_index_val( VALUE, VALUE);
+static VALUE step_rindex_val( VALUE, VALUE);
+#endif
+#ifdef FEATURE_ARRAY_SELECT_BANG
+static VALUE step_reject( VALUE);
+static VALUE step_invert_yield( VALUE);
+#endif
+static VALUE step_each_line( VALUE);
 static void  step_init_flock( struct step_flock *, VALUE, VALUE);
 static VALUE step_do_unflock( VALUE);
-
+static VALUE step_do_unumask( VALUE);
+static VALUE step_chdir( VALUE);
 #ifdef FEATURE_THREAD_EXCLUSIVE
 static VALUE bsruby_set_thread_critical( VALUE);
 #endif
+
+
+
+static ID id_delete_at;
+static ID id_cmp;
+static ID id_eqq;
+#ifdef FEATURE_ARRAY_SELECT_BANG
+static ID id_reject_bang;
+#endif
+static ID id_chdir;
+static ID id_path;
+static ID id_index;
+
 
 
 /*
@@ -231,16 +230,6 @@ rb_nil_each_line( VALUE str)
 }
 
 
-/*
- *  Document-method: eat_lines
- *
- *  call-seq:
- *     eat_lines { |l| ... }   -> nil
- *
- *  This spares testing for +nil+ when checking strings.
- */
-
-
 
 /*
  *  Document-class: String
@@ -353,68 +342,6 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     return val;
 }
 
-
-/*
- *  Document-method: eat_lines
- *
- *  call-seq:
- *     eat_lines() { |l| .. }   -> nil
- *
- *  Returns parts of +str+, line by line. The line returned will be deleted
- *  from the string. If no +break+ occurs, the string will be empty
- *  afterwards.
- *
- *     a = "foo\nbar\nbaz"
- *     a.eat_lines { |l| break l }   #=> "foo\n"
- *     a                             #=> "bar\nbaz"
- */
-
-VALUE
-rb_str_eat_lines( VALUE self)
-{
-    VALUE val;
-    long l;
-
-    RETURN_ENUMERATOR( self, 0, 0);
-    rb_str_modify( self);
-#ifdef HAVE_HEADER_RUBY_H
-    while ((l = RSTRING_LEN( self)) > 0) {
-        int n;
-        char *p;
-
-        p = RSTRING_PTR( self);
-        /* "\n" and "\r\n" both end in "\n" */
-        for (n = 0; l > 0 && *p != '\n'; n++, l--, p++)
-            ;
-        if (l > 0)
-            n++, l--;
-        val = rb_str_new5( self, RSTRING_PTR( self), n);
-        /* It would be faster if the pointer could be moved ... */
-        memmove( RSTRING_PTR( self), RSTRING_PTR( self) + n, l);
-        RSTRING_LEN( self) = l;
-        rb_yield( val);
-    }
-#else
-    while ((l = step_str_index( self, "\n"))) {
-        val = rb_str_substr( self, 0, l);
-        rb_str_update( self, 0, l, rb_str_new( NULL, 0));
-        rb_yield( val);
-    }
-#endif
-    return Qnil;
-}
-
-/* Arrgh. They forgot to export rb_str_index(). */
-long
-step_str_index( VALUE str, const char *pat)
-{
-    VALUE ix;
-
-    if (!id_index)
-        id_index = rb_intern( "index");
-    ix = rb_funcall( str, id_index, 1, rb_str_new2( pat));
-    return NIL_P( ix) ? rb_str_strlen( str) : NUM2INT( ix) + 1;
-}
 
 /*
  *  call-seq:
@@ -1168,34 +1095,6 @@ step_invert_yield( VALUE elem)
 #endif
 
 
-/*
- *  Document-method: eat_lines
- *
- *  call-seq:
- *     eat_lines   -> ary
- *
- *  Do +eat_lines+ for each member. Members are typically strings and
- *  files. You don't need to +flatten+ as array lines will be eaten, too.
- *
- */
-
-VALUE
-rb_ary_eat_lines( VALUE self)
-{
-    RETURN_ENUMERATOR( self, 0, 0);
-    while (RARRAY_LEN( self) > 0) {
-        rb_iterate( &step_eat_lines, RARRAY_PTR( self)[0], &rb_yield, Qnil);
-        rb_ary_shift( self);
-    }
-    return Qnil;
-}
-
-VALUE step_eat_lines( VALUE obj)
-{
-    rb_funcall( obj, id_eat_lines, 0);
-    return Qnil;
-}
-
 
 /*
  *  Document-class: Hash
@@ -1216,36 +1115,6 @@ VALUE
 rb_hash_notempty_p( VALUE hash)
 {
     return RHASH_SIZE( hash) == 0 ? Qnil : hash;
-}
-
-
-/*
- *  Document-class: IO
- */
-
-/*
- *  Document-method: eat_lines
- *
- *  call-seq:
- *     eat_lines   -> nil
- *
- *  Same as +IO#each_line+ but returns +nil+ so that +break+ values
- *  may be distinguished.
- *
- */
-VALUE
-rb_io_eat_lines( VALUE self)
-{
-    RETURN_ENUMERATOR( self, 0, 0);
-    rb_iterate( &step_each_line, self, &rb_yield, Qnil);
-    return Qnil;
-}
-
-VALUE
-step_each_line( VALUE obj)
-{
-    rb_funcall( obj, rb_intern( "each_line"), 0);
-    return Qnil;
 }
 
 
@@ -1422,7 +1291,7 @@ step_do_unflock( VALUE v)
  */
 
 VALUE
-step_file_s_umask( int argc, VALUE *argv)
+rb_file_s_umask( int argc, VALUE *argv)
 {
     int omask = 0;
 
@@ -1465,7 +1334,7 @@ step_do_unumask( VALUE v)
  */
 
 VALUE
-step_dir_s_current( VALUE dir)
+rb_dir_s_current( VALUE dir)
 {
     return rb_funcall( dir, rb_intern( "new"), 1, rb_str_new( ".", 1));
 }
@@ -1482,7 +1351,7 @@ step_dir_s_current( VALUE dir)
  */
 
 VALUE
-step_dir_chdir( VALUE dir)
+rb_dir_chdir( VALUE dir)
 {
     VALUE path;
 
@@ -1647,12 +1516,10 @@ void Init_step( void)
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "each_line", rb_nil_each_line, 0);
-    rb_define_method( rb_cNilClass, "eat_lines", rb_nil_each_line, 0);
 
     rb_define_method( rb_cString, "new_string", rb_str_new_string, 0);
     rb_define_method( rb_cString, "notempty?", rb_str_notempty_p, 0);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
-    rb_define_method( rb_cString, "eat_lines", rb_str_eat_lines, 0);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
 #ifdef FEATURE_STRING_CLEAR
     rb_define_method( rb_cString, "clear", rb_str_clear, 0);
@@ -1691,18 +1558,15 @@ void Init_step( void)
 #ifdef FEATURE_ARRAY_SELECT_BANG
     rb_define_method( rb_cArray, "select!", rb_ary_select_bang, 0);
 #endif
-    rb_define_method( rb_cArray, "eat_lines", rb_ary_eat_lines, 0);
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
-    rb_define_method( rb_cIO, "eat_lines", rb_io_eat_lines, 0);
-
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
     rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
-    rb_define_singleton_method( rb_cFile, "umask", step_file_s_umask, -1);
+    rb_define_singleton_method( rb_cFile, "umask", rb_file_s_umask, -1);
 
-    rb_define_singleton_method( rb_cDir, "current", step_dir_s_current, 0);
-    rb_define_method( rb_cDir, "chdir", step_dir_chdir, 0);
+    rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
+    rb_define_method( rb_cDir, "chdir", rb_dir_chdir, 0);
 
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
@@ -1715,7 +1579,6 @@ void Init_step( void)
 
     id_delete_at   = rb_intern( "delete_at");
     id_cmp         = rb_intern( "<=>");
-    id_eat_lines   = rb_intern( "eat_lines");
     id_eqq         = 0;
 #ifdef FEATURE_ARRAY_SELECT_BANG
     id_reject_bang = 0;

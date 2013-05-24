@@ -24,7 +24,6 @@ extern VALUE rb_nil_each_line( VALUE);
 extern VALUE rb_str_new_string( VALUE);
 extern VALUE rb_str_notempty_p( VALUE);
 extern VALUE rb_str_eat( int, VALUE *, VALUE);
-extern VALUE rb_str_eat_lines( VALUE);
 extern VALUE rb_str_cut_bang( VALUE, VALUE);
 #ifdef FEATURE_STRING_CLEAR
 extern VALUE rb_str_clear( VALUE);
@@ -54,7 +53,6 @@ extern VALUE rb_ary_rindex( int, VALUE *, VALUE);
 #ifdef FEATURE_ARRAY_SELECT_BANG
 extern VALUE rb_ary_select_bang( VALUE);
 #endif
-extern VALUE rb_ary_eat_lines( VALUE);
 
 extern VALUE rb_num_pos_p( VALUE);
 extern VALUE rb_num_neg_p( VALUE);
@@ -64,12 +62,11 @@ extern VALUE rb_num_cbrt( VALUE);
 
 extern VALUE rb_hash_notempty_p( VALUE);
 
-extern VALUE rb_io_eat_lines( VALUE);
 extern VALUE rb_file_size( VALUE);
 extern VALUE rb_file_flockb( int, VALUE *, VALUE);
-extern VALUE step_file_s_umask( int, VALUE *);
-extern VALUE step_dir_s_current( VALUE);
-extern VALUE step_dir_chdir( VALUE);
+extern VALUE rb_file_s_umask( int, VALUE *);
+extern VALUE rb_dir_s_current( VALUE);
+extern VALUE rb_dir_chdir( VALUE);
 
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
