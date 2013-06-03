@@ -1377,8 +1377,28 @@ rb_dir_s_mkdir_bang( int argc, VALUE *argv)
 
 /*
  *  call-seq:
- *     chdir()                  -> nil
- *     chdir() { |path| .... }  -> obj
+ *     entries!()   -> dir
+ *
+ *  Entries without <code>"."</code> and <code>".."</code>.
+ *
+ */
+
+VALUE
+rb_dir_entries_bang( VALUE self)
+{
+    VALUE e;
+
+    e = rb_funcall( self, rb_intern( "entries"), 0);
+    rb_ary_delete( e, rb_str_new( ".", 1));
+    rb_ary_delete( e, rb_str_new( "..", 2));
+    return e;
+}
+
+
+/*
+ *  call-seq:
+ *     chdir()                 -> nil
+ *     chdir() { |path| ... }  -> obj
  *
  *  As you probably expect, change the working directory like in
  *  <code>Dir.chdir</code>.
@@ -1602,6 +1622,7 @@ void Init_step( void)
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
     rb_define_singleton_method( rb_cDir, "mkdir!", rb_dir_s_mkdir_bang, -1);
+    rb_define_method( rb_cDir, "entries!", rb_dir_entries_bang, 0);
     rb_define_method( rb_cDir, "chdir", rb_dir_chdir, 0);
 
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
