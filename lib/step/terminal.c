@@ -103,7 +103,7 @@ io_reset( VALUE v)
  *
  *  Get the available window space.
  *
- *     rows, cols, xpixel, ypixel = $stdout.winsize
+ *     cols, rows, xpixel, ypixel = $stdout.winsize
  */
 
 VALUE
@@ -128,8 +128,8 @@ rb_io_winsize( VALUE self)
     if (ioctl( fd, TIOCGWINSZ, &w) < 0)
         RB_SYS_FAIL( fptr);
     r = rb_ary_new2( 4);
-    rb_ary_store( r, 0, INT2NUM( w.ws_row));
-    rb_ary_store( r, 1, INT2NUM( w.ws_col));
+    rb_ary_store( r, 0, INT2NUM( w.ws_col));
+    rb_ary_store( r, 1, INT2NUM( w.ws_row));
     rb_ary_store( r, 2, INT2NUM( w.ws_xpixel));
     rb_ary_store( r, 3, INT2NUM( w.ws_ypixel));
     return r;
