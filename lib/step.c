@@ -1343,12 +1343,15 @@ rb_dir_s_current( VALUE dir)
 
 /*
  *  call-seq:
- *     mkdir!( path, modes = nil)   -> nil
+ *     mkdir!( path, modes = nil)   -> str or nil
  *
  *  Make a directory and all subdirectories if needed.
  *
  *  If you specifiy modes, be sure that you have the permission to create
  *  subdirectories.
+ *
+ *  Returns the path demanded if the directory was created and +nil+ if
+ *  it existed before.
  *
  */
 
@@ -1370,6 +1373,7 @@ rb_dir_s_mkdir_bang( int argc, VALUE *argv)
             rb_funcall( rb_cDir, id_mkdir, 1, path);
         else
             rb_funcall( rb_cDir, id_mkdir, 2, path, modes);
+        return path;
     }
     return Qnil;
 }
