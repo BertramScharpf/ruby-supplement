@@ -27,7 +27,7 @@ rb_process_sync( VALUE obj)
 }
 
 
-void Init_step_sync( void)
+void Init_supplement_sync( void)
 {
     rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
 }

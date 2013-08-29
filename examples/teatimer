@@ -11,7 +11,7 @@
 #         # Count down 3 minutes and the exec the player.
 #
 
-require "step/itimer"
+require "supplement/itimer"
 
 
 class TeaTimer

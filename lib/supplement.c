@@ -1,8 +1,8 @@
 /*
- *  step.c  --  Simple Ruby Extensions
+ *  supplement.c  --  Simple Ruby Extensions
  */
 
-#include "step.h"
+#include "supplement.h"
 
 #include "sync.h"
 
@@ -42,31 +42,31 @@
 #endif
 
 
-struct step_flock {
-    struct step_flock *prev;
-    VALUE              file;
-    int                op;
-    int                last_op;
+struct supplement_flock {
+    struct supplement_flock *prev;
+    VALUE                    file;
+    int                      op;
+    int                      last_op;
 };
 
-static struct step_flock *flocks_root = NULL;
+static struct supplement_flock *flocks_root = NULL;
 
 
-static VALUE step_index_blk( VALUE);
-static VALUE step_rindex_blk( VALUE);
+static VALUE supplement_index_blk( VALUE);
+static VALUE supplement_rindex_blk( VALUE);
 #ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
-static VALUE step_index_val( VALUE, VALUE);
-static VALUE step_rindex_val( VALUE, VALUE);
+static VALUE supplement_index_val( VALUE, VALUE);
+static VALUE supplement_rindex_val( VALUE, VALUE);
 #endif
 #ifdef FEATURE_ARRAY_SELECT_BANG
-static VALUE step_reject( VALUE);
-static VALUE step_invert_yield( VALUE);
+static VALUE supplement_reject( VALUE);
+static VALUE supplement_invert_yield( VALUE);
 #endif
-static VALUE step_each_line( VALUE);
-static void  step_init_flock( struct step_flock *, VALUE, VALUE);
-static VALUE step_do_unflock( VALUE);
-static VALUE step_do_unumask( VALUE);
-static VALUE step_chdir( VALUE);
+static VALUE supplement_each_line( VALUE);
+static void  supplement_init_flock( struct supplement_flock *, VALUE, VALUE);
+static VALUE supplement_do_unflock( VALUE);
+static VALUE supplement_do_unumask( VALUE);
+static VALUE supplement_chdir( VALUE);
 #ifdef FEATURE_THREAD_EXCLUSIVE
 static VALUE bsruby_set_thread_critical( VALUE);
 #endif
@@ -915,14 +915,14 @@ rb_ary_pick( VALUE ary)
 {
     VALUE pos;
 
-    pos = step_index_blk( ary);
+    pos = supplement_index_blk( ary);
     if (!NIL_P( pos))
         return rb_funcall( ary, id_delete_at, 1, pos);
     return Qnil;
 }
 
 VALUE
-step_index_blk( VALUE ary)
+supplement_index_blk( VALUE ary)
 {
     long i, j;
 
@@ -952,14 +952,14 @@ rb_ary_rpick( VALUE ary)
 {
     VALUE pos;
 
-    pos = step_rindex_blk( ary);
+    pos = supplement_rindex_blk( ary);
     if (!NIL_P( pos))
         return rb_funcall( ary, id_delete_at, 1, pos);
     return Qnil;
 }
 
 VALUE
-step_rindex_blk( VALUE ary)
+supplement_rindex_blk( VALUE ary)
 {
     long i;
 
@@ -999,14 +999,14 @@ rb_ary_index( int argc, VALUE *argv, VALUE ary)
     if (rb_scan_args( argc, argv, "01", &val) == 1) {
         if (rb_block_given_p())
             rb_warning( "given block not used");
-        return step_index_val( ary, val);
+        return supplement_index_val( ary, val);
     } else
-        return step_index_blk( ary);
+        return supplement_index_blk( ary);
     return Qnil;
 }
 
 VALUE
-step_index_val( VALUE ary, VALUE val)
+supplement_index_val( VALUE ary, VALUE val)
 {
     long i;
 
@@ -1042,14 +1042,14 @@ rb_ary_rindex( int argc, VALUE *argv, VALUE ary)
     if (rb_scan_args( argc, argv, "01", &val) == 1) {
         if (rb_block_given_p())
             rb_warning( "given block not used");
-        return step_rindex_val( ary, val);
+        return supplement_rindex_val( ary, val);
     } else
-        return step_rindex_blk( ary);
+        return supplement_rindex_blk( ary);
     return Qnil;
 }
 
 VALUE
-step_rindex_val( VALUE ary, VALUE val)
+supplement_rindex_val( VALUE ary, VALUE val)
 {
     long i;
 
@@ -1076,11 +1076,12 @@ step_rindex_val( VALUE ary, VALUE val)
 VALUE
 rb_ary_select_bang( VALUE self)
 {
-    return rb_iterate( &step_reject, self, &step_invert_yield, Qnil);
+    return rb_iterate( &supplement_reject, self,
+                                &supplement_invert_yield, Qnil);
 }
 
 VALUE
-step_reject( VALUE obj)
+supplement_reject( VALUE obj)
 {
     if (!id_reject_bang)
         id_reject_bang = rb_intern( "reject!");
@@ -1088,7 +1089,7 @@ step_reject( VALUE obj)
 }
 
 VALUE
-step_invert_yield( VALUE elem)
+supplement_invert_yield( VALUE elem)
 {
     return NIL_P( rb_yield( elem)) ? Qtrue : Qfalse;
 }
@@ -1178,7 +1179,7 @@ VALUE
 rb_file_flockb( int argc, VALUE *argv, VALUE file)
 {
     VALUE excl, nb;
-    struct step_flock cur_flock;
+    struct supplement_flock cur_flock;
 #ifdef HAVE_HEADER_RUBY_H
     OpenFile *fptr;
 #else
@@ -1187,7 +1188,7 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
     int op;
 
     rb_scan_args( argc, argv, "02", &excl, &nb);
-    step_init_flock( &cur_flock, file, excl);
+    supplement_init_flock( &cur_flock, file, excl);
 
     op = cur_flock.op | LOCK_NB;
     GetOpenFile( file, fptr);
@@ -1218,13 +1219,13 @@ rb_file_flockb( int argc, VALUE *argv, VALUE file)
     }
     cur_flock.prev = flocks_root;
     flocks_root = &cur_flock;
-    return rb_ensure( rb_yield, Qnil, step_do_unflock, Qnil);
+    return rb_ensure( rb_yield, Qnil, supplement_do_unflock, Qnil);
 }
 
 void
-step_init_flock( struct step_flock *s, VALUE file, VALUE excl)
+supplement_init_flock( struct supplement_flock *s, VALUE file, VALUE excl)
 {
-    struct step_flock *i;
+    struct supplement_flock *i;
 
     s->file = file;
 
@@ -1251,7 +1252,7 @@ step_init_flock( struct step_flock *s, VALUE file, VALUE excl)
 }
 
 VALUE
-step_do_unflock( VALUE v)
+supplement_do_unflock( VALUE v)
 {
 #ifdef HAVE_HEADER_RUBY_H
     OpenFile *fptr;
@@ -1305,7 +1306,8 @@ rb_file_s_umask( int argc, VALUE *argv)
     case 1:
         omask = umask( NUM2INT( argv[ 0]));
         if (rb_block_given_p())
-          return rb_ensure( rb_yield, Qnil, step_do_unumask, INT2FIX( omask));
+          return rb_ensure( rb_yield, Qnil,
+                              supplement_do_unumask, INT2FIX( omask));
         break;
     default:
         rb_raise( rb_eArgError,
@@ -1315,7 +1317,7 @@ rb_file_s_umask( int argc, VALUE *argv)
 }
 
 VALUE
-step_do_unumask( VALUE v)
+supplement_do_unumask( VALUE v)
 {
     umask( NUM2INT( v));
     return Qnil;
@@ -1420,15 +1422,15 @@ rb_dir_chdir( VALUE dir)
     }
     path = rb_funcall( dir, id_path, 0);
     if (rb_block_given_p())
-        return rb_iterate( &step_chdir, path, &rb_yield, Qnil);
+        return rb_iterate( &supplement_chdir, path, &rb_yield, Qnil);
     else {
-        step_chdir( path);
+        supplement_chdir( path);
         return Qnil;
     }
 }
 
 VALUE
-step_chdir( VALUE path)
+supplement_chdir( VALUE path)
 {
     return rb_funcall( rb_cDir, id_chdir, 1, path);
 }
@@ -1562,7 +1564,7 @@ bsruby_set_thread_critical( VALUE c)
  */
 
 
-void Init_step( void)
+void Init_supplement( void)
 {
     rb_define_alias(  rb_cObject, "cls", "class");
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
@@ -1633,7 +1635,8 @@ void Init_step( void)
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
 #ifdef FEATURE_THREAD_EXCLUSIVE
-    rb_define_singleton_method( rb_cThread, "exclusive", rb_thread_exclusive, 0);
+    rb_define_singleton_method( rb_cThread, "exclusive",
+                                                    rb_thread_exclusive, 0);
 #endif
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
@@ -1649,6 +1652,6 @@ void Init_step( void)
     id_mkdir       = 0;
     id_index       = 0;
 
-    Init_step_sync();
+    Init_supplement_sync();
 }
 

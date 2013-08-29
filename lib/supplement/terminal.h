@@ -1,9 +1,9 @@
 /*
- *  step/terminal.h  --  Terminal methods
+ *  supplement/terminal.h  --  Terminal methods
  */
 
-#ifndef __STEP_TERMINAL_H__
-#define __STEP_TERMINAL_H__
+#ifndef __SUPPLEMENT_TERMINAL_H__
+#define __SUPPLEMENT_TERMINAL_H__
 
 #if   HAVE_HEADER_RUBY_H
     #include <ruby.h>

@@ -1,12 +1,11 @@
-       _             
-   ___| |_ ___ _ __  
-  / __| __/ _ \ '_ \ 
-  \__ \ ||  __/ |_) |
-  |___/\__\___| .__/ 
-              |_|    
+                       _                           _   
+ ___ _   _ _ __  _ __ | | ___ _ __ ___   ___ _ __ | |_ 
+/ __| | | | '_ \| '_ \| |/ _ \ '_ ` _ \ / _ \ '_ \| __|
+\__ \ |_| | |_) | |_) | |  __/ | | | | |  __/ | | | |_ 
+|___/\__,_| .__/| .__/|_|\___|_| |_| |_|\___|_| |_|\__|
+          |_|   |_|                                    
 
-
-Copyright (c) 2009, Bertram Scharpf <software@bertram-scharpf.de>.
+Copyright (c) 2009-2013, Bertram Scharpf <software@bertram-scharpf.de>.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

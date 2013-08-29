@@ -1,5 +1,5 @@
 #
-#  step/date.rb  --  More Date methods
+#  supplement/date.rb  --  More Date methods
 #
 
 require "date"

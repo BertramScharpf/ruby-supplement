@@ -1,5 +1,5 @@
 /*
- *  step/terminal.c  --  Terminal methods
+ *  supplement/terminal.c  --  Terminal methods
  */
 
 #include "terminal.h"

@@ -1,10 +1,9 @@
 /*
- *  itimer.h  --  Interval timer
+ *  supplement/itimer.h  --  Interval timer
  */
 
-
-#ifndef __ITIMER_H__
-#define __ITIMER_H__
+#ifndef __SUPPLEMENT_ITIMER_H__
+#define __SUPPLEMENT_ITIMER_H__
 
 #include <ruby.h>
 

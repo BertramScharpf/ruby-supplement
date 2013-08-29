@@ -1,9 +1,9 @@
 #
-#  step.gemspec  --  Step Gem specification
+#  supplement.gemspec  --  Supplement Gem specification
 #
 
 Gem::Specification.new do |s|
-  s.name              = "step"
+  s.name              = "supplement"
   (File.read "README") =~ /^=\s.*?(\d+(?:\.\d+)*)/
   s.version           = $1
   s.summary           = "Simple Ruby extensions"
@@ -29,17 +29,17 @@ EOT
   s.files             = %w(
                           lib/mkrf_conf
                           lib/Rakefile
-                          lib/step.c
-                          lib/step.h
+                          lib/supplement.c
+                          lib/supplement.h
                           lib/sync.c
                           lib/sync.h
-                          lib/step/filesys.c
-                          lib/step/filesys.h
-                          lib/step/itimer.c
-                          lib/step/itimer.h
-                          lib/step/terminal.c
-                          lib/step/terminal.h
-                          lib/step/date.rb
+                          lib/supplement/filesys.c
+                          lib/supplement/filesys.h
+                          lib/supplement/itimer.c
+                          lib/supplement/itimer.h
+                          lib/supplement/terminal.c
+                          lib/supplement/terminal.h
+                          lib/supplement/date.rb
                           examples/teatimer
                         )
   s.executables       = %w(

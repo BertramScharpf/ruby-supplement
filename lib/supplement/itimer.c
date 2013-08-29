@@ -1,5 +1,5 @@
 /*
- *  itimer.c  --  Interval timer
+ *  supplement/itimer.c  --  Interval timer
  */
 
 
@@ -7,8 +7,8 @@
 
 #include <math.h>
 
-static void  step_sec_timeval( VALUE, struct timeval *t);
-static VALUE step_timeval_sec( struct timeval *);
+static void  suppelement_sec_timeval( VALUE, struct timeval *t);
+static VALUE suppelement_timeval_sec( struct timeval *);
 
 
 /*
@@ -31,11 +31,11 @@ rb_process_setitimer( int argc, VALUE *argv, VALUE obj)
 
     rb_scan_args( argc, argv, "02", &isec, &vsec);
 
-    step_sec_timeval( isec, &it.it_interval);
+    suppelement_sec_timeval( isec, &it.it_interval);
     if (NIL_P(vsec) && !NIL_P(isec))
         it.it_value = it.it_interval;
     else
-    step_sec_timeval( vsec, &it.it_value);
+    suppelement_sec_timeval( vsec, &it.it_value);
 
     if (setitimer( ITIMER_REAL, &it, NULL) < 0)
         rb_raise( rb_eSystemCallError, "setitimer failed.");
@@ -43,7 +43,7 @@ rb_process_setitimer( int argc, VALUE *argv, VALUE obj)
 }
 
 void
-step_sec_timeval( VALUE secs, struct timeval *t)
+suppelement_sec_timeval( VALUE secs, struct timeval *t)
 {
     switch (TYPE(secs)) {
       case T_FIXNUM:
@@ -101,13 +101,13 @@ rb_process_getitimer( VALUE obj)
         rb_raise( rb_eSystemCallError, "getitimer failed.");
 
     r = rb_ary_new3( 2,
-      step_timeval_sec( &it.it_interval),
-      step_timeval_sec( &it.it_value));
+      suppelement_timeval_sec( &it.it_interval),
+      suppelement_timeval_sec( &it.it_value));
     return r;
 }
 
 VALUE
-step_timeval_sec( struct timeval *t)
+suppelement_timeval_sec( struct timeval *t)
 {
     VALUE r;
     if (t->tv_usec)

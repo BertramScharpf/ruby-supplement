@@ -12,10 +12,10 @@ rule ".o" => ".c" do |t|
 end
 
 DLs = {
-  "step.so"          => %w(step.o sync.o),
-  "step/filesys.so"  => %w(step/filesys.o),
-  "step/itimer.so"   => %w(step/itimer.o),
-  "step/terminal.so" => %w(step/terminal.o),
+  "supplement.so"          => %w(supplement.o sync.o),
+  "supplement/filesys.so"  => %w(supplement/filesys.o),
+  "supplement/itimer.so"   => %w(supplement/itimer.o),
+  "supplement/terminal.so" => %w(supplement/terminal.o),
 }
 
 DLs.each { |k,v|

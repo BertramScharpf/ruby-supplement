@@ -1,9 +1,9 @@
 /*
- *  filesys.h  --  File system tools
+ *  supplement/filesys.h  --  File system tools
  */
 
-#ifndef __FILESYS_H__
-#define __FILESYS_H__
+#ifndef __SUPPLEMENT_FILESYS_H__
+#define __SUPPLEMENT_FILESYS_H__
 
 #include <ruby.h>
 

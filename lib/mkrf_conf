@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 #
-#  mkrf_conf  --  configure Step
+#  mkrf_conf  --  configure Supplement
 #
 
 require "autorake/mkconfig"

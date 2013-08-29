@@ -1,10 +1,10 @@
 /*
- *  step.h  --  Simple Ruby Extensions
+ *  supplement.h  --  Simple Ruby Extensions
  */
 
 
-#ifndef __STEP_H__
-#define __STEP_H__
+#ifndef __SUPPELEMENT_H__
+#define __SUPPELEMENT_H__
 
 #if   HAVE_HEADER_RUBY_H
     #include <ruby.h>
@@ -77,7 +77,7 @@ extern VALUE rb_match_end( int, VALUE *, VALUE);
 extern VALUE rb_thread_exclusive( void);
 #endif
 
-extern void Init_step( void);
+extern void Init_supplement( void);
 
 #endif
 
