@@ -12,7 +12,7 @@ Simple methods that didn't manage to become part of standard Ruby.
 EOT
   s.authors           = [ "Bertram Scharpf"]
   s.email             = "<software@bertram-scharpf.de>"
-  s.homepage          = "http://www.bertram-scharpf.de"
+  s.homepage          = "http://www.bertram-scharpf.de/software/supplement"
 
   s.rubyforge_project = "NONE"
 
