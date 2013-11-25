@@ -53,7 +53,9 @@ static struct supplement_flock *flocks_root = NULL;
 
 
 static VALUE supplement_index_blk( VALUE);
+static VALUE supplement_index_ref( VALUE, VALUE);
 static VALUE supplement_rindex_blk( VALUE);
+static VALUE supplement_rindex_ref( VALUE, VALUE);
 #ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
 static VALUE supplement_index_val( VALUE, VALUE);
 static VALUE supplement_rindex_val( VALUE, VALUE);
@@ -899,10 +901,12 @@ rb_ary_indexes( VALUE ary)
 
 /*
  *  call-seq:
+ *     pick( ref)           -> obj or nil
  *     pick { |elem| ... }  -> obj or nil
  *
- *  Deletes the element where the <em>block</em> first returns
- *  <code>true</code>. Or <code>nil</code> if nothing is found.
+ *  Deletes the element where first <code>ref === obj</code> is true or the
+ *  <em>block</em> first returns <code>true</code>. The result will be
+ *  <code>nil</code> if nothing is found.
  *
  *     a = %w(ant bat cat dog)
  *     a.pick { |e| e =~ /^c/ }  #=> "cat"
@@ -911,13 +915,33 @@ rb_ary_indexes( VALUE ary)
  */
 
 VALUE
-rb_ary_pick( VALUE ary)
+rb_ary_pick( int argc, VALUE *argv, VALUE ary)
 {
+    VALUE ref;
     VALUE pos;
+    VALUE p;
 
-    pos = supplement_index_blk( ary);
+    if (rb_scan_args( argc, argv, "01", &ref) == 1)
+        pos = supplement_index_ref( ary, ref);
+    else
+        pos = supplement_index_blk( ary);
+
     if (!NIL_P( pos))
         return rb_funcall( ary, id_delete_at, 1, pos);
+    return Qnil;
+}
+
+VALUE
+supplement_index_ref( VALUE ary, VALUE ref)
+{
+    long i, j;
+
+    if (!id_eqq)
+        id_eqq = rb_intern( "===");
+    for (i = 0, j = RARRAY_LEN( ary); j > 0; i++, j--) {
+        if (RTEST( rb_funcall( ref, id_eqq, 1, RARRAY_PTR( ary)[ i])))
+            return LONG2NUM( i);
+    }
     return Qnil;
 }
 
@@ -935,11 +959,12 @@ supplement_index_blk( VALUE ary)
 
 /*
  *  call-seq:
+ *     rpick( ref)           -> obj or nil
  *     rpick { |elem| ... }  -> obj or nil
  *
- *  Deletes the element where the <em>block</em> first returns
- *  <code>true</code>. Or <code>nil</code> if nothing is found. Search
- *  from right to left.
+ *  Deletes the element where first <code>ref === obj</code> is true or the
+ *  <em>block</em> first returns <code>true</code>. The result will be
+ *  <code>nil</code> if nothing is found. Search from right to left.
  *
  *     a = %w(ant cow bat cat dog)
  *     a.rpick { |e| e =~ /^c/ }  #=> "cat"
@@ -948,13 +973,34 @@ supplement_index_blk( VALUE ary)
  */
 
 VALUE
-rb_ary_rpick( VALUE ary)
+rb_ary_rpick( int argc, VALUE *argv, VALUE ary)
 {
+    VALUE ref;
     VALUE pos;
+    VALUE p;
 
-    pos = supplement_rindex_blk( ary);
+    if (rb_scan_args( argc, argv, "01", &ref) == 1)
+        pos = supplement_rindex_ref( ary, ref);
+    else
+        pos = supplement_rindex_blk( ary);
+
     if (!NIL_P( pos))
         return rb_funcall( ary, id_delete_at, 1, pos);
+    return Qnil;
+}
+
+VALUE
+supplement_rindex_ref( VALUE ary, VALUE ref)
+{
+    long i;
+
+    if (!id_eqq)
+        id_eqq = rb_intern( "===");
+    for (i = RARRAY_LEN( ary); i;) {
+        --i;
+        if (RTEST( rb_funcall( ref, id_eqq, 1, RARRAY_PTR( ary)[ i])))
+            return LONG2NUM( i);
+    }
     return Qnil;
 }
 
@@ -965,7 +1011,7 @@ supplement_rindex_blk( VALUE ary)
 
     for (i = RARRAY_LEN( ary); i;) {
         --i;
-        if (rb_yield( RARRAY_PTR( ary)[ i]))
+        if (RTEST( rb_yield( RARRAY_PTR( ary)[ i])))
             return LONG2NUM( i);
     }
     return Qnil;
@@ -1610,8 +1656,8 @@ void Init_supplement( void)
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
     rb_define_method( rb_cArray, "indexes", rb_ary_indexes, 0);
     rb_define_alias(  rb_cArray, "keys", "indexes");
-    rb_define_method( rb_cArray, "pick", rb_ary_pick, 0);
-    rb_define_method( rb_cArray, "rpick", rb_ary_rpick, 0);
+    rb_define_method( rb_cArray, "pick", rb_ary_pick, -1);
+    rb_define_method( rb_cArray, "rpick", rb_ary_rpick, -1);
 #ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
     rb_define_method( rb_cArray, "index", rb_ary_index, -1);
     rb_define_method( rb_cArray, "rindex", rb_ary_rindex, -1);

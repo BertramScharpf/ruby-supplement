@@ -19,12 +19,6 @@ EOT
   s.requirements      = "Ruby and the autorake gem"
   s.add_dependency      "autorake", ">=2.0"
 
-  s.has_rdoc          = true
-  s.extra_rdoc_files  = %w(
-                          README
-                          LICENSE
-                        )
-
   s.extensions        = "lib/mkrf_conf"
   s.files             = %w(
                           lib/mkrf_conf
@@ -43,6 +37,13 @@ EOT
                           examples/teatimer
                         )
   s.executables       = %w(
+                        )
+
+  s.has_rdoc          = true
+  s.rdoc_options.concat %w(--charset utf-8 --main README)
+  s.extra_rdoc_files  = %w(
+                          README
+                          LICENSE
                         )
 end
 

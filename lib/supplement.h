@@ -44,8 +44,8 @@ extern VALUE rb_str_axe( int, VALUE *, VALUE);
 
 extern VALUE rb_ary_notempty_p( VALUE);
 extern VALUE rb_ary_indexes( VALUE);
-extern VALUE rb_ary_pick( VALUE);
-extern VALUE rb_ary_rpick( VALUE);
+extern VALUE rb_ary_pick(  int, VALUE *, VALUE);
+extern VALUE rb_ary_rpick( int, VALUE *, VALUE);
 #ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
 extern VALUE rb_ary_index( int, VALUE *, VALUE);
 extern VALUE rb_ary_rindex( int, VALUE *, VALUE);

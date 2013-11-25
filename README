@@ -1,4 +1,4 @@
-= supplement 1.6.1  --  Useful Ruby enhancements
+= supplement 1.7  --  Useful Ruby enhancements
 
 Some simple Ruby extensions.
 
@@ -42,9 +42,4 @@ Now here it is where I can just point to.
 * Interval timer
 * File system stats
 * File#flockb using a block
-
-== Warning
-
-The RDoc in this project doesn't work properly. If in doubt, refer to the
-source code.
 
