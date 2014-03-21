@@ -61,7 +61,7 @@ suppelement_sec_timeval( VALUE secs, struct timeval *t)
             d = modf( RFLOAT_VALUE(secs), &f);
             t->tv_sec = (time_t) f, t->tv_usec = (time_t) (d*1e6+0.5);
             if (f != t->tv_sec)
-                rb_raise( rb_eRangeError, "time interval out of Time range",
+                rb_raise( rb_eRangeError, "time interval %f out of Time range",
                     RFLOAT_VALUE(secs));
         }
         break;
