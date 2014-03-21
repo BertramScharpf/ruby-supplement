@@ -68,7 +68,6 @@ static VALUE supplement_each_line( VALUE);
 static void  supplement_init_flock( struct supplement_flock *, VALUE, VALUE);
 static VALUE supplement_do_unflock( VALUE);
 static VALUE supplement_do_unumask( VALUE);
-static VALUE supplement_chdir( VALUE);
 #ifdef FEATURE_THREAD_EXCLUSIVE
 static VALUE bsruby_set_thread_critical( VALUE);
 #endif
@@ -81,8 +80,6 @@ static ID id_eqq;
 #ifdef FEATURE_ARRAY_SELECT_BANG
 static ID id_reject_bang;
 #endif
-static ID id_chdir;
-static ID id_path;
 static ID id_mkdir;
 static ID id_index;
 
@@ -1447,40 +1444,6 @@ rb_dir_entries_bang( VALUE self)
 }
 
 
-/*
- *  call-seq:
- *     chdir()                 -> nil
- *     chdir() { |path| ... }  -> obj
- *
- *  As you probably expect, change the working directory like in
- *  <code>Dir.chdir</code>.
- *
- */
-
-VALUE
-rb_dir_chdir( VALUE dir)
-{
-    VALUE path;
-
-    if (!id_chdir) {
-        id_chdir = rb_intern( "chdir");
-        id_path  = rb_intern( "path");
-    }
-    path = rb_funcall( dir, id_path, 0);
-    if (rb_block_given_p())
-        return rb_iterate( &supplement_chdir, path, &rb_yield, Qnil);
-    else {
-        supplement_chdir( path);
-        return Qnil;
-    }
-}
-
-VALUE
-supplement_chdir( VALUE path)
-{
-    return rb_funcall( rb_cDir, id_chdir, 1, path);
-}
-
 
 /*
  *  Document-class: Match
@@ -1675,7 +1638,6 @@ void Init_supplement( void)
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
     rb_define_singleton_method( rb_cDir, "mkdir!", rb_dir_s_mkdir_bang, -1);
     rb_define_method( rb_cDir, "entries!", rb_dir_entries_bang, 0);
-    rb_define_method( rb_cDir, "chdir", rb_dir_chdir, 0);
 
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
@@ -1693,8 +1655,6 @@ void Init_supplement( void)
 #ifdef FEATURE_ARRAY_SELECT_BANG
     id_reject_bang = 0;
 #endif
-    id_chdir       = 0;
-    id_path        = 0;
     id_mkdir       = 0;
     id_index       = 0;
 

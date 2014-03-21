@@ -68,7 +68,6 @@ extern VALUE rb_file_s_umask( int, VALUE *);
 extern VALUE rb_dir_s_current( VALUE);
 extern VALUE rb_dir_s_mkdir_bang( int, VALUE *);
 extern VALUE rb_dir_entries_bang( VALUE);
-extern VALUE rb_dir_chdir( VALUE);
 
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
