@@ -64,7 +64,6 @@ static VALUE supplement_rindex_val( VALUE, VALUE);
 static VALUE supplement_reject( VALUE);
 static VALUE supplement_invert_yield( VALUE);
 #endif
-static VALUE supplement_each_line( VALUE);
 static void  supplement_init_flock( struct supplement_flock *, VALUE, VALUE);
 static VALUE supplement_do_unflock( VALUE);
 static VALUE supplement_do_unumask( VALUE);
