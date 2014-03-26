@@ -29,6 +29,7 @@ EOT
                           lib/sync.h
                           lib/supplement/locked.c
                           lib/supplement/locked.h
+                          lib/supplement/dir.rb
                           lib/supplement/filesys.c
                           lib/supplement/filesys.h
                           lib/supplement/itimer.c
