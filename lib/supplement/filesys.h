@@ -5,7 +5,11 @@
 #ifndef __SUPPLEMENT_FILESYS_H__
 #define __SUPPLEMENT_FILESYS_H__
 
-#include <ruby.h>
+#if   HAVE_HEADER_RUBY_H
+    #include <ruby.h>
+#elif HAVE_HEADER_RUBY_RUBY_H
+    #include <ruby/ruby.h>
+#endif
 
 
 extern VALUE rb_fsstat_s_alloc( VALUE);

@@ -21,7 +21,6 @@ Autorake.configure {
         enable :string_start_with
         enable :thread_exclusive
       end
-      have_header "rubysig.h"
     end
   end
 
@@ -30,11 +29,14 @@ Autorake.configure {
     have_header "st.h"
     have_header "rubyio.h"
     have_header "re.h"
+    have_header "rubysig.h"
   else
     have_header "ruby/ruby.h"
     have_header "ruby/st.h"
     have_header "ruby/io.h"
     have_header "ruby/re.h"
+
+    have_function "rb_thread_wait_for"
   end
 
 }

@@ -29,27 +29,11 @@
 #endif
 
 
-#include <sys/stat.h>
-#include <sys/file.h>
-#include <math.h>
-
-
-
 #ifdef HAVE_HEADER_RUBY_H
     /* Oh what a bug! */
     #define R_MATCH( obj) RMATCH( obj)
 #else
 #endif
-
-
-struct supplement_flock {
-    struct supplement_flock *prev;
-    VALUE                    file;
-    int                      op;
-    int                      last_op;
-};
-
-static struct supplement_flock *flocks_root = NULL;
 
 
 static VALUE supplement_index_blk( VALUE);
@@ -64,8 +48,6 @@ static VALUE supplement_rindex_val( VALUE, VALUE);
 static VALUE supplement_reject( VALUE);
 static VALUE supplement_invert_yield( VALUE);
 #endif
-static void  supplement_init_flock( struct supplement_flock *, VALUE, VALUE);
-static VALUE supplement_do_unflock( VALUE);
 static VALUE supplement_do_unumask( VALUE);
 #ifdef FEATURE_THREAD_EXCLUSIVE
 static VALUE bsruby_set_thread_critical( VALUE);
@@ -1203,120 +1185,6 @@ rb_file_size( VALUE obj)
 
 /*
  *  call-seq:
- *     flockb( excl = nil, nb = nil) { || ... }  -> nil
- *
- *  Lock file using the <code>flock()</code> system call.
- *  When the <code>nb</code> flag is <code>true</code>, the method
- *  won't block but rather raise an exception. Catch
- *  <code>SystemCallError</code>. The calls may be nested in any order.
- *
- *    File.open "/var/mail/joe", "a" do  |f|
- *      f.flockb true do
- *        f.write another_message
- *      end
- *    end
- */
-
-VALUE
-rb_file_flockb( int argc, VALUE *argv, VALUE file)
-{
-    VALUE excl, nb;
-    struct supplement_flock cur_flock;
-#ifdef HAVE_HEADER_RUBY_H
-    OpenFile *fptr;
-#else
-    rb_io_t *fptr;
-#endif
-    int op;
-
-    rb_scan_args( argc, argv, "02", &excl, &nb);
-    supplement_init_flock( &cur_flock, file, excl);
-
-    op = cur_flock.op | LOCK_NB;
-    GetOpenFile( file, fptr);
-#ifdef HAVE_HEADER_RUBY_H
-    while (flock( fileno( fptr->f), op) < 0) {
-#else
-    while (flock( fptr->fd, op) < 0) {
-#endif
-        switch (errno) {
-          case EAGAIN:
-          case EACCES:
-#if defined( EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
-          case EWOULDBLOCK:
-#endif
-            if (!RTEST( nb)) {
-                rb_thread_polling();        /* busy wait */
-                rb_io_check_closed( fptr);
-                continue;
-            }
-            /* fall through */
-          default:
-#ifdef HAVE_HEADER_RUBY_H
-            rb_sys_fail( fptr->path);
-#else
-            rb_sys_fail_str( fptr->pathv);
-#endif
-        }
-    }
-    cur_flock.prev = flocks_root;
-    flocks_root = &cur_flock;
-    return rb_ensure( rb_yield, Qnil, supplement_do_unflock, Qnil);
-}
-
-void
-supplement_init_flock( struct supplement_flock *s, VALUE file, VALUE excl)
-{
-    struct supplement_flock *i;
-
-    s->file = file;
-
-    s->last_op = LOCK_UN;
-    for (i = flocks_root; i != NULL; i = i->prev) {
-        if (i->file == file) {
-            s->last_op = i->op;
-            break;
-        }
-    }
-
-    switch (s->last_op) {
-        case LOCK_UN:
-        case LOCK_SH:
-            s->op = RTEST( excl) ? LOCK_EX : LOCK_SH;
-            break;
-        case LOCK_EX:
-            s->op = LOCK_EX;
-            break;
-        default:
-            s->op = LOCK_UN;  /* should never be reached. */
-            break;
-    }
-}
-
-VALUE
-supplement_do_unflock( VALUE v)
-{
-#ifdef HAVE_HEADER_RUBY_H
-    OpenFile *fptr;
-#else
-    rb_io_t *fptr;
-#endif
-    int fd;
-
-    GetOpenFile( flocks_root->file, fptr);
-#ifdef HAVE_HEADER_RUBY_H
-    flock( fileno( fptr->f), flocks_root->last_op);
-#else
-    flock( fptr->fd, flocks_root->last_op);
-#endif
-    flocks_root = flocks_root->prev;
-
-    return Qnil;
-}
-
-
-/*
- *  call-seq:
  *     umask()             -> int
  *     umask( int)         -> int
  *     umask( int) { ... } -> obj
@@ -1631,7 +1499,6 @@ void Init_supplement( void)
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
-    rb_define_method( rb_cFile, "flockb", rb_file_flockb, -1);
     rb_define_singleton_method( rb_cFile, "umask", rb_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);

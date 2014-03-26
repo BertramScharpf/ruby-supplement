@@ -63,7 +63,6 @@ extern VALUE rb_num_cbrt( VALUE);
 extern VALUE rb_hash_notempty_p( VALUE);
 
 extern VALUE rb_file_size( VALUE);
-extern VALUE rb_file_flockb( int, VALUE *, VALUE);
 extern VALUE rb_file_s_umask( int, VALUE *);
 extern VALUE rb_dir_s_current( VALUE);
 extern VALUE rb_dir_s_mkdir_bang( int, VALUE *);
