@@ -4,7 +4,7 @@
 
 #include "supplement.h"
 
-#include "sync.h"
+#include "process.h"
 
 #if   HAVE_HEADER_ST_H
     #include <st.h>
@@ -1524,6 +1524,6 @@ void Init_supplement( void)
     id_mkdir       = 0;
     id_index       = 0;
 
-    Init_supplement_sync();
+    Init_supplement_process();
 }
 

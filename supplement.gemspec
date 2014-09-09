@@ -25,8 +25,8 @@ EOT
                           lib/Rakefile
                           lib/supplement.c
                           lib/supplement.h
-                          lib/sync.c
-                          lib/sync.h
+                          lib/process.c
+                          lib/process.h
                           lib/supplement/locked.c
                           lib/supplement/locked.h
                           lib/supplement/dir.rb

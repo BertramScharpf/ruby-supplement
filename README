@@ -1,4 +1,4 @@
-= supplement 2.0  --  Useful Ruby enhancements
+= supplement 2.1  --  Useful Ruby enhancements
 
 Some simple Ruby extensions.
 
@@ -39,6 +39,7 @@ Now here it is where I can just point to.
 * Array#notempty?
 * Hash#notempty?
 * Struct.[]
+* Process.renice
 * Interval timer
 * File system stats
 * LockedFile

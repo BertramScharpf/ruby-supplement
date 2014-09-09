@@ -12,7 +12,7 @@ rule ".o" => ".c" do |t|
 end
 
 DLs = {
-  "supplement.so"          => %w(supplement.o sync.o),
+  "supplement.so"          => %w(supplement.o process.o),
   "supplement/locked.so"   => %w(supplement/locked.o),
   "supplement/filesys.so"  => %w(supplement/filesys.o),
   "supplement/itimer.so"   => %w(supplement/itimer.o),
