@@ -806,6 +806,9 @@ rb_num_sqrt( VALUE num)
 VALUE
 rb_num_cbrt( VALUE num)
 {
+#if HAVE_FUNC_CBRT
+    return rb_float_new( cbrt( RFLOAT_VALUE( rb_Float( num))));
+#else
     double n;
     int neg;
     int i;
@@ -826,6 +829,7 @@ rb_num_cbrt( VALUE num)
       n = w;
     }
     return rb_float_new( neg ? -n : n);
+#endif
 }
 
 

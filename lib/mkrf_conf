@@ -39,5 +39,7 @@ Autorake.configure {
     have_function "rb_thread_wait_for"
   end
 
+  have_function "cbrt"
+
 }
 
