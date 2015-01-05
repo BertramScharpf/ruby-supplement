@@ -5,7 +5,7 @@
 
 #include "itimer.h"
 
-#include <math.h>
+#include <sys/time.h>
 
 static void  suppelement_sec_timeval( VALUE, struct timeval *t);
 static VALUE suppelement_timeval_sec( struct timeval *);
