@@ -101,8 +101,8 @@ rb_process_getitimer( VALUE obj)
         rb_raise( rb_eSystemCallError, "getitimer failed.");
 
     r = rb_ary_new3( 2,
-      suppelement_timeval_sec( &it.it_interval),
-      suppelement_timeval_sec( &it.it_value));
+        suppelement_timeval_sec( &it.it_interval),
+        suppelement_timeval_sec( &it.it_value));
     return r;
 }
 

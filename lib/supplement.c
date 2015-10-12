@@ -163,7 +163,7 @@ VALUE
 rb_krn_tap_bang( VALUE obj)
 {
     if (!NIL_P( obj))
-      rb_yield( obj);
+        rb_yield( obj);
     return obj;
 }
 
@@ -524,7 +524,7 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
 #ifdef HAVE_HEADER_RUBY_H
 #else
     if (!rb_str_comparable( str, oth))
-      return Qnil;
+        return Qnil;
 #endif
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
@@ -567,7 +567,7 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
 #ifdef HAVE_HEADER_RUBY_H
 #else
     if (!rb_str_comparable( str, oth))
-      return Qnil;
+        return Qnil;
 #endif
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
@@ -815,18 +815,18 @@ rb_num_cbrt( VALUE num)
 
     n = RFLOAT_VALUE( rb_Float( num));
     if ((neg = n < 0))
-      n = -n;
+        n = -n;
     n = sqrt( sqrt( n));
     i = 2;
     for (;;) {
-      double w = n;
-      int j;
+        double w = n;
+        int j;
 
-      for (j=i;j;--j) w = sqrt( w);
-      i *= 2;
-      w *= n;
-      if (n == w) break;
-      n = w;
+        for (j=i;j;--j) w = sqrt( w);
+        i *= 2;
+        w *= n;
+        if (n == w) break;
+        n = w;
     }
     return rb_float_new( neg ? -n : n);
 #endif
