@@ -71,6 +71,8 @@ extern VALUE rb_dir_entries_bang( VALUE);
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
 
+extern VALUE rb_struct_fields( int, VALUE *, VALUE);
+
 #ifdef FEATURE_THREAD_EXCLUSIVE
 extern VALUE rb_thread_exclusive( void);
 #endif

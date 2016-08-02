@@ -1391,6 +1391,30 @@ rb_match_end( int argc, VALUE *argv, VALUE match)
 }
 
 
+/*
+ *  call-seq:
+ *     fields( ...)   -> ary
+ *
+ *  Returns the values of some fields.
+ *
+ *     S = Struct[ :a, :b, :c]
+ *     s = S[ "A", "B", "C"]
+ *     s.fields( :b, :a)    #=> [ "B", "A"]
+ */
+
+VALUE
+rb_struct_fields( int argc, VALUE *argv, VALUE strct)
+{
+    VALUE ary;
+    int i;
+
+    ary = rb_ary_new2( argc);
+    for (i = 0; i < argc; i++)
+        rb_ary_push( ary, rb_struct_aref( strct, argv[ i]));
+    return ary;
+}
+
+
 #ifdef FEATURE_THREAD_EXCLUSIVE
 
 /*
@@ -1518,6 +1542,8 @@ void Init_supplement( void)
 #endif
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
+    rb_define_method( rb_cStruct, "fields", rb_struct_fields, -1);
+    rb_define_alias(  rb_cStruct, "fetch_values", "fields");
 
     id_delete_at   = rb_intern( "delete_at");
     id_cmp         = rb_intern( "<=>");
