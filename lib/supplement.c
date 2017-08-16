@@ -88,6 +88,8 @@ rb_obj_new_string( VALUE obj)
     VALUE r;
 
     r = rb_obj_as_string( obj);
+    if (OBJ_FROZEN( r))
+        r = rb_str_new_string( r);
     if (rb_block_given_p())
         rb_yield( r);
     return r;
