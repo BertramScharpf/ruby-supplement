@@ -859,6 +859,22 @@ rb_ary_notempty_p( VALUE ary)
 
 /*
  *  call-seq:
+ *     range()    ->  range
+ *
+ *  Returns the range <code>0...size</code>.
+ *
+ *     [ "a", "h", "q"].range   #=> 0...3
+ */
+
+VALUE
+rb_ary_range( VALUE ary)
+{
+    return rb_range_new( INT2FIX( 0), INT2FIX( RARRAY_LEN( ary)), 1);
+}
+
+
+/*
+ *  call-seq:
  *     indexes()  ->  ary
  *     keys()     ->  ary
  *
@@ -1516,6 +1532,7 @@ void Init_supplement( void)
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
     rb_define_method( rb_cArray, "indexes", rb_ary_indexes, 0);
     rb_define_alias(  rb_cArray, "keys", "indexes");
+    rb_define_method( rb_cArray, "range", rb_ary_range, 0);
     rb_define_method( rb_cArray, "pick", rb_ary_pick, -1);
     rb_define_method( rb_cArray, "rpick", rb_ary_rpick, -1);
 #ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
