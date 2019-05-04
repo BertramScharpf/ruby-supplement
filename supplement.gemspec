@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.name              = "supplement"
   (File.read "README") =~ /^=\s.*?(\d+(?:\.\d+)*)/
   s.version           = $1
+  s.license           = "BSD-2-Clause"
   s.summary           = "Simple Ruby extensions"
   s.description       = <<EOT
 Simple methods that didn't manage to become part of standard Ruby.
@@ -17,7 +18,7 @@ EOT
   s.rubyforge_project = "NONE"
 
   s.requirements      = "Ruby and the autorake gem"
-  s.add_dependency      "autorake", ">=2.0"
+  s.add_dependency      "autorake", "~>2"
 
   s.extensions        = "lib/mkrf_conf"
   s.files             = %w(
@@ -42,7 +43,6 @@ EOT
   s.executables       = %w(
                         )
 
-  s.has_rdoc          = true
   s.rdoc_options.concat %w(--charset utf-8 --main README)
   s.extra_rdoc_files  = %w(
                           README
