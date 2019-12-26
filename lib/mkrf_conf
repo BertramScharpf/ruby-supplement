@@ -10,16 +10,19 @@ Autorake.configure {
 
   extending_ruby
 
-  if RUBY_VERSION < "1.9.2" then
-    enable :array_select_bang
-    if RUBY_VERSION < "1.9" then
-      enable :string_ord
-      enable :string_clear
-      if RUBY_VERSION < "1.8.7" then
-        enable :array_index_with_block
-        enable :kernel_tap
-        enable :string_start_with
-        enable :thread_exclusive
+  if RUBY_VERSION < "2.5" then
+    enable :dir_children
+    if RUBY_VERSION < "1.9.2" then
+      enable :array_select_bang
+      if RUBY_VERSION < "1.9" then
+        enable :string_ord
+        enable :string_clear
+        if RUBY_VERSION < "1.8.7" then
+          enable :array_index_with_block
+          enable :kernel_tap
+          enable :string_start_with
+          enable :thread_exclusive
+        end
       end
     end
   end
