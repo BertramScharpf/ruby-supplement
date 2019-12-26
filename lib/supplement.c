@@ -72,14 +72,15 @@ static ID id_index;
 
 /*
  *  call-seq:
- *     new_string     -> str
+ *     new_string                -> str
+ *     new_string { |str| ... }  -> str
  *
  *  Returns another string that may be modified without touching the original
  *  object. This means +dup+ for a string and +to_s+ for any other object.
  *
  *  If a block is given, that may modify a created string (built from a
  *  non-string object). For a dup'ed string object the block will not be
- *  called.
+ *  called (See +String#new_string+).
  */
 
 VALUE
@@ -1229,7 +1230,7 @@ rb_file_s_umask( int argc, VALUE *argv)
 {
     int omask = 0;
 
-    rb_secure( 2);
+    rb_secure( 1);
     switch (argc) {
     case 0:
         omask = umask( 0777);
