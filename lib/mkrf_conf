@@ -10,7 +10,7 @@ Autorake.configure {
 
   extending_ruby
 
-  if RUBY_VERSION < "2.5" then
+  if RUBY_VERSION < "2.6" then
     enable :dir_children
     if RUBY_VERSION < "1.9.2" then
       enable :array_select_bang
