@@ -15,8 +15,6 @@ EOT
   s.email             = "<software@bertram-scharpf.de>"
   s.homepage          = "http://www.bertram-scharpf.de/software/supplement"
 
-  s.rubyforge_project = "NONE"
-
   s.requirements      = "Ruby and the autorake gem"
   s.add_dependency      "autorake", "~>2"
 
