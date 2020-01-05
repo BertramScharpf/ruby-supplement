@@ -36,6 +36,7 @@ EOT
                           lib/supplement/terminal.c
                           lib/supplement/terminal.h
                           lib/supplement/date.rb
+                          lib/supplement/roman.rb
                           examples/teatimer
                         )
   s.executables       = %w(

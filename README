@@ -1,12 +1,26 @@
-= supplement 2.5.2  --  Useful Ruby enhancements
+= supplement 2.6  --  Useful Ruby enhancements
+
 
 Some simple Ruby extensions.
+
+
+== Author
+
+Bertram Scharpf <software@bertram-scharpf.de>
+
+
+== Motivation
+
+The original motivation was my conviction that a language that has a
+Numeric#nonzero? method induces a programming style that as well demands
+for a String#notempty? method.
+
+
 
 == Description
 
 These are methods on standard classes that didn't manage to become part of
-the Ruby interpreter. (Although, some are part of Ruby 1.9/1.8.7 but not
-1.8.6).
+the Ruby interpreter. (Although, some did in the meantime.)
 
 They are all very small, most of them have less than 15 lines of code.
 So they would not be a weight in the Ruby interpreter but it is very
@@ -18,6 +32,8 @@ to make them part of their programming style.
 If you like to get taunted, then go to the Ruby mailing list and propose
 one of them to be included into the Ruby standard.
 
+
+
 == Intention
 
 In my own code I use quite often a method <code>String#notempty?</code>
@@ -27,20 +43,27 @@ the discussion evolves the same every time.
 
 Now here it is where I can just point to.
 
+
+
 == Contents (uncomplete)
 
-* String#notempty?
-* String#clear
-* String#head
-* String#tail
-* String#rest
-* String#start_with?
-* String#end_with?
-* Array#notempty?
-* Hash#notempty?
-* Struct.[]
-* Process.renice
-* Interval timer
-* File system stats
-* LockedFile
+  * String#notempty?
+  * String#clear
+  * String#head
+  * String#tail
+  * String#rest
+  * String#start_with?
+  * String#end_with?
+  * Array#notempty?
+  * Hash#notempty?
+  * Struct.[]
+  * Integer.roman
+  * Date.easter
+  * File system stats
+  * Process.renice
+  * Interval timer
+  * LockedFile
 
+
+
+// vim:set ft=asciidoc :
