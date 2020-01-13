@@ -42,6 +42,28 @@ class Date
 
   end
 
+
+  def workday_after n
+    r = self + n
+    case r.wday
+      when 0 then r += 1
+      when 6 then r += 2
+    end
+    r
+  end
+
+  def quarter
+    (month-1) / 3 + 1
+  end
+
+  def wstart
+    self - wday
+  end
+
+  def cwstart
+    self - (cwday-1)
+  end
+
 end
 
 

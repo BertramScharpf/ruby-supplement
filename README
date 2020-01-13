@@ -1,4 +1,4 @@
-= supplement 2.6  --  Useful Ruby enhancements
+= supplement 2.7  --  Useful Ruby enhancements
 
 
 Some simple Ruby extensions.
@@ -64,6 +64,3 @@ Now here it is where I can just point to.
   * Interval timer
   * LockedFile
 
-
-
-// vim:set ft=asciidoc :
