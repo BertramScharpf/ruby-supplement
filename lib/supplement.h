@@ -17,6 +17,7 @@ extern VALUE rb_obj_new_string( VALUE);
 extern VALUE rb_obj_nil_if( VALUE, VALUE);
 extern VALUE rb_krn_tap( VALUE);
 extern VALUE rb_krn_tap_bang( VALUE);
+extern VALUE rb_krn_with( VALUE);
 
 extern VALUE rb_nil_notempty_p( VALUE);
 extern VALUE rb_nil_each_line( VALUE);

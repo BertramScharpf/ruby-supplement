@@ -173,7 +173,7 @@ rb_krn_tap_bang( VALUE obj)
 
 /*
  *  call-seq:
- *     do_with { |x| ... }    -> obj
+ *     with { |x| ... }    -> obj
  *
  *  Yields +x+ to the block.
  *  This difference to +tap+ is that the block's result will be returned.
@@ -183,7 +183,7 @@ rb_krn_tap_bang( VALUE obj)
  */
 
 VALUE
-rb_krn_do_with( VALUE obj)
+rb_krn_with( VALUE obj)
 {
     return rb_yield( obj);
 }
@@ -1518,7 +1518,7 @@ void Init_supplement( void)
     rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
 #endif
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
-    rb_define_method( rb_mKernel, "do_with", rb_krn_do_with, 0);
+    rb_define_method( rb_mKernel, "with", rb_krn_with, 0);
 
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
