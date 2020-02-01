@@ -20,7 +20,7 @@ DLs = {
 }
 
 DLs.each { |k,v|
-  task k => v do |t|
+  file k => v do |t|
     l.cc t.name, t.prerequisites
   end
 }
