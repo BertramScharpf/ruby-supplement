@@ -64,6 +64,26 @@ class Date
     self - (cwday-1)
   end
 
+  def first_of_month
+    if day == 1 then
+      self
+    else
+      self.class.civil year, month, 1
+    end
+  end
+
+  def months_forward n
+    res = self
+    n.times { res = res.next_month }
+    res
+  end
+
+  def months_backward n
+    res = self
+    n.times { res = res.prev_month }
+    res
+  end
+
 end
 
 
