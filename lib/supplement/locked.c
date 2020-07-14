@@ -42,7 +42,11 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
 #endif
     int op;
 
+#ifdef XFEATURE_SUPER_KWARGS
+    rb_call_super_kw(argc, argv, RB_PASS_CALLED_KEYWORDS);
+#else
     rb_call_super( argc, argv);
+#endif
     GetOpenFile( self, fptr);
 
     op = fptr->mode & FMODE_WRITABLE ? LOCK_EX : LOCK_SH;

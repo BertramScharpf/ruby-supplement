@@ -1244,7 +1244,7 @@ rb_file_size( VALUE obj)
  */
 
 VALUE
-rb_file_s_umask( int argc, VALUE *argv)
+rb_file_s_umask( int argc, VALUE *argv, VALUE file)
 {
     int omask = 0;
 
@@ -1309,7 +1309,7 @@ rb_dir_s_current( VALUE dir)
  */
 
 VALUE
-rb_dir_s_mkdir_bang( int argc, VALUE *argv)
+rb_dir_s_mkdir_bang( int argc, VALUE *argv, VALUE dir)
 {
     VALUE path, modes;
 
@@ -1319,7 +1319,7 @@ rb_dir_s_mkdir_bang( int argc, VALUE *argv)
 
         parent[ 0] = rb_file_dirname( path);
         parent[ 1] = modes;
-        rb_dir_s_mkdir_bang( 2, parent);
+        rb_dir_s_mkdir_bang( 2, parent, dir);
         if (!id_mkdir)
             id_mkdir = rb_intern( "mkdir");
         if (NIL_P(modes))
