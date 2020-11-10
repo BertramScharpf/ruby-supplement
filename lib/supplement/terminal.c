@@ -99,15 +99,15 @@ io_reset( VALUE v)
 
 /*
  *  call-seq:
- *     io.winsize()   -> ary
+ *     io.wingeom()   -> ary
  *
  *  Get the available window space.
  *
- *     cols, rows, xpixel, ypixel = $stdout.winsize
+ *     cols, rows, xpixel, ypixel = $stdout.wingeom
  */
 
 VALUE
-rb_io_winsize( VALUE self)
+rb_io_wingeom( VALUE self)
 {
 #ifndef RUBY_VM
     OpenFile *fptr;
@@ -139,6 +139,6 @@ rb_io_winsize( VALUE self)
 void Init_terminal( void)
 {
     rb_define_method( rb_cIO, "unget", rb_io_unget, -1);
-    rb_define_method( rb_cIO, "winsize", rb_io_winsize, 0);
+    rb_define_method( rb_cIO, "wingeom", rb_io_wingeom, 0);
 }
 

@@ -13,7 +13,7 @@
 
 
 extern VALUE rb_io_unget( int, VALUE *, VALUE);
-extern VALUE rb_io_winsize( VALUE);
+extern VALUE rb_io_wingeom( VALUE);
 
 extern void Init_terminal( void);
 
