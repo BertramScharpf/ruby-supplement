@@ -15,7 +15,9 @@
 
 extern VALUE rb_obj_new_string( VALUE);
 extern VALUE rb_obj_nil_if( VALUE, VALUE);
+#ifdef FEATURE_KERNEL_TAP
 extern VALUE rb_krn_tap( VALUE);
+#endif
 extern VALUE rb_krn_tap_bang( VALUE);
 extern VALUE rb_krn_with( VALUE);
 
