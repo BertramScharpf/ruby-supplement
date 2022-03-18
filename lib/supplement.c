@@ -1248,7 +1248,6 @@ rb_file_s_umask( int argc, VALUE *argv, VALUE file)
 {
     int omask = 0;
 
-    rb_secure( 1);
     switch (argc) {
     case 0:
         omask = umask( 0777);

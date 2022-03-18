@@ -40,7 +40,6 @@ rb_process_renice( int argc, VALUE *argv, VALUE obj)
     else
         pid = NUM2INT( p1), prio = NUM2INT( p2);
 
-    rb_secure(1);
     if (setpriority( PRIO_PROCESS, pid, prio) < 0)
         rb_sys_fail(0);
 
