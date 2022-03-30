@@ -8,9 +8,9 @@ Gem::Specification.new do |s|
   s.version           = $1
   s.license           = "BSD-2-Clause"
   s.summary           = "Simple Ruby extensions"
-  s.description       = <<EOT
-Simple methods that didn't manage to become part of standard Ruby.
-EOT
+  s.description       = <<~EOT
+                          Simple methods that didn't manage to become part of standard Ruby.
+                        EOT
   s.authors           = [ "Bertram Scharpf"]
   s.email             = "<software@bertram-scharpf.de>"
   s.homepage          = "http://www.bertram-scharpf.de/software/supplement"
