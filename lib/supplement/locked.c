@@ -59,8 +59,8 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
         static ID id_lock_failed = 0;
 
         switch (errno) {
-	case EINTR:
-	    break;
+        case EINTR:
+            break;
         case EAGAIN:
         case EACCES:
 #if defined( EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
