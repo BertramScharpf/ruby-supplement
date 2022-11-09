@@ -667,8 +667,8 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
         e = rb_str_strlen( ell);
 #endif
         if (newlen > e) {
-          ret = rb_str_substr( str, 0, newlen - e);
-          rb_str_append( ret, ell);
+            ret = rb_str_substr( str, 0, newlen - e);
+            rb_str_append( ret, ell);
         } else
             ret = rb_str_substr( str, 0, newlen);
         OBJ_INFECT( ret, str);
