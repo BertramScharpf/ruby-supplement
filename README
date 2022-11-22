@@ -1,4 +1,4 @@
-= supplement 2.13  --  Useful Ruby enhancements
+= supplement 2.14  --  Useful Ruby enhancements
 
 
 Some simple Ruby extensions.
@@ -59,6 +59,7 @@ Now here it is where I can just point to.
   * Struct.[]
   * Integer.roman
   * Date.easter
+  * TCPServer.accept with a code block
   * File system stats
   * Process.renice
   * Interval timer

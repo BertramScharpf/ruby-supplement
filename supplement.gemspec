@@ -35,6 +35,8 @@ Gem::Specification.new do |s|
                           lib/supplement/itimer.h
                           lib/supplement/terminal.c
                           lib/supplement/terminal.h
+                          lib/supplement/socket.c
+                          lib/supplement/socket.h
                           lib/supplement/date.rb
                           lib/supplement/roman.rb
                           examples/teatimer
