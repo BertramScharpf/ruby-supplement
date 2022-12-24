@@ -354,7 +354,6 @@ rb_fsstat_inspect( VALUE self)
         rb_str_append( str, rb_inspect( (*member[i].func)( self)));
     }
     rb_str_buf_cat2( str, ">");
-    OBJ_INFECT( str, self);
 
     return str;
 }

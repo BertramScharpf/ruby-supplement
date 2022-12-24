@@ -328,7 +328,6 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
         val = rb_str_new5( str, RSTRING_PTR( str) + r, -n);
     }
     RSTRING_LEN( str) = r;
-    OBJ_INFECT( val, str);
 #else
     if (n > 0) {
         r = 0;
@@ -671,7 +670,6 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
             rb_str_append( ret, ell);
         } else
             ret = rb_str_substr( str, 0, newlen);
-        OBJ_INFECT( ret, str);
     } else
         ret = str;
     return ret;
