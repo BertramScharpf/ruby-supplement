@@ -1187,6 +1187,9 @@ rb_hash_notempty_p( VALUE hash)
  *  Document-class: File
  */
 
+
+#ifdef FEATURE_FILE_SIZE
+
 /*
  *  call-seq:
  *     size   -> integer
@@ -1220,6 +1223,8 @@ rb_file_size( VALUE obj)
 #endif
     return INT2FIX( st.st_size);
 }
+
+#endif
 
 
 /*
@@ -1566,7 +1571,9 @@ void Init_supplement( void)
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
+#ifdef FEATURE_FILE_SIZE
     rb_define_method( rb_cFile, "size", rb_file_size, 0);
+#endif
     rb_define_singleton_method( rb_cFile, "umask", rb_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);

@@ -15,6 +15,7 @@ Autorake.configure {
       enable :dir_children
       if RUBY_VERSION < "1.9.2" then
         enable :array_select_bang
+        enable :file_size
         if RUBY_VERSION < "1.9" then
           enable :string_ord
           enable :string_clear

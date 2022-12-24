@@ -66,7 +66,9 @@ extern VALUE rb_num_cbrt( VALUE);
 
 extern VALUE rb_hash_notempty_p( VALUE);
 
+#ifdef FEATURE_FILE_SIZE
 extern VALUE rb_file_size( VALUE);
+#endif
 extern VALUE rb_file_s_umask( int, VALUE *, VALUE);
 extern VALUE rb_dir_s_current( VALUE);
 extern VALUE rb_dir_s_mkdir_bang( int, VALUE *, VALUE);
