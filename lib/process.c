@@ -19,6 +19,7 @@
 
 static VALUE rb_process_renice( int argc, VALUE *argv, VALUE obj);
 static VALUE rb_process_sync( VALUE obj);
+static VALUE rb_process_alarm( int argc, VALUE *argv, VALUE obj);
 
 
 /*
@@ -62,9 +63,43 @@ rb_process_sync( VALUE obj)
 }
 
 
+/*
+ *  call-seq:
+ *     Process.alarm( seconds = nil) -> nil
+ *
+ * Set alarm. Examples:
+ *
+ *     Signal.trap :ALRM do
+ *         puts "Three seconds have passed."
+ *     end
+ *     Process.alarm 3
+ *     sleep 4
+ *
+ *     begin
+ *         Process.alarm 3
+ *         sleep
+ *     rescue SignalException
+ *         $!.signm == "SIGALRM" or raise
+ *         puts "Three seconds have passed."
+ *     end
+ */
+
+VALUE
+rb_process_alarm( int argc, VALUE *argv, VALUE obj)
+{
+    VALUE p;
+    unsigned int s;
+
+    s = rb_scan_args( argc, argv, "01", &p) == 1 ? NUM2INT( p) : 0;
+    s = alarm( s);
+    return s ? INT2NUM( s) : Qnil;
+}
+
+
 void Init_supplement_process( void)
 {
     rb_define_singleton_method( rb_mProcess, "renice", rb_process_renice, -1);
     rb_define_singleton_method( rb_mProcess, "sync", rb_process_sync, 0);
+    rb_define_singleton_method( rb_mProcess, "alarm", rb_process_alarm, -1);
 }
 
