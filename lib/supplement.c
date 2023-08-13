@@ -1513,7 +1513,6 @@ bsruby_set_thread_critical( VALUE c)
 
 void Init_supplement( void)
 {
-    rb_define_alias(  rb_cObject, "cls", "class");
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
     rb_define_method( rb_cObject, "nil_if", rb_obj_nil_if, 1);
 #ifdef FEATURE_KERNEL_TAP
