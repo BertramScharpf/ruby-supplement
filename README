@@ -59,7 +59,7 @@ Now here it is where I can just point to.
   * Struct.[]
   * Integer.roman
   * Date.easter
-  * TCPServer.accept with a code block
+  * TCPServer/UNIXServer.accept with a code block
   * File system stats
   * Process.renice
   * Interval timer

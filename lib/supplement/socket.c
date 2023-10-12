@@ -40,14 +40,18 @@ socket_close( VALUE v)
 void Init_socket( void)
 {
     VALUE rb_cTCPServer;
+    VALUE rb_cUNIXServer;
 
     id_accept_orig = rb_intern( "accept_orig");
     id_close = rb_intern( "close");
 
     rb_require( "socket");
-    rb_cTCPServer = rb_const_get( rb_cObject, rb_intern( "TCPServer"));
+    rb_cTCPServer  = rb_const_get( rb_cObject, rb_intern( "TCPServer"));
+    rb_cUNIXServer = rb_const_get( rb_cObject, rb_intern( "UNIXServer"));
 
-    rb_define_alias( rb_cTCPServer, "accept_orig", "accept");
-    rb_define_method( rb_cTCPServer, "accept", rb_socket_accept, 0);
+    rb_define_alias( rb_cTCPServer,  "accept_orig", "accept");
+    rb_define_method( rb_cTCPServer,  "accept", rb_socket_accept, 0);
+    rb_define_alias( rb_cUNIXServer, "accept_orig", "accept");
+    rb_define_method( rb_cUNIXServer, "accept", rb_socket_accept, 0);
 }
 
