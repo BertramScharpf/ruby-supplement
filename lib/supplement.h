@@ -83,6 +83,9 @@ extern VALUE rb_thread_exclusive( void);
 
 extern VALUE rb_struct_fields( int, VALUE *, VALUE);
 
+extern VALUE rb_nil_to_bool( VALUE);
+extern VALUE rb_obj_to_bool( VALUE);
+
 extern void Init_supplement( void);
 
 #endif

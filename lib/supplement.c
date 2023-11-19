@@ -1511,6 +1511,32 @@ bsruby_set_thread_critical( VALUE c)
  */
 
 
+
+/*
+ *  Document-class: Object
+ */
+
+/*
+ *  call-seq:
+ *     to_bool -> true
+ *
+ *  Returns true for anything but +nil+ and +false+.
+ */
+
+VALUE
+rb_nil_to_bool( VALUE obj)
+{
+    return Qfalse;
+}
+
+VALUE
+rb_obj_to_bool( VALUE obj)
+{
+    return Qtrue;
+}
+
+
+
 void Init_supplement( void)
 {
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
@@ -1593,6 +1619,10 @@ void Init_supplement( void)
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
     rb_define_method( rb_cStruct, "fields", rb_struct_fields, -1);
     rb_define_alias(  rb_cStruct, "fetch_values", "fields");
+
+    rb_define_method( rb_cNilClass, "to_bool", rb_nil_to_bool, 0);
+    rb_define_method( rb_cFalseClass, "to_bool", rb_nil_to_bool, 0);
+    rb_define_method( rb_cObject, "to_bool", rb_obj_to_bool, 0);
 
     id_delete_at   = rb_intern( "delete_at");
     id_cmp         = rb_intern( "<=>");
