@@ -45,6 +45,12 @@ extern VALUE rb_str_ord( VALUE);
 #endif
 extern VALUE rb_str_axe( int, VALUE *, VALUE);
 
+extern VALUE rb_num_pos_p( VALUE);
+extern VALUE rb_num_neg_p( VALUE);
+extern VALUE rb_num_grammatical( VALUE, VALUE, VALUE);
+extern VALUE rb_num_sqrt( VALUE);
+extern VALUE rb_num_cbrt( VALUE);
+
 extern VALUE rb_ary_notempty_p( VALUE);
 extern VALUE rb_ary_indexes( VALUE);
 extern VALUE rb_ary_range( VALUE);
@@ -57,12 +63,6 @@ extern VALUE rb_ary_rindex( int, VALUE *, VALUE);
 #ifdef FEATURE_ARRAY_SELECT_BANG
 extern VALUE rb_ary_select_bang( VALUE);
 #endif
-
-extern VALUE rb_num_pos_p( VALUE);
-extern VALUE rb_num_neg_p( VALUE);
-extern VALUE rb_num_grammatical( VALUE, VALUE, VALUE);
-extern VALUE rb_num_sqrt( VALUE);
-extern VALUE rb_num_cbrt( VALUE);
 
 extern VALUE rb_hash_notempty_p( VALUE);
 
@@ -77,11 +77,11 @@ extern VALUE rb_dir_children( VALUE);
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);
 
-extern VALUE rb_struct_fields( int, VALUE *, VALUE);
-
 #ifdef FEATURE_THREAD_EXCLUSIVE
 extern VALUE rb_thread_exclusive( void);
 #endif
+
+extern VALUE rb_struct_fields( int, VALUE *, VALUE);
 
 extern void Init_supplement( void);
 
