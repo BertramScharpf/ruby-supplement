@@ -1292,7 +1292,8 @@ supplement_do_unumask( VALUE v)
 VALUE
 rb_dir_s_current( VALUE dir)
 {
-    return rb_funcall( dir, rb_intern( "new"), 1, rb_str_new( ".", 1));
+    VALUE dot = rb_str_new( ".", 1);
+    return rb_funcall_passing_block( dir, rb_intern( "open"), 1, &dot);
 }
 
 
