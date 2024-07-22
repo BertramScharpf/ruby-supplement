@@ -16,36 +16,18 @@ Autorake.configure {
       if RUBY_VERSION < "1.9.2" then
         enable :array_select_bang
         enable :file_size
-        if RUBY_VERSION < "1.9" then
-          enable :string_ord
-          enable :string_clear
-          if RUBY_VERSION < "1.8.7" then
-            enable :array_index_with_block
-            enable :kernel_tap
-            enable :string_start_with
-            enable :thread_exclusive
-          end
-        end
       end
     end
   else
     enable :super_kwargs
   end
 
-  if RUBY_VERSION < "1.9" then
-    have_header "ruby.h"
-    have_header "st.h"
-    have_header "rubyio.h"
-    have_header "re.h"
-    have_header "rubysig.h"
-  else
-    have_header "ruby/ruby.h"
-    have_header "ruby/st.h"
-    have_header "ruby/io.h"
-    have_header "ruby/re.h"
+  have_header "ruby/ruby.h"
+  have_header "ruby/st.h"
+  have_header "ruby/io.h"
+  have_header "ruby/re.h"
 
-    have_function "rb_thread_wait_for"
-  end
+  have_function "rb_thread_wait_for"
 
   have_function "cbrt"
 

@@ -5,11 +5,7 @@
 
 #include "process.h"
 
-#if   HAVE_HEADER_RUBY_H
-    #include <ruby.h>
-#elif HAVE_HEADER_RUBY_RUBY_H
-    #include <ruby/ruby.h>
-#endif
+#include <ruby/ruby.h>
 
 #include <sys/time.h>
 #include <sys/resource.h>

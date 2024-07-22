@@ -6,33 +6,14 @@
 
 #include "process.h"
 
-#if   HAVE_HEADER_ST_H
-    #include <st.h>
-#elif HAVE_HEADER_RUBY_ST_H
-    #include <ruby/st.h>
-#endif
-#if   HAVE_HEADER_RUBYIO_H
-    #include <rubyio.h>
-#elif HAVE_HEADER_RUBY_IO_H
-    #include <ruby/io.h>
-#endif
-#if   HAVE_HEADER_RE_H
-    #include <re.h>
-#elif HAVE_HEADER_RUBY_RE_H
-    #include <ruby/re.h>
-#endif
+#include <ruby/st.h>
+#include <ruby/io.h>
+#include <ruby/re.h>
 
 #ifdef FEATURE_THREAD_EXCLUSIVE
 #ifdef HAVE_HEADER_RUBYSIG_H
 #include <rubysig.h>
 #endif
-#endif
-
-
-#ifdef HAVE_HEADER_RUBY_H
-    /* Oh what a bug! */
-    #define R_MATCH( obj) RMATCH( obj)
-#else
 #endif
 
 
@@ -328,11 +309,7 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     int l;
     int r;
 
-#ifdef HAVE_HEADER_RUBY_H
-    n = l = RSTRING_LEN( str);
-#else
     n = l = rb_str_strlen( str);
-#endif
     if (rb_scan_args( argc, argv, "01", &val) == 1) {
         if (!NIL_P( val)) {
             int v = NUM2INT( val);
@@ -345,17 +322,6 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
         }
     }
     rb_str_modify( str);
-#ifdef HAVE_HEADER_RUBY_H
-    if (n > 0) {
-        r = l - n;
-        val = rb_str_new5( str, RSTRING_PTR( str), n);
-        memmove( RSTRING_PTR( str), RSTRING_PTR( str) + n, r);
-    } else {
-        r = l + n;
-        val = rb_str_new5( str, RSTRING_PTR( str) + r, -n);
-    }
-    RSTRING_LEN( str) = r;
-#else
     if (n > 0) {
         r = 0;
     } else if (n < 0) {
@@ -366,7 +332,6 @@ rb_str_eat( int argc, VALUE *argv, VALUE str)
     val = rb_str_substr( str, r, n);
     if (!NIL_P(val))
         rb_str_update( str, r, n, rb_str_new( NULL, 0));
-#endif
     return val;
 }
 
@@ -388,27 +353,17 @@ VALUE
 rb_str_cut_bang( VALUE str, VALUE len)
 {
     int l;
-#ifdef HAVE_HEADER_RUBY_H
-#else
     int n;
-#endif
 
     rb_str_modify( str);
     l = NUM2INT( len);
     if (l < 0)
         l = 0;
-#ifdef HAVE_HEADER_RUBY_H
-    if (l < RSTRING_LEN( str)) {
-        RSTRING_LEN( str) = l;
-        return str;
-    }
-#else
     n = rb_str_strlen( str);
     if (l < n) {
         rb_str_update( str, l, n - l, rb_str_new( NULL, 0));
         return str;
     }
-#endif
     return Qnil;
 }
 
@@ -476,11 +431,7 @@ rb_str_rest( int argc, VALUE *argv, VALUE str)
     beg = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
     if (beg < 0)
         beg = 0;
-#ifdef HAVE_HEADER_RUBY_H
-    l = RSTRING_LEN( str);
-#else
     l = rb_str_strlen( str);
-#endif
     return rb_str_substr( str, beg, l - beg);
 }
 
@@ -501,11 +452,7 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
     long l, beg, len;
 
     len = rb_scan_args( argc, argv, "01", &n) == 1 ? NUM2LONG( n) : 1;
-#ifdef HAVE_HEADER_RUBY_H
-    l = RSTRING_LEN( str);
-#else
     l = rb_str_strlen( str);
-#endif
     beg = l - len;
     if (beg < 0)
         beg = 0, len = l;
@@ -568,11 +515,8 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-#ifdef HAVE_HEADER_RUBY_H
-#else
     if (!rb_str_comparable( str, oth))
         return Qnil;
-#endif
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
@@ -583,11 +527,7 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
         if (*s != *o)
             return Qnil;
     }
-#ifdef HAVE_HEADER_RUBY_H
-    return INT2FIX( RSTRING_LEN( ost));
-#else
     return INT2FIX( rb_str_strlen( ost));
-#endif
 }
 
 
@@ -611,11 +551,8 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-#ifdef HAVE_HEADER_RUBY_H
-#else
     if (!rb_str_comparable( str, oth))
         return Qnil;
-#endif
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
@@ -625,11 +562,7 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     for (; i; i--)
         if (*--s != *--o)
             return Qnil;
-#ifdef HAVE_HEADER_RUBY_H
-    return INT2FIX( RSTRING_LEN( str) - RSTRING_LEN( ost));
-#else
     return INT2FIX( rb_str_strlen( str) - rb_str_strlen( ost));
-#endif
 }
 
 #ifdef FEATURE_STRING_ORD
@@ -677,21 +610,13 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
     if (newlen < 0)
         return Qnil;
 
-#ifdef HAVE_HEADER_RUBY_H
-    oldlen = RSTRING_LEN( str);
-#else
     oldlen = rb_str_strlen( str);
-#endif
     if (newlen < oldlen) {
         VALUE ell;
         long e;
 
         ell = rb_str_new2( "...");
-#ifdef HAVE_HEADER_RUBY_H
-        e = RSTRING_LEN( ell);
-#else
         e = rb_str_strlen( ell);
-#endif
         if (newlen > e) {
             ret = rb_str_substr( str, 0, newlen - e);
             rb_str_append( ret, ell);
@@ -1231,23 +1156,13 @@ rb_hash_notempty_p( VALUE hash)
 VALUE
 rb_file_size( VALUE obj)
 {
-#ifdef HAVE_HEADER_RUBY_H
-    OpenFile *fptr;
-#else
     rb_io_t *fptr;
-#endif
     struct stat st;
 
     GetOpenFile( obj, fptr);
-#ifdef HAVE_HEADER_RUBY_H
-    if (fstat( fileno( fptr->f), &st) == -1) {
-        rb_sys_fail( fptr->path);
-    }
-#else
     if (fstat( fptr->fd, &st) == -1) {
         rb_sys_fail_str( fptr->pathv);
     }
-#endif
     return INT2FIX( st.st_size);
 }
 

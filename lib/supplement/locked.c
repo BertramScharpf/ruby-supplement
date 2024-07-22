@@ -4,11 +4,7 @@
 
 #include "locked.h"
 
-#if   HAVE_HEADER_RUBYIO_H
-    #include <rubyio.h>
-#elif HAVE_HEADER_RUBY_IO_H
-    #include <ruby/io.h>
-#endif
+#include <ruby/io.h>
 
 #include <sys/file.h>
 
@@ -32,11 +28,7 @@
 VALUE
 rb_locked_init( int argc, VALUE *argv, VALUE self)
 {
-#ifdef HAVE_HEADER_RUBY_H
-    OpenFile *fptr;
-#else
     rb_io_t *fptr;
-#endif
 #ifdef HAVE_FUNC_RB_THREAD_WAIT_FOR
     struct timeval time;
 #endif
@@ -51,11 +43,7 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
 
     op = fptr->mode & FMODE_WRITABLE ? LOCK_EX : LOCK_SH;
     op |= LOCK_NB;
-#ifdef HAVE_HEADER_RUBY_H
-    while (flock( fileno( fptr->f), op) < 0) {
-#else
     while (flock( fptr->fd, op) < 0) {
-#endif
         static ID id_lock_failed = 0;
 
         switch (errno) {
@@ -81,11 +69,7 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
             }
             break;
         default:
-#ifdef HAVE_HEADER_RUBY_H
-            rb_sys_fail( fptr->path);
-#else
             rb_sys_fail_str( fptr->pathv);
-#endif
             break;
         }
     }
@@ -103,18 +87,10 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
 VALUE
 rb_locked_close( VALUE self)
 {
-#ifdef HAVE_HEADER_RUBY_H
-    OpenFile *fptr;
-#else
     rb_io_t *fptr;
-#endif
 
     GetOpenFile( self, fptr);
-#ifdef HAVE_HEADER_RUBY_H
-    flock( fileno( fptr->f), LOCK_UN);
-#else
     flock( fptr->fd, LOCK_UN);
-#endif
     rb_call_super( 0, NULL);
     return Qnil;
 }

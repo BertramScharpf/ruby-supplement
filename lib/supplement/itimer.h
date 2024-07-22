@@ -5,11 +5,7 @@
 #ifndef __SUPPLEMENT_ITIMER_H__
 #define __SUPPLEMENT_ITIMER_H__
 
-#if   HAVE_HEADER_RUBY_H
-    #include <ruby.h>
-#elif HAVE_HEADER_RUBY_RUBY_H
-    #include <ruby/ruby.h>
-#endif
+#include <ruby/ruby.h>
 
 
 extern VALUE rb_process_setitimer( int, VALUE *, VALUE);

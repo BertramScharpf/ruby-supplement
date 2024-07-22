@@ -4,11 +4,7 @@
 
 #include "terminal.h"
 
-#if   HAVE_HEADER_RUBYIO_H
-    #include <rubyio.h>
-#elif HAVE_HEADER_RUBY_IO_H
-    #include <ruby/io.h>
-#endif
+#include <ruby/io.h>
 
 #include <sys/ioctl.h>
 #include <termios.h>
