@@ -17,11 +17,7 @@ static VALUE io_unget( VALUE);
 static VALUE io_reset( VALUE);
 
 
-#ifndef RUBY_VM
-  #define RB_SYS_FAIL( fptr)     rb_sys_fail( ((OpenFile *) fptr)->path);
-#else
-  #define RB_SYS_FAIL( fptr)     rb_sys_fail_str( ((rb_io_t *) fptr)->pathv);
-#endif
+#define RB_SYS_FAIL( fptr)     rb_sys_fail_str( ((rb_io_t *) fptr)->pathv);
 
 /*
  *  call-seq:
@@ -35,21 +31,13 @@ static VALUE io_reset( VALUE);
 VALUE
 rb_io_unget( int argc, VALUE *argv, VALUE io)
 {
-#ifndef RUBY_VM
-    OpenFile *fptr;
-#else
     rb_io_t *fptr;
-#endif
     int fd;
     struct termios oldtio, newtio;
     void *v[5];
 
     GetOpenFile( io, fptr);
-#ifndef RUBY_VM
-    fd = fileno( fptr->f);
-#else
     fd = fptr->fd;
-#endif
 
     if (tcgetattr( fd, &oldtio) < 0)
         RB_SYS_FAIL( fptr);
@@ -109,21 +97,13 @@ io_reset( VALUE v)
 VALUE
 rb_io_wingeom( VALUE self)
 {
-#ifndef RUBY_VM
-    OpenFile *fptr;
-#else
     rb_io_t *fptr;
-#endif
     int fd;
     struct winsize w;
     VALUE r;
 
     GetOpenFile( self, fptr);
-#ifndef RUBY_VM
-    fd = fileno( fptr->f);
-#else
     fd = fptr->fd;
-#endif
 
     if (ioctl( fd, TIOCGWINSZ, &w) < 0)
         RB_SYS_FAIL( fptr);
