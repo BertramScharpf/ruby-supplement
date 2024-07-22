@@ -17,7 +17,7 @@ static VALUE io_unget( VALUE);
 static VALUE io_reset( VALUE);
 
 
-#define RB_SYS_FAIL( fptr)     rb_sys_fail_str( ((rb_io_t *) fptr)->pathv);
+#define RB_SYS_FAIL( io)     rb_sys_fail_str( rb_io_path( io));
 
 /*
  *  call-seq:
@@ -31,22 +31,20 @@ static VALUE io_reset( VALUE);
 VALUE
 rb_io_unget( int argc, VALUE *argv, VALUE io)
 {
-    rb_io_t *fptr;
     int fd;
     struct termios oldtio, newtio;
     void *v[5];
 
-    GetOpenFile( io, fptr);
-    fd = fptr->fd;
+    fd = rb_io_descriptor( io);
 
     if (tcgetattr( fd, &oldtio) < 0)
-        RB_SYS_FAIL( fptr);
+        RB_SYS_FAIL( io);
     newtio = oldtio;
     newtio.c_iflag &= ~ICRNL;
     if (tcsetattr( fd, TCSANOW, &newtio) < 0)
-        RB_SYS_FAIL( fptr);
+        RB_SYS_FAIL( io);
 
-    v[0] = &fd, v[1] = fptr, v[2] = &oldtio,
+    v[0] = &fd, v[1] = (void *) io, v[2] = &oldtio,
         v[3] = &argc, v[4] = (void *) argv;
     return rb_ensure( io_unget, (VALUE) v, io_reset, (VALUE) v);
 }
@@ -68,7 +66,7 @@ io_unget( VALUE v)
         p = RSTRING_PTR(str);
         for (i = RSTRING_LEN(str); i; --i, ++p)
             if (ioctl( *(int *) vp[0], TIOCSTI, p) < 0)
-                RB_SYS_FAIL( vp[1]);
+                RB_SYS_FAIL( (VALUE) vp[1]);
     }
     return Qnil;
 }
@@ -79,7 +77,7 @@ io_reset( VALUE v)
     void **vp = (void **) v;
 
     if (tcsetattr( *(int *) vp[0], TCSANOW, (struct termios *) vp[2]) < 0)
-        RB_SYS_FAIL( vp[1]);
+        RB_SYS_FAIL( (VALUE) vp[1]);
 
     return Qnil;
 }
@@ -97,16 +95,14 @@ io_reset( VALUE v)
 VALUE
 rb_io_wingeom( VALUE self)
 {
-    rb_io_t *fptr;
     int fd;
     struct winsize w;
     VALUE r;
 
-    GetOpenFile( self, fptr);
-    fd = fptr->fd;
+    fd = rb_io_descriptor( self);
 
     if (ioctl( fd, TIOCGWINSZ, &w) < 0)
-        RB_SYS_FAIL( fptr);
+        RB_SYS_FAIL( self);
     r = rb_ary_new2( 4);
     rb_ary_store( r, 0, INT2NUM( w.ws_col));
     rb_ary_store( r, 1, INT2NUM( w.ws_row));
