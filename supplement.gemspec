@@ -15,8 +15,11 @@ Gem::Specification.new do |s|
   s.email             = "<software@bertram-scharpf.de>"
   s.homepage          = "http://www.bertram-scharpf.de/software/supplement"
 
+  s.required_ruby_version = Gem::Requirement.new ">= 2.0.0"
+
   s.requirements      = "Ruby and the autorake gem"
-  s.add_dependency      "autorake", "~>2"
+  s.add_dependency      "rake", "~>13.0"
+  s.add_dependency      "autorake", "~>2.18"
 
   s.extensions        = "lib/mkrf_conf"
   s.files             = %w(
