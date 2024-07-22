@@ -190,6 +190,33 @@ rb_krn_with( VALUE obj)
 
 
 /*
+ *  Document-class: Module
+ */
+
+/*
+ *  call-seq:
+ *     plain_name   -> str
+ *
+ *  The last part of a `::`-separated Module name path.
+ */
+
+VALUE
+rb_module_plain_name( VALUE cls)
+{
+    VALUE n;
+    VALUE i;
+
+    n = rb_str_dup( rb_funcall( cls, rb_intern( "name"), 0));
+    i = rb_funcall( n, rb_intern( "rindex"), 1, rb_str_new( "::", 2));
+    if (!NIL_P( i)) {
+        i = rb_funcall( i, rb_intern( "+"), 1, INT2FIX( 2));
+        rb_funcall( n, rb_intern( "slice!"), 2, INT2FIX( 0), i);
+    }
+    return n;
+}
+
+
+/*
  *  Document-class: NilClass
  */
 
@@ -1229,9 +1256,9 @@ rb_file_size( VALUE obj)
 
 /*
  *  call-seq:
- *     umask()             -> int
- *     umask( int)         -> int
- *     umask( int) { ... } -> obj
+ *     File.umask()             -> int
+ *     File.umask( int)         -> int
+ *     File.umask( int) { ... } -> obj
  *
  *  Returns the current umask value for this process.  If the optional
  *  argument is given, set the umask to that value and return the
@@ -1283,7 +1310,7 @@ supplement_do_unumask( VALUE v)
 
 /*
  *  call-seq:
- *     current()   -> dir
+ *     Dir.current()   -> dir
  *
  *  Current directory as a Dir object.
  *
@@ -1298,7 +1325,7 @@ rb_dir_s_current( VALUE dir)
 
 /*
  *  call-seq:
- *     mkdir!( path, modes = nil)   -> str or nil
+ *     Dir.mkdir!( path, modes = nil)   -> str or nil
  *
  *  Make a directory and all subdirectories if needed.
  *
@@ -1546,6 +1573,8 @@ void Init_supplement( void)
 #endif
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
     rb_define_method( rb_mKernel, "with", rb_krn_with, 0);
+
+    rb_define_method( rb_cModule, "plain_name", rb_module_plain_name, 0);
 
     rb_define_method( rb_cNilClass, "notempty?", rb_nil_notempty_p, 0);
     rb_define_method( rb_cNilClass, "nonzero?", rb_nil_notempty_p, 0);
