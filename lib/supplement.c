@@ -25,10 +25,6 @@ static VALUE supplement_rindex_ref( VALUE, VALUE);
 static VALUE supplement_index_val( VALUE, VALUE);
 static VALUE supplement_rindex_val( VALUE, VALUE);
 #endif
-#ifdef FEATURE_ARRAY_SELECT_BANG
-static VALUE supplement_reject( VALUE);
-static VALUE supplement_invert_yield( VALUE);
-#endif
 static VALUE supplement_do_unumask( VALUE);
 #ifdef FEATURE_THREAD_EXCLUSIVE
 static VALUE bsruby_set_thread_critical( VALUE);
@@ -39,9 +35,6 @@ static VALUE bsruby_set_thread_critical( VALUE);
 static ID id_delete_at;
 static ID id_cmp;
 static ID id_eqq;
-#ifdef FEATURE_ARRAY_SELECT_BANG
-static ID id_reject_bang;
-#endif
 static ID id_mkdir;
 static ID id_index;
 
@@ -1076,42 +1069,6 @@ supplement_rindex_val( VALUE ary, VALUE val)
 
 #endif
 
-#ifdef FEATURE_ARRAY_SELECT_BANG
-
-/*
- *  Document-method: select!
- *
- *  call-seq:
- *     select! { |x| ... }   -> ary
- *
- *  Remove all items for that the block returns +nil+ or +false+.
- *
- */
-
-VALUE
-rb_ary_select_bang( VALUE self)
-{
-    return rb_iterate( &supplement_reject, self,
-                                &supplement_invert_yield, Qnil);
-}
-
-VALUE
-supplement_reject( VALUE obj)
-{
-    if (!id_reject_bang)
-        id_reject_bang = rb_intern( "reject!");
-    return rb_funcall( obj, id_reject_bang, 0);
-}
-
-VALUE
-supplement_invert_yield( VALUE elem)
-{
-    return NIL_P( rb_yield( elem)) ? Qtrue : Qfalse;
-}
-
-#endif
-
-
 
 /*
  *  Document-class: Hash
@@ -1138,36 +1095,6 @@ rb_hash_notempty_p( VALUE hash)
 /*
  *  Document-class: File
  */
-
-
-#ifdef FEATURE_FILE_SIZE
-
-/*
- *  call-seq:
- *     size   -> integer
- *
- *  Returns <code>file</code>'s size. A shortcut for
- *  <code>file.stat.size</code>. This constitutes consistency with
- *  <code>StringIO</code>.
- *
- *     file.size     #=> 16384
- */
-
-VALUE
-rb_file_size( VALUE obj)
-{
-    rb_io_t *fptr;
-    struct stat st;
-
-    GetOpenFile( obj, fptr);
-    if (fstat( fptr->fd, &st) == -1) {
-        rb_sys_fail_str( fptr->pathv);
-    }
-    return INT2FIX( st.st_size);
-}
-
-#endif
-
 
 /*
  *  call-seq:
@@ -1534,15 +1461,9 @@ void Init_supplement( void)
     rb_define_method( rb_cArray, "index", rb_ary_index, -1);
     rb_define_method( rb_cArray, "rindex", rb_ary_rindex, -1);
 #endif
-#ifdef FEATURE_ARRAY_SELECT_BANG
-    rb_define_method( rb_cArray, "select!", rb_ary_select_bang, 0);
-#endif
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
-#ifdef FEATURE_FILE_SIZE
-    rb_define_method( rb_cFile, "size", rb_file_size, 0);
-#endif
     rb_define_singleton_method( rb_cFile, "umask", rb_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
@@ -1571,9 +1492,6 @@ void Init_supplement( void)
     id_delete_at   = rb_intern( "delete_at");
     id_cmp         = rb_intern( "<=>");
     id_eqq         = 0;
-#ifdef FEATURE_ARRAY_SELECT_BANG
-    id_reject_bang = 0;
-#endif
     id_mkdir       = 0;
     id_index       = 0;
 
