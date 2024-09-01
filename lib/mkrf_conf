@@ -10,12 +10,15 @@ Autorake.configure {
 
   extending_ruby
 
-  if RUBY_VERSION < "2.7" then
-    if RUBY_VERSION < "2.6" then
-      enable :dir_children
+  if RUBY_VERSION < "3.3" then
+    if RUBY_VERSION < "2.7" then
+      if RUBY_VERSION < "2.6" then
+        enable :dir_children
+      end
+    else
+      enable :super_kwargs
     end
-  else
-    enable :super_kwargs
+    enable :old_io_functions
   end
 
   have_header "ruby/ruby.h"

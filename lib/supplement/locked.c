@@ -28,10 +28,17 @@
 VALUE
 rb_locked_init( int argc, VALUE *argv, VALUE self)
 {
+#ifdef FEATURE_OLD_IO_FUNCTIONS
+    rb_io_t *fptr;
+#endif
 #ifdef HAVE_FUNC_RB_THREAD_WAIT_FOR
     struct timeval time;
 #endif
     int op;
+
+#ifdef FEATURE_OLD_IO_FUNCTIONS
+    GetOpenFile( self, fptr);
+#endif
 
 #ifdef FEATURE_SUPER_KWARGS
     rb_call_super_kw(argc, argv, RB_PASS_CALLED_KEYWORDS);
@@ -39,9 +46,17 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
     rb_call_super( argc, argv);
 #endif
 
+#ifdef FEATURE_OLD_IO_FUNCTIONS
+    op = fptr->mode & FMODE_WRITABLE ? LOCK_EX : LOCK_SH;
+#else
     op = rb_io_mode( self) & FMODE_WRITABLE ? LOCK_EX : LOCK_SH;
+#endif
     op |= LOCK_NB;
+#ifdef FEATURE_OLD_IO_FUNCTIONS
+    while (flock( fptr->fd, op) < 0) {
+#else
     while (flock( rb_io_descriptor( self), op) < 0) {
+#endif
         static ID id_lock_failed = 0;
 
         switch (errno) {
@@ -67,7 +82,11 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
             }
             break;
         default:
+#ifdef FEATURE_OLD_IO_FUNCTIONS
+            rb_sys_fail_str( fptr->pathv);
+#else
             rb_sys_fail_str( rb_io_path( self));
+#endif
             break;
         }
     }
