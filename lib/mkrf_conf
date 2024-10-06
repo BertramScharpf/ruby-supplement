@@ -30,5 +30,6 @@ Autorake.configure {
 
   have_function "cbrt"
 
+  have_header "sys/vfs.h"
 }
 

@@ -5,12 +5,14 @@
 #include "filesys.h"
 
 #include <stdlib.h>
-#ifdef __FSID_T_TYPE
+#ifdef HAVE_HEADER_SYS_VFS_H
     /* Linux */
     #include <sys/vfs.h>
+    #define FSID_val __val
 #else
     #include <sys/param.h>
     #include <sys/mount.h>
+    #define FSID_val val
 #endif
 
 
@@ -208,13 +210,6 @@ rb_fsstat_ffree( VALUE self)
  *
  *  Filesystem id; array of 2 integers.
  */
-
-#ifdef __FSID_T_TYPE
-    /* Linux */
-    #define FSID_val __val
-#else
-    #define FSID_val val
-#endif
 
 VALUE
 rb_fsstat_fsid( VALUE self)
