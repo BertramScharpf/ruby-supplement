@@ -508,8 +508,6 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-    if (!rb_str_comparable( str, oth))
-        return Qnil;
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
@@ -544,8 +542,6 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-    if (!rb_str_comparable( str, oth))
-        return Qnil;
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
