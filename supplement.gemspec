@@ -9,11 +9,12 @@ Gem::Specification.new do |s|
   s.license           = "BSD-2-Clause"
   s.summary           = "Simple Ruby extensions"
   s.description       = <<~EOT
-                          Simple methods that didn't manage to become part of standard Ruby.
+                          Simple methods that didn't manage to become
+                          part of standard Ruby.
                         EOT
   s.authors           = [ "Bertram Scharpf"]
   s.email             = "<software@bertram-scharpf.de>"
-  s.homepage          = "http://www.bertram-scharpf.de/software/supplement"
+  s.homepage          = "https://github.com/BertramScharpf/ruby-supplement"
 
   s.required_ruby_version = Gem::Requirement.new ">= 2.0.0"
 
@@ -47,7 +48,7 @@ Gem::Specification.new do |s|
   s.executables       = %w(
                         )
 
-  s.rdoc_options.concat %w(--charset utf-8 --main README)
+  s.rdoc_options.concat %w(--main README)
   s.extra_rdoc_files  = %w(
                           README
                           LICENSE
