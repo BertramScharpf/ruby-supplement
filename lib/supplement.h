@@ -50,6 +50,8 @@ extern VALUE rb_num_sqrt( VALUE);
 extern VALUE rb_num_cbrt( VALUE);
 
 extern VALUE rb_ary_notempty_p( VALUE);
+extern VALUE rb_ary_first_set( VALUE, VALUE);
+extern VALUE rb_ary_last_set( VALUE, VALUE);
 extern VALUE rb_ary_indexes( VALUE);
 extern VALUE rb_ary_range( VALUE);
 extern VALUE rb_ary_pick(  int, VALUE *, VALUE);
