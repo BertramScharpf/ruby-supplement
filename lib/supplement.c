@@ -831,8 +831,11 @@ rb_ary_notempty_p( VALUE ary)
 VALUE
 rb_ary_first_set( VALUE ary, VALUE val)
 {
-    rb_ary_modify(ary);
-    RARRAY_ASET(ary, 0, val);
+    rb_ary_modify( ary);
+    long len = RARRAY_LEN( ary);
+    if (len == 0)
+        rb_raise( rb_eArgError, "cannot replace first element of an empty array");
+    RARRAY_ASET( ary, 0, val);
     return val;
 }
 
@@ -853,8 +856,11 @@ rb_ary_first_set( VALUE ary, VALUE val)
 VALUE
 rb_ary_last_set( VALUE ary, VALUE val)
 {
-    rb_ary_modify(ary);
-    RARRAY_ASET(ary, RARRAY_LEN(ary)-1, val);
+    rb_ary_modify( ary);
+    long len = RARRAY_LEN( ary);
+    if (len == 0)
+        rb_raise( rb_eArgError, "cannot replace last element of an empty array");
+    RARRAY_ASET( ary, len - 1, val);
     return val;
 }
 
