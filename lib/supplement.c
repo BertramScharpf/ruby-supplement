@@ -17,6 +17,7 @@
 #endif
 
 
+static void  supplement_ary_assure_notempty( VALUE);
 static VALUE supplement_index_blk( VALUE);
 static VALUE supplement_index_ref( VALUE, VALUE);
 static VALUE supplement_rindex_blk( VALUE);
@@ -832,18 +833,27 @@ VALUE
 rb_ary_first_set( VALUE ary, VALUE val)
 {
     rb_ary_modify( ary);
-    long len = RARRAY_LEN( ary);
-    if (len == 0)
-        rb_raise( rb_eArgError, "cannot replace first element of an empty array");
+    supplement_ary_assure_notempty( ary);
     RARRAY_ASET( ary, 0, val);
     return val;
+}
+
+void
+supplement_ary_assure_notempty( VALUE ary)
+{
+    long len = RARRAY_LEN( ary);
+    if (len == 0) {
+        VALUE q = Qnil;
+        rb_ary_cat( ary, &q, 1);
+    }
 }
 
 /*
  *  call-seq:
  *     last = obj  -> obj
  *
- *  Replace the last element. Equivalent to <code>ary[-1]=</code>.
+ *  Replace the last element. Almost equivalent to
+ *  <code>ary[-1]=</code> (works also for empty arrays).
  *
  *    a = [ 42, 39, -1]
  *    a.last = 42
@@ -857,10 +867,8 @@ VALUE
 rb_ary_last_set( VALUE ary, VALUE val)
 {
     rb_ary_modify( ary);
-    long len = RARRAY_LEN( ary);
-    if (len == 0)
-        rb_raise( rb_eArgError, "cannot replace last element of an empty array");
-    RARRAY_ASET( ary, len - 1, val);
+    supplement_ary_assure_notempty( ary);
+    RARRAY_ASET( ary, RARRAY_LEN( ary) - 1, val);
     return val;
 }
 
