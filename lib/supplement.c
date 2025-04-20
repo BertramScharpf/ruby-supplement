@@ -17,6 +17,7 @@
 #endif
 
 
+static void  supplement_ary_assure_notempty( VALUE);
 static VALUE supplement_index_blk( VALUE);
 static VALUE supplement_index_ref( VALUE, VALUE);
 static VALUE supplement_rindex_blk( VALUE);
@@ -508,8 +509,6 @@ rb_str_starts_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-    if (!rb_str_comparable( str, oth))
-        return Qnil;
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
@@ -544,8 +543,6 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     char *s, *o;
     VALUE ost;
 
-    if (!rb_str_comparable( str, oth))
-        return Qnil;
     ost = rb_string_value( &oth);
     i = RSTRING_LEN( ost);
     if (i > RSTRING_LEN( str))
@@ -816,6 +813,63 @@ VALUE
 rb_ary_notempty_p( VALUE ary)
 {
     return RARRAY_LEN( ary) == 0 ? Qnil : ary;
+}
+
+/*
+ *  call-seq:
+ *     first = obj  -> obj
+ *
+ *  Replace the first element. Equivalent to <code>ary[0]=</code>.
+ *
+ *    a = [ -1, 39, 56]
+ *    a.first = 42
+ *    a                            #=> [42, 39, 56]
+ *    a.unshift 266
+ *    a.first /= 14
+ *    a                            #=> [19, 42, 39, 56]
+ */
+
+VALUE
+rb_ary_first_set( VALUE ary, VALUE val)
+{
+    rb_ary_modify( ary);
+    supplement_ary_assure_notempty( ary);
+    RARRAY_ASET( ary, 0, val);
+    return val;
+}
+
+void
+supplement_ary_assure_notempty( VALUE ary)
+{
+    long len = RARRAY_LEN( ary);
+    if (len == 0) {
+        VALUE q = Qnil;
+        rb_ary_cat( ary, &q, 1);
+    }
+}
+
+/*
+ *  call-seq:
+ *     last = obj  -> obj
+ *
+ *  Replace the last element. Almost equivalent to
+ *  <code>ary[-1]=</code> (works also for empty arrays).
+ *
+ *    a = [ 42, 39, -1]
+ *    a.last = 42
+ *    a                            #=> [42, 39, 42]
+ *    a.push 266
+ *    a.last /= 14
+ *    a                            #=> [42, 39, 42, 19]
+ */
+
+VALUE
+rb_ary_last_set( VALUE ary, VALUE val)
+{
+    rb_ary_modify( ary);
+    supplement_ary_assure_notempty( ary);
+    RARRAY_ASET( ary, RARRAY_LEN( ary) - 1, val);
+    return val;
 }
 
 
@@ -1453,6 +1507,8 @@ void Init_supplement( void)
     rb_define_method( rb_cNumeric, "cbrt", rb_num_cbrt, 0);
 
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
+    rb_define_method( rb_cArray, "first=", rb_ary_first_set, 1);
+    rb_define_method( rb_cArray, "last=", rb_ary_last_set, 1);
     rb_define_method( rb_cArray, "indexes", rb_ary_indexes, 0);
     rb_define_alias(  rb_cArray, "keys", "indexes");
     rb_define_method( rb_cArray, "range", rb_ary_range, 0);

@@ -1,4 +1,4 @@
-= supplement 2.22  --  Useful Ruby enhancements
+= supplement 2.25  --  Useful Ruby enhancements
 
 
 Some simple Ruby extensions.
@@ -55,6 +55,7 @@ Now here it is where I can just point to.
   * String#start_with?
   * String#end_with?
   * Array#notempty?
+  * Array#first=/last=
   * Hash#notempty?
   * Struct.[]
   * Integer.roman
