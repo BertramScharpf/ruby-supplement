@@ -43,8 +43,6 @@ extern VALUE rb_str_ord( VALUE);
 #endif
 extern VALUE rb_str_axe( int, VALUE *, VALUE);
 
-extern VALUE rb_num_pos_p( VALUE);
-extern VALUE rb_num_neg_p( VALUE);
 extern VALUE rb_num_grammatical( VALUE, VALUE, VALUE);
 extern VALUE rb_num_sqrt( VALUE);
 extern VALUE rb_num_cbrt( VALUE);

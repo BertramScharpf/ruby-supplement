@@ -624,78 +624,6 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
 
 /*
  *  call-seq:
- *     pos?  ->  true or false
- *
- *  Check whether +num+ is positive.
- *
- */
-
-VALUE
-rb_num_pos_p( VALUE num)
-{
-    VALUE r = Qfalse;
-
-    switch (TYPE( num)) {
-        case T_FIXNUM:
-            if (NUM2LONG( num) > 0)
-                r = Qtrue;
-            break;
-
-        case T_BIGNUM:
-            if (RBIGNUM_SIGN( num))  /* 0 is not a Bignum. */
-                r = Qtrue;
-            break;
-
-        case T_FLOAT:
-            if (RFLOAT_VALUE( num) > 0.0)
-                r = Qtrue;
-            break;
-
-        default:
-            return rb_num_neg_p( rb_funcall( INT2FIX( 0), id_cmp, 1, num));
-            break;
-    }
-    return r;
-}
-
-/*
- *  call-seq:
- *     neg?  ->  true or false
- *
- *  Check whether +num+ is negative.
- *
- */
-
-VALUE
-rb_num_neg_p( VALUE num)
-{
-    VALUE r = Qfalse;
-
-    switch (TYPE( num)) {
-        case T_FIXNUM:
-            if (NUM2LONG( num) < 0)
-                r = Qtrue;
-            break;
-
-        case T_BIGNUM:
-            if (!RBIGNUM_SIGN( num))  /* 0 is not a Bignum. */
-                r = Qtrue;
-            break;
-
-        case T_FLOAT:
-            if (RFLOAT_VALUE( num) < 0.0)
-                r = Qtrue;
-            break;
-
-        default:
-            return rb_num_neg_p( rb_funcall( num, id_cmp, 1, INT2FIX( 0)));
-            break;
-    }
-    return r;
-}
-
-/*
- *  call-seq:
  *     grammatical sing, plu  -> str
  *
  *  Singular or plural
@@ -1500,8 +1428,6 @@ void Init_supplement( void)
 #endif
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
 
-    rb_define_method( rb_cNumeric, "pos?", rb_num_pos_p, 0);
-    rb_define_method( rb_cNumeric, "neg?", rb_num_neg_p, 0);
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
     rb_define_method( rb_cNumeric, "sqrt", rb_num_sqrt, 0);
     rb_define_method( rb_cNumeric, "cbrt", rb_num_cbrt, 0);
