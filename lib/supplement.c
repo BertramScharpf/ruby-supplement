@@ -606,6 +606,27 @@ rb_num_cbrt( VALUE num)
 
 
 /*
+ *  Document-class: Rational
+ */
+
+/*
+ *  call-seq:
+ *     rat.inv   -> rat
+ *
+ *  The reciprocal.
+ *
+ *     5/7r.inv       #=> 7/5r
+ */
+
+VALUE
+rb_rat_inverse( VALUE rat)
+{
+    /* There is an internal function `rb_ration_reciprocal()`, but that cannot be reached from here. */
+    return rb_Rational( rb_rational_den( rat), rb_rational_num( rat));
+}
+
+
+/*
  *  Document-class: Array
  */
 
@@ -1176,6 +1197,8 @@ void Init_supplement( void)
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
     rb_define_method( rb_cNumeric, "sqrt", rb_num_sqrt, 0);
     rb_define_method( rb_cNumeric, "cbrt", rb_num_cbrt, 0);
+
+    rb_define_method( rb_cRational, "inv", rb_rat_inverse, 0);
 
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
     rb_define_method( rb_cArray, "first=", rb_ary_first_set, 1);
