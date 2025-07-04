@@ -10,27 +10,13 @@
 #include <ruby/io.h>
 #include <ruby/re.h>
 
-#ifdef FEATURE_THREAD_EXCLUSIVE
-#ifdef HAVE_HEADER_RUBYSIG_H
-#include <rubysig.h>
-#endif
-#endif
-
 
 static void  supplement_ary_assure_notempty( VALUE);
 static VALUE supplement_index_blk( VALUE);
 static VALUE supplement_index_ref( VALUE, VALUE);
 static VALUE supplement_rindex_blk( VALUE);
 static VALUE supplement_rindex_ref( VALUE, VALUE);
-#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
-static VALUE supplement_index_val( VALUE, VALUE);
-static VALUE supplement_rindex_val( VALUE, VALUE);
-#endif
 static VALUE supplement_do_unumask( VALUE);
-#ifdef FEATURE_THREAD_EXCLUSIVE
-static VALUE bsruby_set_thread_critical( VALUE);
-#endif
-
 
 
 static ID id_delete_at;
@@ -102,31 +88,6 @@ rb_obj_nil_if( VALUE obj, VALUE val)
  *  Document-module: Kernel
  */
 
-#ifdef FEATURE_KERNEL_TAP
-
-/*
- *  call-seq:
- *     tap { |x| ... }    -> obj
- *
- *  Yields <code>x</code> to the block, and then returns <code>x</code>.
- *  The primary purpose of this method is to "tap into" a method chain,
- *  in order to perform operations on intermediate results within the chain.
- *
- *      (1..10)                  .tap { |x| puts "original: #{x.inspect}" }
- *        .to_a                  .tap { |x| puts "array:    #{x.inspect}" }
- *        .select { |x| x%2==0 } .tap { |x| puts "evens:    #{x.inspect}" }
- *        .map { |x| x*x }       .tap { |x| puts "squares:  #{x.inspect}" }
- *
- */
-
-VALUE
-rb_krn_tap( VALUE obj)
-{
-    rb_yield( obj);
-    return obj;
-}
-
-#endif
 
 /*
  *  call-seq:
@@ -362,30 +323,6 @@ rb_str_cut_bang( VALUE str, VALUE len)
 }
 
 
-#ifdef FEATURE_STRING_CLEAR
-
-/*
- *  call-seq:
- *     clear   -> self
- *
- *  Set to empty string. Equivalent to <code>str.replace ""</code>.
- *
- *     a = "hello"  #=> "hello"
- *     a.clear      #=> ""
- *     a.empty?     #=> true
- */
-
-VALUE
-rb_str_clear( VALUE str)
-{
-    rb_str_modify( str);
-    rb_str_resize( str, 0);
-    return str;
-}
-
-#endif
-
-
 /*
  *  call-seq:
  *     head( n = 1)   -> str
@@ -454,41 +391,6 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
 }
 
 
-#ifdef FEATURE_STRING_START_WITH
-
-/*
- *  call-seq:
- *     start_with?( oth)   -> true or false
- *
- *  Checks whether the head is <code>oth</code>.
- *
- *     "sys-apps".start_with?( "sys-")    #=> true
- */
-
-VALUE
-rb_str_start_with_p( VALUE str, VALUE oth)
-{
-    return NIL_P( rb_str_starts_with_p( str, oth)) ? Qfalse : Qtrue;
-}
-
-
-/*
- *  call-seq:
- *     end_with?( oth)   -> true or false
- *
- *  Checks whether the tail is <code>oth</code>.
- *
- *     "sys-apps".end_with?( "-apps")    #=> true
- */
-
-VALUE
-rb_str_end_with_p( VALUE str, VALUE oth)
-{
-    return NIL_P( rb_str_ends_with_p( str, oth)) ? Qfalse : Qtrue;
-}
-
-#endif
-
 /*
  *  call-seq:
  *     starts_with?( oth)   -> nil or int
@@ -555,25 +457,6 @@ rb_str_ends_with_p( VALUE str, VALUE oth)
     return INT2FIX( rb_str_strlen( str) - rb_str_strlen( ost));
 }
 
-#ifdef FEATURE_STRING_ORD
-
-/*
- *  call-seq:
- *     ord()   -> nil or int
- *
- *  Returns the ASCII value of the first character, if any.
- *
- *  Caution! For UTF-8 characters, this will return the first byte's value.
- *  This will do no harm in Ruby 1.8 but the standard Ruby 1.9 +String#ord+
- *  returns the first codepoint. Please do not overwrite that method.
- */
-
-VALUE rb_str_ord( VALUE str)
-{
-    return RSTRING_LEN( str) > 0 ? INT2FIX( RSTRING_PTR( str)[ 0]) : Qnil;
-}
-
-#endif
 
 /*
  *  call-seq:
@@ -962,96 +845,6 @@ supplement_rindex_blk( VALUE ary)
 }
 
 
-#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
-
-/*
- *  call-seq:
- *     index( obj)              ->  int or nil
- *     index() { |elem| ... }   ->  int or nil
- *
- *  Returns the index of the first object in <code>self</code> such that
- *  is <code>==</code> to <code>obj</code> or the <em>block</em> returns
- *  <code>true</code>. If no match is found, <code>nil</code> is
- *  returned.
- *
- *     a = %w(a b c d e)
- *     a.index("b")               #=> 1
- *     a.index("z")               #=> nil
- *     a.index { |e| e >= "b" }   #=> 1
- *     a.index { |e| e >= "q" }   #=> nil
- */
-
-VALUE
-rb_ary_index( int argc, VALUE *argv, VALUE ary)
-{
-    VALUE val;
-
-    if (rb_scan_args( argc, argv, "01", &val) == 1) {
-        if (rb_block_given_p())
-            rb_warning( "given block not used");
-        return supplement_index_val( ary, val);
-    } else
-        return supplement_index_blk( ary);
-    return Qnil;
-}
-
-VALUE
-supplement_index_val( VALUE ary, VALUE val)
-{
-    long i;
-
-    for (i = 0; i < RARRAY_LEN( ary); i++)
-        if (rb_equal( RARRAY_PTR( ary)[ i], val))
-            return LONG2NUM( i);
-    return Qnil;
-}
-
-
-/*
- *  call-seq:
- *     rindex( obj)              ->  int or nil
- *     rindex() { |elem| ... }   ->  int or nil
- *
- *  Returns the index of the first object in <code>self</code> such that
- *  is <code>==</code> to <code>obj</code> or the <em>block</em> returns
- *  <code>true</code>. If no match is found, <code>nil</code> is
- *  returned. Search from right to left.
- *
- *     a = %w(a b c d e)
- *     a.rindex("b")               #=> 1
- *     a.rindex("z")               #=> nil
- *     a.rindex { |e| e >= "b" }   #=> 4
- *     a.rindex { |e| e >= "q" }   #=> nil
- */
-
-VALUE
-rb_ary_rindex( int argc, VALUE *argv, VALUE ary)
-{
-    VALUE val;
-
-    if (rb_scan_args( argc, argv, "01", &val) == 1) {
-        if (rb_block_given_p())
-            rb_warning( "given block not used");
-        return supplement_rindex_val( ary, val);
-    } else
-        return supplement_rindex_blk( ary);
-    return Qnil;
-}
-
-VALUE
-supplement_rindex_val( VALUE ary, VALUE val)
-{
-    long i;
-
-    for (i = RARRAY_LEN( ary); i;)
-        if (rb_equal( RARRAY_PTR( ary)[ --i], val))
-            return LONG2NUM( i);
-    return Qnil;
-}
-
-#endif
-
-
 /*
  *  Document-class: Hash
  */
@@ -1310,40 +1103,6 @@ rb_struct_fields( int argc, VALUE *argv, VALUE strct)
 }
 
 
-#ifdef FEATURE_THREAD_EXCLUSIVE
-
-/*
- *  Document-class: Thread
- */
-
-/*
- *  call-seq:
- *     Thread.exclusive { ... }  -> obj
- *
- *  Sets the global ``thread critical'' condition temporarily. Return
- *  value is the object returned by the <em>block</em>.
- */
-
-VALUE
-rb_thread_exclusive( void)
-{
-    VALUE old_tc = rb_thread_critical;
-
-    rb_thread_critical = Qtrue;
-    return rb_ensure( rb_yield, Qnil, bsruby_set_thread_critical, old_tc);
-}
-
-VALUE
-bsruby_set_thread_critical( VALUE c)
-{
-    rb_thread_critical = c;
-    return Qnil;
-}
-
-#endif
-
-
-
 /*
  *  Document-class: Struct
  */
@@ -1361,7 +1120,6 @@ bsruby_set_thread_critical( VALUE c)
  *    s = S[ 'A', 'B']       #=>  #<struct S a="A", b="B">
  *
  */
-
 
 
 /*
@@ -1393,9 +1151,6 @@ void Init_supplement( void)
 {
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
     rb_define_method( rb_cObject, "nil_if", rb_obj_nil_if, 1);
-#ifdef FEATURE_KERNEL_TAP
-    rb_define_method( rb_mKernel, "tap", rb_krn_tap, 0);
-#endif
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
     rb_define_method( rb_mKernel, "with", rb_krn_with, 0);
 
@@ -1409,23 +1164,13 @@ void Init_supplement( void)
     rb_define_method( rb_cString, "notempty?", rb_str_notempty_p, 0);
     rb_define_method( rb_cString, "eat", rb_str_eat, -1);
     rb_define_method( rb_cString, "cut!", rb_str_cut_bang, 1);
-#ifdef FEATURE_STRING_CLEAR
-    rb_define_method( rb_cString, "clear", rb_str_clear, 0);
-#endif
     rb_define_method( rb_cString, "head", rb_str_head, -1);
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
-#ifdef FEATURE_STRING_START_WITH
-    rb_define_method( rb_cString, "start_with?", rb_str_start_with_p, 1);
-    rb_define_method( rb_cString, "end_with?", rb_str_end_with_p, 1);
-#endif
     rb_define_method( rb_cString, "starts_with?", rb_str_starts_with_p, 1);
     rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, 1);
     rb_define_alias(  rb_cString, "starts_with", "start_with?");
     rb_define_alias(  rb_cString, "ends_with", "end_with?");
-#ifdef FEATURE_STRING_ORD
-    rb_define_method( rb_cString, "ord", rb_str_ord, 0);
-#endif
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
 
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
@@ -1440,10 +1185,6 @@ void Init_supplement( void)
     rb_define_method( rb_cArray, "range", rb_ary_range, 0);
     rb_define_method( rb_cArray, "pick", rb_ary_pick, -1);
     rb_define_method( rb_cArray, "rpick", rb_ary_rpick, -1);
-#ifdef FEATURE_ARRAY_INDEX_WITH_BLOCK
-    rb_define_method( rb_cArray, "index", rb_ary_index, -1);
-    rb_define_method( rb_cArray, "rindex", rb_ary_rindex, -1);
-#endif
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
@@ -1458,11 +1199,6 @@ void Init_supplement( void)
 
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
-
-#ifdef FEATURE_THREAD_EXCLUSIVE
-    rb_define_singleton_method( rb_cThread, "exclusive",
-                                                    rb_thread_exclusive, 0);
-#endif
 
     rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
     rb_define_method( rb_cStruct, "fields", rb_struct_fields, -1);
