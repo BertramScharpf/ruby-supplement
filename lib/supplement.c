@@ -1126,8 +1126,6 @@ void Init_supplement( void)
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
     rb_define_method( rb_cString, "starts_with?", rb_str_starts_with_p, 1);
     rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, 1);
-    rb_define_alias(  rb_cString, "starts_with", "start_with?");
-    rb_define_alias(  rb_cString, "ends_with", "end_with?");
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
 
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
