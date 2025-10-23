@@ -401,7 +401,8 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
  *     "sys-apps".starts_with?( "sys-")    #=> 4
  *
  *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
- *  just returns +true+ or +false+.
+ *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
+ *  <code>#slice</code>.
  */
 
 VALUE

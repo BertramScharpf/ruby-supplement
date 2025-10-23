@@ -4,7 +4,7 @@
 
 Gem::Specification.new do |s|
   s.name              = "supplement"
-  (File.read "README") =~ /^=\s.*?(\d+(?:\.\d+)*)/
+  (File.read "README.md") =~ /^#\s.*?(\d+(?:\.\d+)*)/
   s.version           = $1
   s.license           = "BSD-2-Clause"
   s.summary           = "Simple Ruby extensions"
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.email             = "<software@bertram-scharpf.de>"
   s.homepage          = "https://github.com/BertramScharpf/ruby-supplement"
 
-  s.required_ruby_version = Gem::Requirement.new ">= 2.0.0"
+  s.required_ruby_version = Gem::Requirement.new ">= 3.1.0"
 
   s.requirements      = "Ruby and the autorake gem"
   s.add_dependency      "rake", "~>13.0"
@@ -48,9 +48,8 @@ Gem::Specification.new do |s|
   s.executables       = %w(
                         )
 
-  s.rdoc_options.concat %w(--main README)
   s.extra_rdoc_files  = %w(
-                          README
+                          README.md
                           LICENSE
                         )
 end
