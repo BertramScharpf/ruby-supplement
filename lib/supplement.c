@@ -393,74 +393,6 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
 
 /*
  *  call-seq:
- *     starts_with?( oth)   -> nil or int
- *
- *  Checks whether the head is <code>oth</code>. Returns length of
- *  <code>oth</code> when matching.
- *
- *     "sys-apps".starts_with?( "sys-")    #=> 4
- *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
- *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
- *  <code>#slice</code>.
- */
-
-VALUE
-rb_str_starts_with_p( VALUE str, VALUE oth)
-{
-    long i;
-    char *s, *o;
-    VALUE ost;
-
-    ost = rb_string_value( &oth);
-    i = RSTRING_LEN( ost);
-    if (i > RSTRING_LEN( str))
-        return Qnil;
-    s = RSTRING_PTR( str);
-    o = RSTRING_PTR( ost);
-    for (; i; i--, s++, o++) {
-        if (*s != *o)
-            return Qnil;
-    }
-    return INT2FIX( rb_str_strlen( ost));
-}
-
-
-/*
- *  call-seq:
- *     ends_with?( oth)   -> nil or int
- *
- *  Checks whether the tail is <code>oth</code>. Returns the position
- *  where <code>oth</code> starts when matching.
- *
- *     "sys-apps".ends_with?( "-apps")    #=> 3
- *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
- *  just returns +true+ or +false+.
- */
-
-VALUE
-rb_str_ends_with_p( VALUE str, VALUE oth)
-{
-    long i;
-    char *s, *o;
-    VALUE ost;
-
-    ost = rb_string_value( &oth);
-    i = RSTRING_LEN( ost);
-    if (i > RSTRING_LEN( str))
-        return Qnil;
-    s = RSTRING_END( str);
-    o = RSTRING_END( ost);
-    for (; i; i--)
-        if (*--s != *--o)
-            return Qnil;
-    return INT2FIX( rb_str_strlen( str) - rb_str_strlen( ost));
-}
-
-
-/*
- *  call-seq:
  *     axe( n = 80)   -> str
  *
  *  Cut off everthing beyond then <code>n</code>th character. Replace the
@@ -499,6 +431,129 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
     } else
         ret = str;
     return ret;
+}
+
+
+/*
+ *  call-seq:
+ *     starts_with?( *oth)   -> nil or int
+ *
+ *  Checks whether the head is one of <code>oth</code>. Returns the position
+ *  where the match ends.
+ *
+ *     "sys-apps".starts_with?( "sys-")    #=> 4
+ *
+ *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
+ *  <code>#slice</code>.
+ */
+
+VALUE
+rb_str_starts_with_p( int argc, VALUE *argv, VALUE str)
+{
+    int j;
+
+    for (j = 0; j < argc; j++) {
+        long i;
+        char *s, *o;
+        VALUE ost;
+        VALUE oth = argv[ j];
+
+        ost = rb_string_value( &oth);
+        i = RSTRING_LEN( ost);
+        if (i > RSTRING_LEN( str))
+            return Qnil;
+        s = RSTRING_PTR( str);
+        o = RSTRING_PTR( ost);
+        for (; i; i--, s++, o++) {
+            if (*s != *o)
+                break;
+        }
+        if (!i)
+            return INT2FIX( rb_str_strlen( ost));
+    }
+    return Qnil;
+}
+
+
+/*
+ *  call-seq:
+ *     ends_with?( *oth)   -> nil or int
+ *
+ *  Checks whether the tail is one of <code>oth</code>. Returns the position
+ *  where the match starts.
+ *
+ *     "sys-apps".ends_with?( "-apps")    #=> 3
+ *
+ *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  just returns +true+ or +false+.
+ */
+
+VALUE
+rb_str_ends_with_p( int argc, VALUE *argv, VALUE str)
+{
+    int j;
+
+    for (j = 0; j < argc; j++) {
+        long i;
+        char *s, *o;
+        VALUE ost;
+        VALUE oth = argv[ j];
+
+        ost = rb_string_value( &oth);
+        i = RSTRING_LEN( ost);
+        if (i > RSTRING_LEN( str))
+            return Qnil;
+        s = RSTRING_END( str);
+        o = RSTRING_END( ost);
+        for (; i; i--)
+            if (*--s != *--o)
+                break;
+        if (!i)
+            return INT2FIX( rb_str_strlen( str) - rb_str_strlen( ost));
+    }
+    return Qnil;
+}
+
+
+/*
+ *  call-seq:
+ *     starts_with?( oth)   -> nil or int
+ *
+ *  Checks whether the head is <code>oth</code>. Returns length of
+ *  <code>oth</code> when matching.
+ *
+ *     :"sys-apps".starts_with?( "sys-")    #=> 4
+ *
+ *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
+ *  <code>#slice</code>.
+ */
+
+VALUE
+rb_sym_starts_with_p( int argc, VALUE *argv, VALUE sym)
+{
+    return rb_str_starts_with_p(argc, argv, rb_sym2str(sym));
+}
+
+
+/*
+ *  call-seq:
+ *     ends_with?( oth)   -> nil or int
+ *
+ *  Checks whether the tail is <code>oth</code>. Returns the position
+ *  where <code>oth</code> starts when matching.
+ *
+ *     :"sys-apps".ends_with?( "-apps")    #=> 3
+ *
+ *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  just returns +true+ or +false+.
+ */
+
+VALUE
+rb_sym_ends_with_p( int argc, VALUE *argv, VALUE sym)
+{
+    return rb_str_ends_with_p(argc, argv, rb_sym2str(sym));
 }
 
 
@@ -1125,9 +1180,11 @@ void Init_supplement( void)
     rb_define_method( rb_cString, "head", rb_str_head, -1);
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
-    rb_define_method( rb_cString, "starts_with?", rb_str_starts_with_p, 1);
-    rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, 1);
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
+    rb_define_method( rb_cString, "starts_with?", rb_str_starts_with_p, -1);
+    rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, -1);
+    rb_define_method( rb_cSymbol, "starts_with?", rb_sym_starts_with_p, -1);
+    rb_define_method( rb_cSymbol, "ends_with?", rb_sym_ends_with_p, -1);
 
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
     rb_define_method( rb_cNumeric, "sqrt", rb_num_sqrt, 0);
