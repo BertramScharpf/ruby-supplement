@@ -48,9 +48,6 @@ extern VALUE rb_hash_notempty_p( VALUE);
 extern VALUE rb_file_s_umask( int, VALUE *, VALUE);
 extern VALUE rb_dir_s_current( VALUE);
 extern VALUE rb_dir_s_mkdir_bang( int, VALUE *, VALUE);
-#ifdef FEATURE_DIR_CHILDREN
-extern VALUE rb_dir_children( VALUE);
-#endif
 
 extern VALUE rb_match_begin( int, VALUE *, VALUE);
 extern VALUE rb_match_end( int, VALUE *, VALUE);

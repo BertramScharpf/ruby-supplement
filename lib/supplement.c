@@ -1000,31 +1000,6 @@ rb_dir_s_mkdir_bang( int argc, VALUE *argv, VALUE dir)
 }
 
 
-#ifdef FEATURE_DIR_CHILDREN
-
-/*
- *  call-seq:
- *     children()   -> ary
- *
- *  Entries without <code>"."</code> and <code>".."</code>.
- *
- */
-
-VALUE
-rb_dir_children( VALUE self)
-{
-    VALUE e;
-
-    e = rb_funcall( self, rb_intern( "entries"), 0);
-    rb_ary_delete( e, rb_str_new( ".", 1));
-    rb_ary_delete( e, rb_str_new( "..", 2));
-    return e;
-}
-
-#endif
-
-
-
 /*
  *  Document-class: Match
  */
@@ -1215,9 +1190,6 @@ void Init_supplement( void)
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
     rb_define_singleton_method( rb_cDir, "mkdir!", rb_dir_s_mkdir_bang, -1);
-#ifdef FEATURE_DIR_CHILDREN
-    rb_define_method( rb_cDir, "children", rb_dir_children, 0);
-#endif
     rb_define_alias(  rb_cDir, "entries!", "children");
 
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
