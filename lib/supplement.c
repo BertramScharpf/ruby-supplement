@@ -567,45 +567,6 @@ rb_num_sqrt( VALUE num)
 }
 
 /*
- *  call-seq:
- *     num.cbrt   -> num
- *
- *  Cube root.
- *
- *     27.cbrt       #=> 3.0
- */
-
-VALUE
-rb_num_cbrt( VALUE num)
-{
-#if HAVE_FUNC_CBRT
-    return rb_float_new( cbrt( RFLOAT_VALUE( rb_Float( num))));
-#else
-    double n;
-    int neg;
-    int i;
-
-    n = RFLOAT_VALUE( rb_Float( num));
-    if ((neg = n < 0))
-        n = -n;
-    n = sqrt( sqrt( n));
-    i = 2;
-    for (;;) {
-        double w = n;
-        int j;
-
-        for (j=i;j;--j) w = sqrt( w);
-        i *= 2;
-        w *= n;
-        if (n == w) break;
-        n = w;
-    }
-    return rb_float_new( neg ? -n : n);
-#endif
-}
-
-
-/*
  *  Document-class: Rational
  */
 
@@ -1171,7 +1132,6 @@ void Init_supplement( void)
 
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
     rb_define_method( rb_cNumeric, "sqrt", rb_num_sqrt, 0);
-    rb_define_method( rb_cNumeric, "cbrt", rb_num_cbrt, 0);
 
     rb_define_method( rb_cRational, "inv", rb_rat_inverse, 0);
 

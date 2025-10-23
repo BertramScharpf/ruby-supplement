@@ -21,8 +21,6 @@ Autorake.configure {
 
   have_function "rb_thread_wait_for"
 
-  have_function "cbrt"
-
   have_header "sys/vfs.h"
 }
 
