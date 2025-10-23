@@ -19,11 +19,11 @@ static VALUE supplement_rindex_ref( VALUE, VALUE);
 static VALUE supplement_do_unumask( VALUE);
 
 
-static ID id_delete_at;
-static ID id_cmp;
-static ID id_eqq;
-static ID id_mkdir;
-static ID id_index;
+static ID id_delete_at = 0;
+static ID id_cmp = 0;
+static ID id_eqq = 0;
+static ID id_mkdir = 0;
+static ID id_index = 0;
 
 
 

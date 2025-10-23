@@ -19,7 +19,7 @@
 
 static struct statfs *get_statfs( VALUE);
 
-static ID id_mul;
+static ID id_mul = 0;
 
 /*
  *  Document-class: Filesys

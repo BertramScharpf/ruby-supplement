@@ -5,8 +5,8 @@
 #include <ruby/io.h>
 
 
-static ID id_accept_orig;
-static ID id_close;
+static ID id_accept_orig = 0;
+static ID id_close = 0;
 
 static VALUE socket_close( VALUE);
 
