@@ -19,8 +19,6 @@ Autorake.configure {
   have_header "ruby/io.h"
   have_header "ruby/re.h"
 
-  have_function "rb_thread_wait_for"
-
   have_header "sys/vfs.h"
 }
 

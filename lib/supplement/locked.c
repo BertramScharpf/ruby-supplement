@@ -31,9 +31,7 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
 #ifdef FEATURE_OLD_IO_FUNCTIONS
     rb_io_t *fptr;
 #endif
-#ifdef HAVE_FUNC_RB_THREAD_WAIT_FOR
     struct timeval time;
-#endif
     int op;
 
 #ifdef FEATURE_OLD_IO_FUNCTIONS
@@ -68,13 +66,9 @@ rb_locked_init( int argc, VALUE *argv, VALUE self)
             if (rb_respond_to( self, id_lock_failed))
                 rb_funcall( self, id_lock_failed, 0);
             else {
-#ifdef HAVE_FUNC_RB_THREAD_WAIT_FOR
                 time.tv_sec = 0;
                 time.tv_usec = 100 * 1000;
                 rb_thread_wait_for(time);
-#else
-                rb_thread_polling();
-#endif
             }
             break;
         default:
