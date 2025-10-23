@@ -10,8 +10,8 @@ Autorake.configure {
 
   extending_ruby
 
-  if RUBY_VERSION < "3.3" then
-    enable :old_io_functions
+  if RUBY_VERSION < "3.3" then  # Always true after March 2026
+    enable :some_calls
   end
 
   have_header "ruby/ruby.h"
