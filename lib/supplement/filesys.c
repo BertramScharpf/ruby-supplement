@@ -21,6 +21,13 @@ static struct statfs *get_statfs( VALUE);
 
 static ID id_mul = 0;
 
+static const rb_data_type_t fsstat_data_type = {
+    "supplement:statfs",
+    { NULL, &ruby_xfree, NULL, NULL},
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
+
 /*
  *  Document-class: Filesys
  *
@@ -43,7 +50,8 @@ static ID id_mul = 0;
 VALUE
 rb_fsstat_s_alloc( VALUE klass)
 {
-    return Data_Wrap_Struct( klass, NULL, &free, (struct statfs *) NULL);
+    struct statfs *s;
+    return TypedData_Make_Struct( klass, struct statfs, &fsstat_data_type, s);
 }
 
 /*
@@ -57,56 +65,22 @@ rb_fsstat_s_alloc( VALUE klass)
 VALUE
 rb_fsstat_init( VALUE obj, VALUE dname)
 {
-    struct statfs st, *nst;
+    struct statfs *st;
+
+    TypedData_Get_Struct( obj, struct statfs, &fsstat_data_type, st);
 
     SafeStringValue( dname);
-
-    if (statfs( StringValueCStr( dname), &st) == -1)
+    if (statfs( StringValueCStr( dname), st) == -1)
         rb_sys_fail( RSTRING_PTR(dname));
-    if (DATA_PTR(obj)) {
-        free( DATA_PTR(obj));
-        DATA_PTR(obj) = NULL;
-    }
-    nst = ALLOC(struct statfs);
-    *nst = st;
-    DATA_PTR(obj) = nst;
-
     return Qnil;
 }
 
-/* :nodoc: */
-VALUE
-rb_fsstat_init_copy( VALUE copy, VALUE orig)
-{
-    struct statfs *nst;
 
-    if (copy == orig)
-        return orig;
-
-    rb_check_frozen( copy);
-    if (!rb_obj_is_instance_of( orig, rb_obj_class( copy)))
-        rb_raise(rb_eTypeError, "wrong argument class");
-    if (DATA_PTR(copy)) {
-        free( DATA_PTR(copy));
-        DATA_PTR(copy) = NULL;
-    }
-    if (DATA_PTR(orig)) {
-        nst = ALLOC(struct statfs);
-        *nst = *(struct statfs *) DATA_PTR(orig);
-        DATA_PTR(copy) = nst;
-    }
-
-    return copy;
-}
-
-/* :nodoc: */
 struct statfs *
 get_statfs( VALUE self)
 {
     struct statfs *st;
-    Data_Get_Struct(self, struct statfs, st);
-    if (!st)
-        rb_raise( rb_eTypeError, "uninitialized Filesys::Stat");
+    TypedData_Get_Struct( self, struct statfs, &fsstat_data_type, st);
     return st;
 }
 
@@ -360,12 +334,11 @@ void Init_filesys( void)
     VALUE rb_cFilesys;
     VALUE rb_cFilesysStat;
 
-    rb_cFilesys = rb_define_class( "Filesys", rb_cObject);
+    rb_cFilesys = rb_define_module( "Filesys");
 
     rb_cFilesysStat = rb_define_class_under( rb_cFilesys, "Stat", rb_cObject);
-    rb_define_alloc_func( rb_cFilesysStat,  rb_fsstat_s_alloc);
+    rb_define_alloc_func( rb_cFilesysStat, rb_fsstat_s_alloc);
     rb_define_method( rb_cFilesysStat, "initialize", rb_fsstat_init, 1);
-    rb_define_method( rb_cFilesysStat, "initialize_copy", rb_fsstat_init_copy, 1);
 
     rb_define_method( rb_cFilesysStat, "type",   rb_fsstat_type  , 0);
     rb_define_method( rb_cFilesysStat, "bsize",  rb_fsstat_bsize , 0);
