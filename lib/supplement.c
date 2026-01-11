@@ -111,8 +111,10 @@ rb_krn_tap_bang( VALUE obj)
  *  call-seq:
  *     with { |x| ... }    -> obj
  *
+ *  Warning. This method will be removed. Use +Kernel#then+ instead.
+ *
  *  Yields +x+ to the block.
- *  This difference to +tap+ is that the block's result will be returned.
+ *  The difference to +tap+ is that the block's result will be returned.
  *
  *  Use this to narrow your namespace.
  *
@@ -121,6 +123,8 @@ rb_krn_tap_bang( VALUE obj)
 VALUE
 rb_krn_with( VALUE obj)
 {
+    rb_category_warning(RB_WARN_CATEGORY_DEPRECATED,
+        "Kernel#with will be removed from the supplement gem. Use Kernel#then instead.");
     return rb_yield( obj);
 }
 
@@ -443,7 +447,7 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
  *
  *     "sys-apps".starts_with?( "sys-")    #=> 4
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
  *  <code>#slice</code>.
  */
@@ -485,7 +489,7 @@ rb_str_starts_with_p( int argc, VALUE *argv, VALUE str)
  *
  *     "sys-apps".ends_with?( "-apps")    #=> 3
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+.
  */
 
@@ -525,7 +529,7 @@ rb_str_ends_with_p( int argc, VALUE *argv, VALUE str)
  *
  *     :"sys-apps".starts_with?( "sys-")    #=> 4
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
  *  <code>#slice</code>.
  */
@@ -546,7 +550,7 @@ rb_sym_starts_with_p( int argc, VALUE *argv, VALUE sym)
  *
  *     :"sys-apps".ends_with?( "-apps")    #=> 3
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+.
  */
 
@@ -1202,12 +1206,15 @@ void Init_supplement( void)
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
+    rb_undef_method( rb_singleton_class( rb_cFile), "umask");
     rb_define_singleton_method( rb_cFile, "umask", rb_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
     rb_define_singleton_method( rb_cDir, "mkdir!", rb_dir_s_mkdir_bang, -1);
     rb_define_alias(  rb_cDir, "entries!", "children");
 
+    rb_undef_method( rb_cMatch, "begin");
+    rb_undef_method( rb_cMatch, "end");
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
