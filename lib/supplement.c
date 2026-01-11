@@ -108,28 +108,6 @@ rb_krn_tap_bang( VALUE obj)
 
 
 /*
- *  call-seq:
- *     with { |x| ... }    -> obj
- *
- *  Warning. This method will be removed. Use +Kernel#then+ instead.
- *
- *  Yields +x+ to the block.
- *  The difference to +tap+ is that the block's result will be returned.
- *
- *  Use this to narrow your namespace.
- *
- */
-
-VALUE
-rb_krn_with( VALUE obj)
-{
-    rb_category_warning(RB_WARN_CATEGORY_DEPRECATED,
-        "Kernel#with will be removed from the supplement gem. Use Kernel#then instead.");
-    return rb_yield( obj);
-}
-
-
-/*
  *  Document-class: Module
  */
 
@@ -1169,7 +1147,6 @@ void Init_supplement( void)
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
     rb_define_method( rb_cObject, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
-    rb_define_method( rb_mKernel, "with", rb_krn_with, 0);
 
     rb_define_method( rb_cModule, "plain_name", rb_module_plain_name, 0);
 

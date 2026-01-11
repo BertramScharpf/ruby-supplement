@@ -12,7 +12,6 @@
 extern VALUE rb_obj_new_string( VALUE);
 extern VALUE rb_obj_nil_if( VALUE, VALUE);
 extern VALUE rb_krn_tap_bang( VALUE);
-extern VALUE rb_krn_with( VALUE);
 
 extern VALUE rb_module_plain_name( VALUE);
 
