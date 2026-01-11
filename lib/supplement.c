@@ -111,6 +111,8 @@ rb_krn_tap_bang( VALUE obj)
  *  call-seq:
  *     with { |x| ... }    -> obj
  *
+ *  Warning. This method will be removed. Use +Kernel#then+ instead.
+ *
  *  Yields +x+ to the block.
  *  The difference to +tap+ is that the block's result will be returned.
  *
@@ -121,6 +123,8 @@ rb_krn_tap_bang( VALUE obj)
 VALUE
 rb_krn_with( VALUE obj)
 {
+    rb_category_warning(RB_WARN_CATEGORY_DEPRECATED,
+        "Kernel#with will be removed from the supplement gem. Use Kernel#then instead.");
     return rb_yield( obj);
 }
 
