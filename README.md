@@ -1,4 +1,4 @@
-# supplement 2.30  --  Useful Ruby enhancements
+# supplement 2.31  --  Useful Ruby enhancements
 
 Some simple Ruby extensions.
 
@@ -48,7 +48,7 @@ one of them to be included into the Ruby standard.
 
 ## Copyright
 
-  * (C) 2009-2025 Bertram Scharpf <software@bertram-scharpf.de>
+  * (C) 2009-2026 Bertram Scharpf <software@bertram-scharpf.de>
   * License: [BSD-2-Clause+](./LICENSE)
   * Repository: [ruby-supplement](https://github.com/BertramScharpf/ruby-supplement)
 
