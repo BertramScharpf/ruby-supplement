@@ -1206,12 +1206,15 @@ void Init_supplement( void)
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
+    rb_undef_method( rb_singleton_class( rb_cFile), "umask");
     rb_define_singleton_method( rb_cFile, "umask", rb_file_s_umask, -1);
 
     rb_define_singleton_method( rb_cDir, "current", rb_dir_s_current, 0);
     rb_define_singleton_method( rb_cDir, "mkdir!", rb_dir_s_mkdir_bang, -1);
     rb_define_alias(  rb_cDir, "entries!", "children");
 
+    rb_undef_method( rb_cMatch, "begin");
+    rb_undef_method( rb_cMatch, "end");
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
