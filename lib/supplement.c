@@ -112,7 +112,7 @@ rb_krn_tap_bang( VALUE obj)
  *     with { |x| ... }    -> obj
  *
  *  Yields +x+ to the block.
- *  This difference to +tap+ is that the block's result will be returned.
+ *  The difference to +tap+ is that the block's result will be returned.
  *
  *  Use this to narrow your namespace.
  *
@@ -443,7 +443,7 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
  *
  *     "sys-apps".starts_with?( "sys-")    #=> 4
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
  *  <code>#slice</code>.
  */
@@ -485,7 +485,7 @@ rb_str_starts_with_p( int argc, VALUE *argv, VALUE str)
  *
  *     "sys-apps".ends_with?( "-apps")    #=> 3
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+.
  */
 
@@ -525,7 +525,7 @@ rb_str_ends_with_p( int argc, VALUE *argv, VALUE str)
  *
  *     :"sys-apps".starts_with?( "sys-")    #=> 4
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+. Mnemonics: "s" = prepare for
  *  <code>#slice</code>.
  */
@@ -546,7 +546,7 @@ rb_sym_starts_with_p( int argc, VALUE *argv, VALUE sym)
  *
  *     :"sys-apps".ends_with?( "-apps")    #=> 3
  *
- *  Caution! The Ruby 1.9.3 method #start_with? (notice the missing s)
+ *  Caution! The Ruby 1.9.3 method #start_with? (note the missing s)
  *  just returns +true+ or +false+.
  */
 
