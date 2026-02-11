@@ -10,7 +10,7 @@ Autorake.configure {
 
   extending_ruby
 
-  if RUBY_VERSION < "3.3" then  # Always true after March 2026
+  if RUBY_VERSION < "3.3" then  # Always false after March 2026
     enable :some_calls
   end
 
