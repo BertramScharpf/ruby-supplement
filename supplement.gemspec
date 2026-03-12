@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.email             = "<software@bertram-scharpf.de>"
   s.homepage          = "https://github.com/BertramScharpf/ruby-supplement"
 
-  s.required_ruby_version = Gem::Requirement.new ">= 3.2.0"
+  s.required_ruby_version = Gem::Requirement.new ">= 3.3.0"
 
   s.requirements      = "Ruby and the autorake gem"
   s.add_dependency      "rake", "~>13.0"
