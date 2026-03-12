@@ -11,6 +11,8 @@
 #include <ruby/re.h>
 
 
+static long  supplement_args_len_default( int, VALUE *);
+static void  supplement_make_ellipse( void);
 static void  supplement_ary_assure_notempty( VALUE);
 static VALUE supplement_index_blk( VALUE);
 static VALUE supplement_index_ref( VALUE, VALUE);
@@ -18,6 +20,9 @@ static VALUE supplement_rindex_blk( VALUE);
 static VALUE supplement_rindex_ref( VALUE, VALUE);
 static VALUE supplement_do_unumask( VALUE);
 
+
+static VALUE supplement_ellipse = Qnil;
+static long  supplement_len_ell = 0;
 
 static ID id_delete_at = 0;
 static ID id_cmp = 0;
@@ -395,46 +400,99 @@ rb_str_tail( int argc, VALUE *argv, VALUE str)
 }
 
 
+long
+supplement_args_len_default( int argc, VALUE *argv)
+{
+    VALUE n;
+    long r;
+
+    if (rb_scan_args( argc, argv, "01", &n) == 1 && !NIL_P( n))
+        r = NUM2LONG( n);
+    else
+        r = 80;
+    return r;
+}
+
+void
+supplement_make_ellipse( void)
+{
+    if (!NIL_P( supplement_ellipse))
+        return;
+    supplement_ellipse = rb_str_new2( "...");
+    supplement_len_ell = rb_str_strlen( supplement_ellipse);
+}
+
 /*
  *  call-seq:
  *     axe( n = 80)   -> str
  *
- *  Cut off everthing beyond then <code>n</code>th character. Replace the
+ *  Cut off everthing beyond the <code>n</code>th character. Replace the
  *  last bytes by ellipses.
  *
- *     a = "Redistribution and use in source and binary forms, with or without"
- *     a.axe( 16)     #=> "Redistributio..."
+ *     a = "Now is the time for all good men to come to the aid of their country etc."
+ *     a.axe( 16)     #=> "Now is the ti..."
  */
 
 VALUE
 rb_str_axe( int argc, VALUE *argv, VALUE str)
 {
-    VALUE n;
     VALUE ret;
     long newlen, oldlen;
 
-    if (rb_scan_args( argc, argv, "01", &n) == 1 && !NIL_P( n))
-        newlen = NUM2LONG( n);
-    else
-        newlen = 80;
+    newlen = supplement_args_len_default( argc, argv);
     if (newlen < 0)
         return Qnil;
 
     oldlen = rb_str_strlen( str);
     if (newlen < oldlen) {
-        VALUE ell;
-        long e;
-
-        ell = rb_str_new2( "...");
-        e = rb_str_strlen( ell);
-        if (newlen > e) {
-            ret = rb_str_substr( str, 0, newlen - e);
-            rb_str_append( ret, ell);
+        supplement_make_ellipse();
+        if (newlen >= supplement_len_ell) {
+            ret = rb_str_substr( str, 0, newlen - supplement_len_ell);
+            rb_str_append( ret, supplement_ellipse);
         } else
-            ret = rb_str_substr( str, 0, newlen);
+            ret = rb_str_substr( supplement_ellipse, 0, newlen);
     } else
         ret = str;
     return ret;
+}
+
+
+/*
+ *  call-seq:
+ *     axe!( n = 80)   -> str
+ *
+ *  Cut off everthing beyond the <code>n</code>th character. Replace the
+ *  last bytes by ellipses.
+ *
+ *     a = "Now is the time for all good men to come to the aid of their country etc."
+ *     a.axe!( 16)     #=> "Now is the ti..."
+ *     a               #=> "Now is the ti..."
+ *
+ *  If nothing was removed, <code>nil</code> is returned.
+ */
+
+VALUE
+rb_str_axe_bang( int argc, VALUE *argv, VALUE str)
+{
+    long newlen, oldlen;
+
+    newlen = supplement_args_len_default( argc, argv);
+    if (newlen < 0)
+        return Qnil;
+
+    rb_str_modify( str);
+
+    oldlen = rb_str_strlen( str);
+    if (newlen < oldlen) {
+        long re;
+
+        rb_str_update( str, newlen, oldlen - newlen, rb_str_new( NULL, 0));
+        supplement_make_ellipse();
+        re = newlen < supplement_len_ell ? newlen : supplement_len_ell;
+        rb_str_update( str, newlen - re, re, rb_str_substr( supplement_ellipse, 0, re));
+        return str;
+    } else
+        return Qnil;
 }
 
 
@@ -1185,6 +1243,7 @@ void Init_supplement( void)
     rb_define_method( rb_cString, "rest", rb_str_rest, -1);
     rb_define_method( rb_cString, "tail", rb_str_tail, -1);
     rb_define_method( rb_cString, "axe", rb_str_axe, -1);
+    rb_define_method( rb_cString, "axe!", rb_str_axe_bang, -1);
     rb_define_method( rb_cString, "starts_with?", rb_str_starts_with_p, -1);
     rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, -1);
     rb_define_method( rb_cSymbol, "starts_with?", rb_sym_starts_with_p, -1);

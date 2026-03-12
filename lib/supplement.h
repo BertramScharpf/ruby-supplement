@@ -27,6 +27,7 @@ extern VALUE rb_str_head( int, VALUE *, VALUE);
 extern VALUE rb_str_rest( int, VALUE *, VALUE);
 extern VALUE rb_str_tail( int, VALUE *, VALUE);
 extern VALUE rb_str_axe( int, VALUE *, VALUE);
+extern VALUE rb_str_axe_bang( int, VALUE *, VALUE);
 extern VALUE rb_str_starts_with_p( int argc, VALUE *argv, VALUE);
 extern VALUE rb_str_ends_with_p( int argc, VALUE *argv, VALUE);
 extern VALUE rb_sym_starts_with_p( int argc, VALUE *argv, VALUE);
