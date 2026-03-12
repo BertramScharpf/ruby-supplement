@@ -12,7 +12,6 @@
 
 
 static long  supplement_args_len_default( int, VALUE *);
-static void  supplement_make_ellipse( void);
 static void  supplement_ary_assure_notempty( VALUE);
 static VALUE supplement_index_blk( VALUE);
 static VALUE supplement_index_ref( VALUE, VALUE);
@@ -21,8 +20,7 @@ static VALUE supplement_rindex_ref( VALUE, VALUE);
 static VALUE supplement_do_unumask( VALUE);
 
 
-static VALUE supplement_ellipse = Qnil;
-static long  supplement_len_ell = 0;
+static const char *supplement_ellipse = "...";
 
 static ID id_delete_at = 0;
 static ID id_cmp = 0;
@@ -391,15 +389,6 @@ supplement_args_len_default( int argc, VALUE *argv)
     return r;
 }
 
-void
-supplement_make_ellipse( void)
-{
-    if (!NIL_P( supplement_ellipse))
-        return;
-    supplement_ellipse = rb_str_new2( "...");
-    supplement_len_ell = rb_str_strlen( supplement_ellipse);
-}
-
 /*
  *  call-seq:
  *     axe( n = 80)   -> str
@@ -423,12 +412,16 @@ rb_str_axe( int argc, VALUE *argv, VALUE str)
 
     oldlen = rb_str_strlen( str);
     if (newlen < oldlen) {
-        supplement_make_ellipse();
-        if (newlen >= supplement_len_ell) {
-            ret = rb_str_substr( str, 0, newlen - supplement_len_ell);
-            rb_str_append( ret, supplement_ellipse);
+        VALUE ell;
+        long le;
+
+        ell = rb_str_new2( supplement_ellipse);
+        le = rb_str_strlen( ell);
+        if (newlen >= le) {
+            ret = rb_str_substr( str, 0, newlen - le);
+            rb_str_append( ret, ell);
         } else
-            ret = rb_str_substr( supplement_ellipse, 0, newlen);
+            ret = rb_str_substr( ell, 0, newlen);
     } else
         ret = str;
     return ret;
@@ -462,12 +455,15 @@ rb_str_axe_bang( int argc, VALUE *argv, VALUE str)
 
     oldlen = rb_str_strlen( str);
     if (newlen < oldlen) {
+        VALUE ell;
+        long le;
         long re;
 
         rb_str_update( str, newlen, oldlen - newlen, rb_str_new( NULL, 0));
-        supplement_make_ellipse();
-        re = newlen < supplement_len_ell ? newlen : supplement_len_ell;
-        rb_str_update( str, newlen - re, re, rb_str_substr( supplement_ellipse, 0, re));
+        ell = rb_str_new2( supplement_ellipse);
+        le = rb_str_strlen( ell);
+        re = newlen < le ? newlen : le;
+        rb_str_update( str, newlen - re, re, rb_str_substr( ell, 0, re));
         return str;
     } else
         return Qnil;
