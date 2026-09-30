@@ -553,6 +553,32 @@ rb_str_ends_with_p( int argc, VALUE *argv, VALUE str)
 
 
 /*
+ *  Document-class: Symbol
+ */
+
+/*
+ *  call-seq:
+ *     notempty?   -> nil or self
+ *
+ *  Returns <code>self</code> if and only if <code>str</code> is not
+ *  empty, <code>nil</code> otherwise.
+ *
+ *     :hello.notempty?     #=> :hello
+ *     :"".notempty?        #=> nil
+ *
+ *  This seems to be quite useless. Its only purpose is to avoid either type
+ *  detection or error catching when other objects are asked whether they're
+ *  not empty.
+ */
+
+VALUE
+rb_sym_notempty_p( VALUE sym)
+{
+    return NUM2LONG( rb_funcall( sym, rb_intern( "length"), 0)) ? sym : Qnil;
+}
+
+
+/*
  *  call-seq:
  *     starts_with?( oth)   -> nil or int
  *
@@ -1219,6 +1245,7 @@ void Init_supplement( void)
     rb_define_method( rb_cString, "axe!", rb_str_axe_bang, -1);
     rb_define_method( rb_cString, "starts_with?", rb_str_starts_with_p, -1);
     rb_define_method( rb_cString, "ends_with?", rb_str_ends_with_p, -1);
+    rb_define_method( rb_cSymbol, "notempty?", rb_sym_notempty_p, 0);
     rb_define_method( rb_cSymbol, "starts_with?", rb_sym_starts_with_p, -1);
     rb_define_method( rb_cSymbol, "ends_with?", rb_sym_ends_with_p, -1);
 
