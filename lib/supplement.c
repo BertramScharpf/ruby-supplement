@@ -1277,7 +1277,7 @@ void Init_supplement( void)
     rb_define_method( rb_cMatch, "begin", rb_match_begin, -1);
     rb_define_method( rb_cMatch, "end", rb_match_end, -1);
 
-    rb_define_alias( rb_singleton_class( rb_cStruct), "[]", "new");
+    rb_define_alias( CLASS_OF( rb_cStruct), "[]", "new");
     rb_define_method( rb_cStruct, "fields", rb_struct_fields, -1);
     rb_define_alias(  rb_cStruct, "fetch_values", "fields");
 
