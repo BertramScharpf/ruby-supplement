@@ -887,8 +887,8 @@ rb_ary_indexes( VALUE ary)
  *     pick( ref)           -> obj or nil
  *     pick { |elem| ... }  -> obj or nil
  *
- *  Deletes the element where first <code>ref === obj</code> is true or the
- *  <em>block</em> first returns <code>true</code>. The result will be
+ *  Deletes the element where first <code>ref === obj</code> or the
+ *  <em>block</em> first returns a true value. The result will be
  *  <code>nil</code> if nothing is found.
  *
  *     a = %w(ant bat cat dog)
@@ -943,8 +943,8 @@ supplement_index_blk( VALUE ary)
  *     rpick( ref)           -> obj or nil
  *     rpick { |elem| ... }  -> obj or nil
  *
- *  Deletes the element where first <code>ref === obj</code> is true or the
- *  <em>block</em> first returns <code>true</code>. The result will be
+ *  Deletes the element where first <code>ref === obj</code> or the
+ *  <em>block</em> first returns a true value. The result will be
  *  <code>nil</code> if nothing is found. Search from right to left.
  *
  *     a = %w(ant cow bat cat dog)
@@ -1001,8 +1001,8 @@ supplement_rindex_blk( VALUE ary)
  *  call-seq:
  *     lstrip! { |elem| ... }   -> nil or self
  *
- *  Strip all elements from left where the block returns <code>true</code>.
- *  Returns <code>nil</code> when the array is empty.
+ *  Strip all elements from left where the block returns a true value.
+ *  Returns <code>nil</code> when the array is empty afterwards.
  *
  *    a = %w(ant bat cow dog eel fox gnu)
  *    a.lstrip! { |e| e =~ /a/ }        #=> [ "cow", "dog", "eel", "fox", "gnu"]
@@ -1021,8 +1021,8 @@ rb_ary_lstrip_bang( VALUE ary)
  *  call-seq:
  *     rstrip! { |elem| ... }   -> nil or self
  *
- *  Strip all elements from left where the block returns <code>true</code>.
- *  Returns <code>nil</code> when the array is empty.
+ *  Strip all elements from left where the block returns a true value.
+ *  Returns <code>nil</code> when the array is empty afterwards.
  *
  *    a = %w(ant bat cow dog eel fox gnu)
  *    a.rstrip! { |e| e =~ /[ou]/ }     #=> [ "ant", "bat", "cow", "dog", "eel"]
@@ -1058,13 +1058,16 @@ supplement_find_nth( VALUE ary, VALUE num, VALUE (*mk_result)( VALUE, long, VALU
 
 /*
  *  call-seq:
- *     find_nth( int) { |elem| ... }   -> obj
+ *     find_nth( int) { |elem| ... }   -> obj or nil
  *
  *  Find the n-th occurrence of an element for which the block returns
- *  <code>true</code>.
+ *  a true value. When less than n elements can be found, <code>nil</code> is
+ *  returned.
  *
  *    a = %w(ant bat cow dog eel fox gnu)
- *    a.find_nth(2) { |e| e =~ /a/ }      #=> "bat"
+ *    a.find_nth(0) { |e| e =~ /a/ }        #=> "ant"
+ *    a.find_nth(1) { |e| e =~ /a/ }        #=> "bat"
+ *    a.find_nth(2) { |e| e =~ /a/ }        #=> nil
  */
 
 VALUE
@@ -1081,14 +1084,17 @@ supplement_find_nth_result( VALUE ary, long i, VALUE cur)
 
 /*
  *  call-seq:
- *     delete_nth( int) { |elem| ... }   -> obj
+ *     delete_nth( int) { |elem| ... }   -> obj or nil
  *
  *  Delete the n-th occurrence of an element for which the block returns
- *  <code>true</code>.
+ *  a true value. When less than n elements can be found, nothing will be
+ *  removed and <code>nil</code> is returned.
  *
  *    a = %w(ant bat cow dog eel fox gnu)
- *    a.delete_nth(2) { |e| e =~ /a/ }      #=> "bat"
- *    a                                     #=> ["ant", "cow", "dog", "eel", "fox", "gnu"]
+ *    a.delete_nth(2) { |e| e =~ /a/ }      #=> nil
+ *    a.delete_nth(1) { |e| e =~ /a/ }      #=> "bat"
+ *    a.delete_nth(0) { |e| e =~ /a/ }      #=> "ant"
+ *    a                                     #=> ["cow", "dog", "eel", "fox", "gnu"]
  */
 
 VALUE
