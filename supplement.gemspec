@@ -4,8 +4,7 @@
 
 Gem::Specification.new do |s|
   s.name              = "supplement"
-  (File.read "README.md") =~ /^#\s.*?(\d+(?:\.\d+)*)/
-  s.version           = $1
+  s.version           = (File.read "lib/supplement.c")[ /^#define +SUPPLEMENT_VERSION +"(.*)"$/, 1]
   s.license           = "BSD-2-Clause"
   s.summary           = "Simple Ruby extensions"
   s.description       = <<~EOT

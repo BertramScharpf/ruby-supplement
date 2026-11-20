@@ -11,6 +11,13 @@
 #include <ruby/re.h>
 
 
+#define SUPPLEMENT_VERSION "2.34"
+
+
+
+#define SPL_CSTR(s) rb_str_new( (s), sizeof (s) - 1)
+
+
 static long  supplement_args_len_default( int, VALUE *);
 static void  supplement_ary_assure_notempty( VALUE);
 static VALUE supplement_index_blk( VALUE);
@@ -24,7 +31,9 @@ static VALUE supplement_delete_nth_result( VALUE, long, VALUE);
 static VALUE supplement_do_unumask( VALUE);
 
 
+static const char *supplement_scope = "::";
 static const char *supplement_ellipse = "...";
+static const char *supplement_dot = ".";
 
 static ID id_delete_at = 0;
 static ID id_eqq       = 0;
@@ -132,7 +141,7 @@ rb_module_plain_name( VALUE cls)
     VALUE i;
 
     n = rb_str_dup( rb_funcall( cls, rb_intern( "name"), 0));
-    i = rb_funcall( n, rb_intern( "rindex"), 1, rb_str_new( "::", 2));
+    i = rb_funcall( n, rb_intern( "rindex"), 1, SPL_CSTR( supplement_scope));
     if (!NIL_P( i)) {
         i = rb_funcall( i, rb_intern( "+"), 1, INT2FIX( 2));
         rb_funcall( n, rb_intern( "slice!"), 2, INT2FIX( 0), i);
@@ -1186,7 +1195,7 @@ supplement_do_unumask( VALUE v)
 VALUE
 rb_dir_s_current( VALUE dir)
 {
-    VALUE dot = rb_str_new( ".", 1);
+    VALUE dot = SPL_CSTR( supplement_dot);
     return rb_funcall_passing_block( dir, rb_intern( "open"), 1, &dot);
 }
 
@@ -1377,6 +1386,8 @@ void Init_supplement( void)
     rb_define_method( rb_cObject, "new_string", rb_obj_new_string, 0);
     rb_define_method( rb_cObject, "nil_if", rb_obj_nil_if, 1);
     rb_define_method( rb_mKernel, "tap!", rb_krn_tap_bang, 0);
+
+    rb_define_global_const("SUPPLEMENT_VERSION", rb_obj_freeze( SPL_CSTR(SUPPLEMENT_VERSION)));
 
     rb_define_method( rb_cModule, "plain_name", rb_module_plain_name, 0);
 

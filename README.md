@@ -1,4 +1,4 @@
-# supplement 2.34  --  Useful Ruby enhancements
+# supplement  --  Useful Ruby enhancements
 
 Some simple Ruby extensions.
 
