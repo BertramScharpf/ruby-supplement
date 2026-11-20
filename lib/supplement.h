@@ -35,6 +35,7 @@ extern VALUE rb_sym_ends_with_p( int argc, VALUE *argv, VALUE);
 
 extern VALUE rb_num_grammatical( VALUE, VALUE, VALUE);
 extern VALUE rb_num_sqrt( VALUE);
+extern VALUE rb_int_length( int, VALUE *, VALUE);
 extern VALUE rb_rat_inverse( VALUE);
 
 extern VALUE rb_ary_notempty_p( VALUE);
@@ -44,6 +45,10 @@ extern VALUE rb_ary_indexes( VALUE);
 extern VALUE rb_ary_range( VALUE);
 extern VALUE rb_ary_pick(  int, VALUE *, VALUE);
 extern VALUE rb_ary_rpick( int, VALUE *, VALUE);
+extern VALUE rb_ary_lstrip_bang( VALUE);
+extern VALUE rb_ary_rstrip_bang( VALUE);
+extern VALUE rb_ary_find_nth( VALUE, VALUE);
+extern VALUE rb_ary_delete_nth( VALUE, VALUE);
 
 extern VALUE rb_hash_notempty_p( VALUE);
 

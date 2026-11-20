@@ -17,16 +17,22 @@ static VALUE supplement_index_blk( VALUE);
 static VALUE supplement_index_ref( VALUE, VALUE);
 static VALUE supplement_rindex_blk( VALUE);
 static VALUE supplement_rindex_ref( VALUE, VALUE);
+static long  supplement_find_nth( VALUE, VALUE, VALUE (*)( VALUE, long, VALUE));
+static VALUE supplement_find_nth_result( VALUE, long, VALUE);
+static VALUE supplement_delete_nth_result( VALUE, long, VALUE);
+
 static VALUE supplement_do_unumask( VALUE);
 
 
 static const char *supplement_ellipse = "...";
 
 static ID id_delete_at = 0;
-static ID id_cmp = 0;
-static ID id_eqq = 0;
-static ID id_mkdir = 0;
-static ID id_index = 0;
+static ID id_eqq       = 0;
+static ID id_cmp       = 0;
+static ID id_mkdir     = 0;
+static ID id_abs       = 0;
+static ID id_div       = 0;
+static ID id_zero_p    = 0;
 
 
 
@@ -81,8 +87,6 @@ rb_obj_new_string( VALUE obj)
 VALUE
 rb_obj_nil_if( VALUE obj, VALUE val)
 {
-    if (!id_eqq)
-        id_eqq = rb_intern( "===");
     return RTEST( rb_funcall( val, id_eqq, 1, obj)) ? Qnil : obj;
 }
 
@@ -657,6 +661,8 @@ rb_num_grammatical( VALUE num, VALUE sing, VALUE plu)
             break;
 
         default:
+            if (!id_cmp)
+                id_cmp = rb_intern( "<=>");
             l = NUM2LONG( rb_funcall( num, id_cmp, 1, INT2FIX( 1)));
             if (l == 0)
                 return sing;
@@ -682,6 +688,47 @@ VALUE
 rb_num_sqrt( VALUE num)
 {
     return rb_float_new( sqrt( RFLOAT_VALUE( rb_Float( num))));
+}
+
+
+/*
+ *  Document-class: Integer
+ */
+
+/*
+ *  call-seq:
+ *     int.length( base = nil)   -> int
+ *
+ *  Length of mantissa. Default base is <code>10</code>.
+ *
+ *     1234.length       #=> 4
+ */
+
+VALUE
+rb_int_length( int argc, VALUE *argv, VALUE num)
+{
+    VALUE base;
+    VALUE x;
+    long n;
+
+    if (!id_abs)
+        id_abs    = rb_intern( "abs");
+    if (!id_div)
+        id_div    = rb_intern( "div");
+    if (!id_zero_p)
+        id_zero_p = rb_intern( "zero?");
+
+    if (rb_scan_args( argc, argv, "01", &base) != 1)
+        base = Qnil;
+    if (NIL_P( base))
+        base = LONG2NUM( 10);
+    n = 0;
+    x = rb_funcall( num, id_abs, 0);
+    while (!RTEST(rb_funcall( x, id_zero_p, 0))) {
+        n++;
+        x = rb_funcall( x, id_div, 1, base);
+    }
+    return LONG2NUM( n);
 }
 
 /*
@@ -863,8 +910,6 @@ supplement_index_ref( VALUE ary, VALUE ref)
 {
     long i, j;
 
-    if (!id_eqq)
-        id_eqq = rb_intern( "===");
     for (i = 0, j = RARRAY_LEN( ary); j > 0; i++, j--) {
         if (RTEST( rb_funcall( ref, id_eqq, 1, RARRAY_PTR( ary)[ i])))
             return LONG2NUM( i);
@@ -921,8 +966,6 @@ supplement_rindex_ref( VALUE ary, VALUE ref)
 {
     long i;
 
-    if (!id_eqq)
-        id_eqq = rb_intern( "===");
     for (i = RARRAY_LEN( ary); i;) {
         --i;
         if (RTEST( rb_funcall( ref, id_eqq, 1, RARRAY_PTR( ary)[ i])))
@@ -942,6 +985,113 @@ supplement_rindex_blk( VALUE ary)
             return LONG2NUM( i);
     }
     return Qnil;
+}
+
+
+/*
+ *  call-seq:
+ *     lstrip! { |elem| ... }   -> nil or self
+ *
+ *  Strip all elements from left where the block returns <code>true</code>.
+ *  Returns <code>nil</code> when the array is empty.
+ *
+ *    a = %w(ant bat cow dog eel fox gnu)
+ *    a.lstrip! { |e| e =~ /a/ }        #=> [ "cow", "dog", "eel", "fox", "gnu"]
+ *    a.lstrip! { |e| e.length == 3 }   #=> nil
+ */
+
+VALUE
+rb_ary_lstrip_bang( VALUE ary)
+{
+    while (RARRAY_LEN( ary) > 0 && RTEST( rb_yield( RARRAY_PTR( ary)[ 0])))
+        rb_ary_shift( ary);
+    return RARRAY_LEN( ary) ? ary : Qnil;
+}
+
+/*
+ *  call-seq:
+ *     rstrip! { |elem| ... }   -> nil or self
+ *
+ *  Strip all elements from left where the block returns <code>true</code>.
+ *  Returns <code>nil</code> when the array is empty.
+ *
+ *    a = %w(ant bat cow dog eel fox gnu)
+ *    a.rstrip! { |e| e =~ /[ou]/ }     #=> [ "ant", "bat", "cow", "dog", "eel"]
+ *    a.lstrip! { |e| e.length == 3 }   #=> nil
+ */
+
+VALUE
+rb_ary_rstrip_bang( VALUE ary)
+{
+    while (RARRAY_LEN( ary) > 0 && RTEST( rb_yield( RARRAY_PTR( ary)[ RARRAY_LEN(ary)-1])))
+        rb_ary_pop( ary);
+    return RARRAY_LEN( ary) ? ary : Qnil;
+}
+
+
+long
+supplement_find_nth( VALUE ary, VALUE num, VALUE (*mk_result)( VALUE, long, VALUE))
+{
+    VALUE cur;
+    long i, n;
+
+    n = NUM2LONG( num);
+    for (i = 0; i < RARRAY_LEN( ary); i++) {
+        cur = RARRAY_PTR( ary)[ i];
+        if (RTEST( rb_yield( cur))) {
+            if (!n)
+                return (*mk_result)( ary, i, cur);
+            n--;
+        }
+    }
+    return Qnil;
+}
+
+/*
+ *  call-seq:
+ *     find_nth( int) { |elem| ... }   -> obj
+ *
+ *  Find the n-th occurrence of an element for which the block returns
+ *  <code>true</code>.
+ *
+ *    a = %w(ant bat cow dog eel fox gnu)
+ *    a.find_nth(2) { |e| e =~ /a/ }      #=> "bat"
+ */
+
+VALUE
+rb_ary_find_nth( VALUE ary, VALUE num)
+{
+    return supplement_find_nth( ary, num, &supplement_find_nth_result);
+}
+
+VALUE
+supplement_find_nth_result( VALUE ary, long i, VALUE cur)
+{
+    return cur;
+}
+
+/*
+ *  call-seq:
+ *     delete_nth( int) { |elem| ... }   -> obj
+ *
+ *  Delete the n-th occurrence of an element for which the block returns
+ *  <code>true</code>.
+ *
+ *    a = %w(ant bat cow dog eel fox gnu)
+ *    a.delete_nth(2) { |e| e =~ /a/ }      #=> "bat"
+ *    a                                     #=> ["ant", "cow", "dog", "eel", "fox", "gnu"]
+ */
+
+VALUE
+rb_ary_delete_nth( VALUE ary, VALUE num)
+{
+    return supplement_find_nth( ary, num, &supplement_delete_nth_result);
+}
+
+VALUE
+supplement_delete_nth_result( VALUE ary, long i, VALUE cur)
+{
+    return rb_funcall( ary, id_delete_at, 1, LONG2NUM( i));
 }
 
 
@@ -1252,6 +1402,8 @@ void Init_supplement( void)
     rb_define_method( rb_cNumeric, "grammatical", rb_num_grammatical, 2);
     rb_define_method( rb_cNumeric, "sqrt", rb_num_sqrt, 0);
 
+    rb_define_method( rb_cInteger, "length", rb_int_length, -1);
+
     rb_define_method( rb_cRational, "inv", rb_rat_inverse, 0);
 
     rb_define_method( rb_cArray, "notempty?", rb_ary_notempty_p, 0);
@@ -1262,6 +1414,10 @@ void Init_supplement( void)
     rb_define_method( rb_cArray, "range", rb_ary_range, 0);
     rb_define_method( rb_cArray, "pick", rb_ary_pick, -1);
     rb_define_method( rb_cArray, "rpick", rb_ary_rpick, -1);
+    rb_define_method( rb_cArray, "lstrip!", rb_ary_lstrip_bang, 0);
+    rb_define_method( rb_cArray, "rstrip!", rb_ary_rstrip_bang, 0);
+    rb_define_method( rb_cArray, "find_nth", rb_ary_find_nth, 1);
+    rb_define_method( rb_cArray, "delete_nth", rb_ary_delete_nth, 1);
 
     rb_define_method( rb_cHash, "notempty?", rb_hash_notempty_p, 0);
 
@@ -1285,11 +1441,8 @@ void Init_supplement( void)
     rb_define_method( rb_cFalseClass, "to_bool", rb_nil_to_bool, 0);
     rb_define_method( rb_cObject, "to_bool", rb_obj_to_bool, 0);
 
-    id_delete_at   = rb_intern( "delete_at");
-    id_cmp         = rb_intern( "<=>");
-    id_eqq         = 0;
-    id_mkdir       = 0;
-    id_index       = 0;
+    id_delete_at = rb_intern( "delete_at");
+    id_eqq       = rb_intern( "===");
 
     Init_supplement_process();
 }
