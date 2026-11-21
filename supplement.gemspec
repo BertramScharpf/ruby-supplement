@@ -22,28 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency      "autorake", "~>2.18"
 
   s.extensions        = "lib/mkrf_conf"
-  s.files             = %w(
-                          lib/mkrf_conf
-                          lib/Rakefile
-                          lib/supplement.c
-                          lib/supplement.h
-                          lib/process.c
-                          lib/process.h
-                          lib/supplement/locked.c
-                          lib/supplement/locked.h
-                          lib/supplement/dir.rb
-                          lib/supplement/filesys.c
-                          lib/supplement/filesys.h
-                          lib/supplement/itimer.c
-                          lib/supplement/itimer.h
-                          lib/supplement/terminal.c
-                          lib/supplement/terminal.h
-                          lib/supplement/socket.c
-                          lib/supplement/socket.h
-                          lib/supplement/date.rb
-                          lib/supplement/roman.rb
-                          examples/teatimer
-                        )
+  s.files             = %w(lib/mkrf_conf lib/Rakefile) + Dir[ "lib/**/*.[ch]"] + Dir[ "lib/**/*.rb"]
   s.executables       = %w(
                         )
 
