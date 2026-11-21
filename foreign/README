@@ -1,0 +1,6 @@
+Do something like what you see in this directory
+if you want to reduce dependencies.
+
+You can find an example in the project `ruby-nvim`
+resp. in the `nvim` gem.
+
